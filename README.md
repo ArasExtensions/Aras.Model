@@ -15,7 +15,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
-Company: Processwall Limited
-Address: The Winnowing House, Mill Lane, Askham Richard, York, YO23 3NW, United Kingdom
-Tel:     +44 113 815 3440
-Email:   support@processwall.com
+ * Company: Processwall Limited
+ * Address: The Winnowing House, Mill Lane, Askham Richard, York, YO23 3NW, United Kingdom
+ * Tel:     +44 113 815 3440
+ * Email:   support@processwall.com
