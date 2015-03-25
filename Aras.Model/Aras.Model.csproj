@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E5B4196A-00D0-4DE7-8104-487A7BC60784}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Aras.Model</RootNamespace>
+    <AssemblyName>Aras.Model</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Action.cs" />
+    <Compile Include="Class.cs" />
+    <Compile Include="Condition.cs" />
+    <Compile Include="Conditions\Base.cs" />
+    <Compile Include="Conditions\AND.cs" />
+    <Compile Include="Conditions\OR.cs" />
+    <Compile Include="Conditions\Properties\String.cs" />
+    <Compile Include="Conditions\Property.cs" />
+    <Compile Include="Exceptions\ArgumentException.cs" />
+    <Compile Include="Database.cs" />
+    <Compile Include="Exceptions\PropertyReadOnlyException.cs" />
+    <Compile Include="Cache\File.cs" />
+    <Compile Include="Cache\Item.cs" />
+    <Compile Include="IO\Item.cs" />
+    <Compile Include="IO\SOAPRequest.cs" />
+    <Compile Include="IO\SOAPResponse.cs" />
+    <Compile Include="Request\File.cs" />
+    <Compile Include="Request\Item.cs" />
+    <Compile Include="ItemType.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Cache\Property.cs" />
+    <Compile Include="PropertyType.cs" />
+    <Compile Include="PropertyTypes\Boolean.cs" />
+    <Compile Include="PropertyTypes\Color.cs" />
+    <Compile Include="PropertyTypes\ColorList.cs" />
+    <Compile Include="PropertyTypes\Decimal.cs" />
+    <Compile Include="PropertyTypes\Foreign.cs" />
+    <Compile Include="PropertyTypes\Date.cs" />
+    <Compile Include="PropertyTypes\Federated.cs" />
+    <Compile Include="PropertyTypes\FilterList.cs" />
+    <Compile Include="PropertyTypes\Float.cs" />
+    <Compile Include="PropertyTypes\FormattedText.cs" />
+    <Compile Include="PropertyTypes\Image.cs" />
+    <Compile Include="PropertyTypes\Integer.cs" />
+    <Compile Include="PropertyTypes\Item.cs" />
+    <Compile Include="PropertyTypes\List.cs" />
+    <Compile Include="PropertyTypes\MD5.cs" />
+    <Compile Include="PropertyTypes\MultilingualString.cs" />
+    <Compile Include="PropertyTypes\Sequence.cs" />
+    <Compile Include="PropertyTypes\String.cs" />
+    <Compile Include="PropertyTypes\Text.cs" />
+    <Compile Include="Cache\Properties\Boolean.cs" />
+    <Compile Include="Cache\Properties\ColorList.cs" />
+    <Compile Include="Cache\Properties\Float.cs" />
+    <Compile Include="Cache\Properties\Decimal.cs" />
+    <Compile Include="Cache\Properties\Image.cs" />
+    <Compile Include="Cache\Properties\Foreign.cs" />
+    <Compile Include="Cache\Properties\Sequence.cs" />
+    <Compile Include="Cache\Properties\List.cs" />
+    <Compile Include="Cache\Properties\Integer.cs" />
+    <Compile Include="Cache\Properties\Text.cs" />
+    <Compile Include="Cache\Properties\Date.cs" />
+    <Compile Include="Cache\Properties\Item.cs" />
+    <Compile Include="Cache\Properties\String.cs" />
+    <Compile Include="Cache\Relationship.cs" />
+    <Compile Include="Request\Relationship.cs" />
+    <Compile Include="RelationshipType.cs" />
+    <Compile Include="Response\IEnumerable.cs" />
+    <Compile Include="Response\Item.cs" />
+    <Compile Include="Response\List.cs" />
+    <Compile Include="Server.cs" />
+    <Compile Include="Exceptions\ServerException.cs" />
+    <Compile Include="Session.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

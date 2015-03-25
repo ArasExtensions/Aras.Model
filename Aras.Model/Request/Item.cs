@@ -1,0 +1,257 @@
+﻿/*  
+  Aras.Model provides a .NET cient library for Aras Innovator
+
+  Copyright (C) 2015 Processwall Limited.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published
+  by the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+  Company: Processwall Limited
+  Address: The Winnowing House, Mill Lane, Askham Richard, York, YO23 3NW, United Kingdom
+  Tel:     +44 113 815 3440
+  Email:   support@processwall.com
+*/
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Xml;
+using System.Net;
+using System.IO;
+
+namespace Aras.Model.Request
+{
+    public class Item
+    {
+        public Session Session
+        {
+            get
+            {
+                return this.Cache.Session;
+            }
+        }
+
+        public ItemType ItemType
+        {
+            get
+            {
+                return this.Cache.ItemType;
+            }
+        }
+
+        public Action Action { get; private set; }
+
+        public Boolean Paging { get; set; }
+
+        public int Page { get; set; }
+
+        public int PageSize { get; set; }
+
+        public Cache.Item Cache { get; private set; }
+
+        private Dictionary<String, PropertyType> _selection;
+        public IEnumerable<PropertyType> Selection
+        {
+            get
+            {
+                return this._selection.Values;
+            }
+        }
+
+        public void AddSelection(PropertyType PropertyType)
+        {
+            if (this.ItemType.Equals(PropertyType.ItemType))
+            {
+                this._selection[PropertyType.Name] = PropertyType;
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("PropertyType not associated with Request ItemType");
+            }
+        }
+
+        public void AddSelection(String Name)
+        {
+            PropertyType proptype = this.ItemType.PropertyType(Name);
+
+            if (proptype != null)
+            {
+                this.AddSelection(proptype);
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("PropertyType does not exist");
+            }
+        }
+
+        internal String SelectionString
+        {
+            get
+            {
+                PropertyType[] proptypes = this._selection.Values.ToArray();
+                StringBuilder ret = new StringBuilder(proptypes[0].Name);
+
+                for (int i = 1; i < proptypes.Count(); i++)
+                {
+                    ret.Append(',');
+                    ret.Append(proptypes[i].Name);
+                }
+
+                return ret.ToString();
+            }
+        }
+
+        public Condition Condition { get; private set; }
+
+        private IO.Item BuildRequest()
+        {
+            IO.Item ret = new IO.Item(this.ItemType.Name, this.Action.Name);
+            ret.Select = this.SelectionString;
+
+            // Add Properties
+            foreach (Cache.Property prop in this.Cache.Properties)
+            {
+                if (!prop.ReadOnly)
+                {
+                    ret.SetProperty(prop.Name, prop.ValueString);
+                }
+            }
+
+            // Where
+            if (this.Cache.ID != null)
+            {
+                ret.ID = this.Cache.ID;
+            }
+            else
+            {
+                if (this.Condition.WhereClause != null)
+                {
+                    ret.Where = this.Condition.WhereClause;
+                }
+            }
+
+            // Paging
+            if (this.Paging)
+            {
+                ret.Page = this.Page;
+                ret.PageSize = this.PageSize;
+            }
+
+            return ret;
+        }
+
+        private Response.List<Response.Item> BuildResponse(IO.SOAPResponse Response)
+        {
+            Response.List<Response.Item> ret = new Response.List<Response.Item>();
+
+            if (Response.IsError)
+            {
+                if (!Response.ErrorMessage.StartsWith("No items of type "))
+                {
+                    throw new Exceptions.ServerException(Response.ErrorMessage);
+                }
+            }
+            else
+            {
+                Boolean pagingset = false;
+
+                foreach (IO.Item ioitem in Response.Items)
+                {
+                    if (this.Paging && !pagingset)
+                    {
+                        ret.ItemMax = ioitem.ItemMax;
+                        ret.Page = ioitem.Page;
+                        ret.PageMax = ioitem.PageMax;
+                        pagingset = true;
+                    }
+
+                    ItemType itemtype = this.Session.AnyItemType(ioitem.ItemType);
+                    String itemid = ioitem.ID;
+                    Cache.Item item = this.Session.GetItemFromCache(itemtype, itemid);
+
+                    if (item == null)
+                    {
+                        item = new Cache.Item(itemtype);
+                    }
+
+                    foreach (PropertyType proptype in this.Selection)
+                    {
+                        Cache.Property property = item.AddProperty(proptype, null);
+                        property.ValueString = ioitem.GetProperty(proptype.Name);
+                    }
+
+                    this.Session.AddItemToCache(item);
+
+                    Response.Item response = new Response.Item(item);
+                    ret.Add(response);
+                }
+            }
+
+            return ret;
+        }
+
+        public async Task<Response.IEnumerable<Response.Item>> ExecuteAsync()
+        {
+            IO.Item item = this.BuildRequest();
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, item);
+            IO.SOAPResponse response = null;
+
+            try
+            {
+                Task<IO.SOAPResponse> task = request.ExecuteAsync();
+                response = await task;
+            }
+            catch (Exception ex)
+            {
+                throw new Exceptions.ServerException("Unable to connect to Server", ex);
+            }
+
+            // Process Response
+            return this.BuildResponse(response);
+        }
+
+        public Response.IEnumerable<Response.Item> Execute()
+        {
+            IO.Item item = this.BuildRequest();
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, item);
+            IO.SOAPResponse response = null;
+
+            try
+            {
+                response = request.Execute();
+            }
+            catch (Exception ex)
+            {
+                throw new Exceptions.ServerException("Unable to connect to Server", ex);
+            }
+
+            // Process Response
+            return this.BuildResponse(response);
+        }
+
+        internal Item(Cache.Item Cache, Action Action)
+        {
+            this.Cache = Cache;
+            this.Action = Action;
+            this.Condition = new Conditions.Base(this);
+            this._selection = new Dictionary<String, PropertyType>();
+            this.AddSelection("id");
+            this.Paging = false;
+            this.Page = 1;
+            this.PageSize = 25;
+        }
+    }
+}
