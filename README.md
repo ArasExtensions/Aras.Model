@@ -1,6 +1,6 @@
-Aras.Model provides a .NET cient library for Aras Innovator
+Aras.Model provides a .NET cient library for [Aras Innovator](http://www.aras.com)
 
-Copyright (C) 2015 Processwall Limited.
+Copyright (C) 2015 [Processwall Limited](http://www.processwall.com).
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
