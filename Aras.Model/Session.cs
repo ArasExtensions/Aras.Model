@@ -44,6 +44,8 @@ namespace Aras.Model
             }
         }
 
+        public Guid ID { get; private set; }
+
         private String UserID { get; set; }
 
         private Cache.Item _user;
@@ -280,6 +282,7 @@ namespace Aras.Model
             this.Username = Username;
             this.Password = Password;
             this.UserID = UserID;
+            this.ID = Guid.NewGuid();
         }
     }
 }
