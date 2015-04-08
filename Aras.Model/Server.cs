@@ -85,7 +85,14 @@ namespace Aras.Model
 
         public Database Database(String Name)
         {
-            return this.DatabaseCache[Name];
+            if (this.DatabaseCache.ContainsKey(Name))
+            {
+                return this.DatabaseCache[Name];
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid Database name: " + Name);
+            }
         }
 
         public override string ToString()
