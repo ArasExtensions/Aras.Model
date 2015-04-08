@@ -36,38 +36,42 @@ namespace Aras.Model
     {
         public String URL { get; private set; }
 
+        private object _databasesCacheLock = new object();
         private Dictionary<String, Database> _databasesCache;
         private Dictionary<String, Database> DatabaseCache
         {
             get
             {
-                if (this._databasesCache == null)
+                lock (this._databasesCacheLock)
                 {
-                    this._databasesCache = new Dictionary<String, Database>();
-
-                    try
+                    if (this._databasesCache == null)
                     {
-                        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.URL + "/Server/dblist.aspx");
+                        this._databasesCache = new Dictionary<String, Database>();
 
-                        using (WebResponse response = request.GetResponse())
+                        try
                         {
-                            using (Stream result = response.GetResponseStream())
-                            {
-                                XmlDocument doc = new XmlDocument();
-                                doc.Load(result);
-                                XmlNode dblist = doc.SelectSingleNode("DBList");
+                            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.URL + "/Server/dblist.aspx");
 
-                                foreach (XmlNode db in dblist.ChildNodes)
+                            using (WebResponse response = request.GetResponse())
+                            {
+                                using (Stream result = response.GetResponseStream())
                                 {
-                                    String name = db.Attributes["id"].Value;
-                                    this._databasesCache[name] = new Database(this, name);
+                                    XmlDocument doc = new XmlDocument();
+                                    doc.Load(result);
+                                    XmlNode dblist = doc.SelectSingleNode("DBList");
+
+                                    foreach (XmlNode db in dblist.ChildNodes)
+                                    {
+                                        String name = db.Attributes["id"].Value;
+                                        this._databasesCache[name] = new Database(this, name);
+                                    }
                                 }
                             }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new Exceptions.ServerException("Unable to connect to Server", ex);
+                        catch (Exception ex)
+                        {
+                            throw new Exceptions.ServerException("Unable to connect to Server", ex);
+                        }
                     }
                 }
 
