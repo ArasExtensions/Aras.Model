@@ -55,12 +55,14 @@ namespace Aras.Model.IO
                 if (this._request == null)
                 {
                     this._request = (HttpWebRequest)WebRequest.Create(this.Database.Server.URL + "/Server/InnovatorServer.aspx");
+                    this._request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                    this._request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
+                    this._request.Headers.Add("Cache-Control", "no-cache");
                     this._request.Method = "POST";
                     this._request.ContentType = "text/xml; charset=utf-8";
                     this._request.Headers.Add("AUTHPASSWORD", this.Password);
                     this._request.Headers.Add("AUTHUSER", this.Username);
                     this._request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
-                    this._request.Headers.Add("Accept-Encoding", "gzip, deflate");
                     this._request.Headers.Add("DATABASE", this.Database.Name);
                     this._request.Headers.Add("SOAPACTION", this.Operation.ToString());
                     this._request.Headers.Add("TIMEZONE_NAME", "GMT Standard Time");

@@ -51,6 +51,9 @@ namespace Aras.Model
                         try
                         {
                             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.URL + "/Server/dblist.aspx");
+                            request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                            request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
+                            request.Headers.Add("Cache-Control", "no-cache");
 
                             using (WebResponse response = request.GetResponse())
                             {
