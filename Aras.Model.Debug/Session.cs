@@ -44,8 +44,14 @@ namespace Aras.Model.Debug
             Request.Item partrequest = session.Create(parttype.Action("get"));
             partrequest.AddSelection("item_number");
             partrequest.AddSelection("keyed_name");
+            partrequest.AddSelection("viewable_file");
 
             Response.IEnumerable<Response.Item> test = partrequest.Execute();
+
+            foreach(Response.Item response in test)
+            {
+                Console.WriteLine(response.Cache.Property("item_number"));
+            }
         }
 
         public Session()

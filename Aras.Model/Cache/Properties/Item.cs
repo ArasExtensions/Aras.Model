@@ -97,8 +97,15 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    throw new NotImplementedException();
-                    //this.Object = this.Session.Get(((PropertyTypes.Item)this.PropertyType).PropertyItemType, value);
+                    // Get Item
+                    Request.Item request = this.Session.Create(((PropertyTypes.Item)this.PropertyType).PropertyItemType.Action("get"));
+                    request.Condition.AddProperty("id", Conditions.Operator.Equals, value);
+                    IEnumerable<Response.Item> response = request.Execute();
+
+                    if (response.Count() == 1)
+                    {
+                        this.Object = response.First().Cache;
+                    }
                 }
             }
         }
