@@ -97,15 +97,20 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    // Get Item
-                    Request.Item request = this.Session.Create(((PropertyTypes.Item)this.PropertyType).PropertyItemType.Action("get"));
-                    request.Condition.AddProperty("id", Conditions.Operator.Equals, value);
-                    IEnumerable<Response.Item> response = request.Execute();
+                    // Add Item from Cache
+                    ItemType itemtype = ((PropertyTypes.Item)this.PropertyType).PropertyItemType;
 
-                    if (response.Count() == 1)
+                    Cache.Item item = this.Session.GetItemFromCache(itemtype, value);
+
+                    if (item == null)
                     {
-                        this.Object = response.First().Cache;
+                        item = new Cache.Item(itemtype);
+                        item.AddProperty(itemtype.PropertyType("id"), value);
+                        this.Session.AddItemToCache(item);
+
                     }
+
+                    this.SetObject(item);
                 }
             }
         }
