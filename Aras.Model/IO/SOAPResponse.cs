@@ -94,8 +94,17 @@ namespace Aras.Model.IO
             {
                if (this.Fault != null)
                 {
-                    XmlNode exception = this.Fault.SelectSingleNode(".//af:exception", this.Namespaces);
-                    return exception.Attributes["message"].Value;
+                    XmlNode faultstring = this.Fault.SelectSingleNode(".//faultstring", this.Namespaces);
+
+                    if (faultstring != null)
+                    {
+                        return faultstring.InnerText;
+                    }
+                    else
+                    {
+                        XmlNode exception = this.Fault.SelectSingleNode(".//af:exception", this.Namespaces);
+                        return exception.Attributes["message"].Value;
+                    }
                 }
                 else
                 {
