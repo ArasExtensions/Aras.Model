@@ -222,6 +222,11 @@ namespace Aras.Model.Cache
             }
         }
 
+        public Boolean HasProperty(String Name)
+        {
+            return (this.ItemType.PropertyType(Name) != null);
+        }
+
         [System.Runtime.CompilerServices.IndexerName("PropertyValue")]
         public Property this[String Name]
         {
