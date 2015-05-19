@@ -85,15 +85,20 @@ namespace Aras.Model.Request
 
         public void AddSelection(String Name)
         {
-            PropertyType proptype = this.ItemType.PropertyType(Name);
+            String[] names = Name.Split(',');
 
-            if (proptype != null)
+            foreach (String name in names)
             {
-                this.AddSelection(proptype);
-            }
-            else
-            {
-                throw new Exceptions.ArgumentException("PropertyType does not exist");
+                PropertyType proptype = this.ItemType.PropertyType(name);
+
+                if (proptype != null)
+                {
+                    this.AddSelection(proptype);
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("PropertyType does not exist");
+                }
             }
         }
 
