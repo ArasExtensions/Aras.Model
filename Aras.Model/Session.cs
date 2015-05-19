@@ -55,7 +55,7 @@ namespace Aras.Model
             {
                 if (this._user == null)
                 {
-                    Request.Item request = this.Create(this.ItemType("User").Action("get"));
+                    Request.Item request = this.Request(this.ItemType("User").Action("get"));
                     request.AddSelection("keyed_name");
                     request.Condition.AddProperty("id", Conditions.Operator.Equals, this.UserID);
                     Response.IEnumerable<Response.Item> response = request.Execute();
@@ -262,7 +262,14 @@ namespace Aras.Model
             }
         }
 
-        public Request.Item Create(Action Action)
+        public Request.Item Request(String ItemType, String Action)
+        {
+            ItemType itemtype = this.ItemType(ItemType);
+            Action action = itemtype.Action(Action);
+            return this.Request(action);
+        }
+
+        public Request.Item Request(Action Action)
         {
             Cache.Item cacheitem = new Cache.Item(Action.ItemType);
             Request.Item requestitem = new Request.Item(cacheitem, Action);
