@@ -33,6 +33,8 @@ namespace Aras.Model.IO
 {
     internal class Item
     {
+        private static String[] SystemChildNodeNames = new String[5] { "id", "itemtype", "source_id", "related_id", "Relationships" };
+
         internal XmlDocument Doc { get; private set; }
 
         internal XmlNode Node { get; private set; }
@@ -256,6 +258,32 @@ namespace Aras.Model.IO
             this.Node = Node;
         }
 
+        internal IEnumerable<String> PropertyNames
+        {
+            get
+            {
+                List<String> ret = new List<String>();
+
+                foreach (XmlNode childnode in this.Node.ChildNodes)
+                {
+                    String name = childnode.Name;
+
+                    if (!SystemChildNodeNames.Contains(name))
+                    {
+                        ret.Add(name);
+                    }
+                }
+
+                return ret;
+            }
+        }
+
+        internal Boolean IsPropertyItem(String Name)
+        {
+            XmlNode propnode = this.Node.SelectSingleNode(Name);
+            return (propnode.FirstChild != null);
+        }
+
         internal String GetProperty(String Name, String Default)
         {
             XmlNode propnode = this.Node.SelectSingleNode(Name);
@@ -349,6 +377,11 @@ namespace Aras.Model.IO
 
                 return ret;
             }
+        }
+
+        public override string ToString()
+        {
+            return this.Node.OuterXml;
         }
 
         internal Item(String ItemType, String Action)

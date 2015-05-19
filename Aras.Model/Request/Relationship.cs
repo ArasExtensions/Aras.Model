@@ -32,11 +32,37 @@ namespace Aras.Model.Request
 {
     public class Relationship : Item
     {
+        public Item Source { get; private set; }
 
-        internal Relationship(Cache.Relationship Cache, Action Action)
+        public Item Related { get; set; }
+
+        internal override string SelectionString
+        {
+            get
+            {
+                String ret = base.SelectionString;
+                ret = ret + ",source_id";
+
+                if (this.Related != null)
+                {
+                    ret = ret + ",related_id(" + this.Related.SelectionString + ")";
+                }
+                else
+                {
+                    if (((RelationshipType)this.ItemType).RelatedType != null)
+                    {
+                        ret = ret + ",related_id(id)";
+                    }
+                }
+
+                return ret;
+            }
+        }
+        internal Relationship(Cache.Relationship Cache, Action Action, Item Source, Item Related)
             :base(Cache, Action)
         {
-
+            this.Source = Source;
+            this.Related = Related;
         }
     }
 }

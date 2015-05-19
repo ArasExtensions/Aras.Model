@@ -177,7 +177,23 @@ namespace Aras.Model.Cache
             }
             else
             {
-                throw new Exceptions.ArgumentException("Property does not exist");
+                throw new Exceptions.ArgumentException("PropertyType does not exist");
+            }
+        }
+
+        internal Property AddProperty(String Name, String ValueString)
+        {
+            PropertyType proptype = this.ItemType.PropertyType(Name);
+
+            if (proptype != null)
+            {
+                Property property = this.AddProperty(proptype, null);
+                property.ValueString = ValueString;
+                return property;
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("PropertyType does not exist");
             }
         }
 

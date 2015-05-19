@@ -161,6 +161,7 @@ namespace Aras.Model
                         {
                             String sourcename = sourceitem.GetProperty("name");
                             ((RelationshipType)this._itemTypesCache[name]).SourceType = this._itemTypesCache[sourcename];
+                            this._itemTypesCache[sourcename].AddRelationshipType(((RelationshipType)this._itemTypesCache[name]));
                         }
 
                         IO.Item relateditem = relationshiptype.GetPropertyItem("related_id");

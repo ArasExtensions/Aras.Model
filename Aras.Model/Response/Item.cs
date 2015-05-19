@@ -33,9 +33,24 @@ namespace Aras.Model.Response
     public class Item
     {
         public Cache.Item Cache { get; private set; }
-        
+
+        private List<Item> _relationships;
+        public IEnumerable<Item> Relationships
+        {
+            get
+            {
+                return this._relationships;
+            }
+        }
+
+        internal void AddRelationship(Item Relationship)
+        {
+            this._relationships.Add(Relationship);
+        }
+
         internal Item(Cache.Item Cache)
         {
+            this._relationships = new List<Item>();
             this.Cache = Cache;
         }
     }

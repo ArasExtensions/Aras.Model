@@ -102,7 +102,7 @@ namespace Aras.Model.Request
             }
         }
 
-        internal String SelectionString
+        internal virtual String SelectionString
         {
             get
             {
@@ -120,6 +120,87 @@ namespace Aras.Model.Request
         }
 
         public Condition Condition { get; private set; }
+
+        private List<Relationship> _relationships;
+        public IEnumerable<Relationship> Relationships
+        {
+            get
+            {
+                return this._relationships;
+            }
+        }
+
+        public IEnumerable<RelationshipType> RelationshipTypes
+        {
+            get
+            {
+                return this.ItemType.RelationshipTypes;
+            }
+        }
+
+        public Relationship AddRelationship(Action Action, Item Related)
+        {
+            if (Action.ItemType is RelationshipType)
+            {
+                RelationshipType relationshiptype = (RelationshipType)Action.ItemType;
+
+                if (relationshiptype.SourceType.Equals(this.ItemType))
+                {
+                    if ((Related != null) && (relationshiptype.RelatedType != null))
+                    {
+                        if (!Related.ItemType.Equals(relationshiptype.RelatedType))
+                        {
+                            throw new Exceptions.ArgumentException("Related must have ItemType: " + relationshiptype.RelatedType.Name);
+                        }
+                    }
+
+                    Relationship relationship = new Relationship(new Model.Cache.Relationship(this.Cache, relationshiptype), Action, this, Related);
+                    this._relationships.Add(relationship);
+                    return relationship;
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Source Type of RelationshipType must be: " + this.ItemType.Name);
+                }
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Action must be from a RelationshipType");
+            }
+        }
+
+        public Relationship AddRelationship(Action Action)
+        {
+            return this.AddRelationship(Action, null);
+        }
+
+        public Relationship AddRelationship(String RelationshipType, String Action, Item Related)
+        {
+            RelationshipType relationshiptype = this.ItemType.RelationshipType(RelationshipType);
+
+            if (relationshiptype != null)
+            {
+                Action action = relationshiptype.Action(Action);
+
+                if (action != null)
+                {
+                    return this.AddRelationship(action, Related);
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Invalid Action");
+                }
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid RelationshipType");
+            }
+        }
+
+        public Relationship AddRelationship(String RelationshipType, String Action)
+        {
+            return this.AddRelationship(RelationshipType, Action, null);
+        }
 
         private IO.Item BuildRequest()
         {
@@ -155,7 +236,70 @@ namespace Aras.Model.Request
                 ret.PageSize = this.PageSize;
             }
 
+            // Relationships
+            foreach(Relationship relationship in this.Relationships)
+            {
+                IO.Item relitem = relationship.BuildRequest();
+                ret.AddRelationship(relitem);
+            }
+
             return ret;
+        }
+
+        private Response.Item BuildItem(IO.Item IOItem)
+        {
+            ItemType itemtype = this.Session.AnyItemType(IOItem.ItemType);
+            String itemid = IOItem.ID;
+            Cache.Item item = this.Session.GetItemFromCache(itemtype, itemid);
+
+            if (item == null)
+            {
+                if (itemtype is RelationshipType)
+                {
+                    RelationshipType relationshiptype = (RelationshipType)itemtype;
+                    Cache.Item source = this.Session.GetItemFromCache(relationshiptype.SourceType, IOItem.GetProperty("source_id"));
+                    item = new Cache.Relationship(source, relationshiptype);
+
+                    if (relationshiptype.RelatedType != null)
+                    {
+                        IO.Item iorelated = IOItem.GetPropertyItem("related_id");
+
+                        if (iorelated != null)
+                        {
+                            ((Cache.Relationship)item).Related = this.BuildItem(iorelated).Cache;
+                        }
+                        else
+                        {
+                            ((Cache.Relationship)item).Related = null;
+                        }
+                    }
+                }
+                else
+                {
+                    item = new Cache.Item(itemtype);
+                }
+
+                item.AddProperty("id", itemid);
+
+                this.Session.AddItemToCache(item);
+            }
+
+            foreach(String propname in IOItem.PropertyNames)
+            {
+                PropertyType proptype = itemtype.PropertyType(propname);
+                Cache.Property property = item.AddProperty(proptype, null);
+                property.ValueString = IOItem.GetProperty(proptype.Name);
+            }
+
+            Response.Item response = new Response.Item(item);
+
+            foreach(IO.Item iorelationship in IOItem.Relationships)
+            {
+                Response.Item relationship = this.BuildItem(iorelationship);
+                response.AddRelationship(relationship);
+            }
+
+            return response;
         }
 
         private Response.List<Response.Item> BuildResponse(IO.SOAPResponse Response)
@@ -182,26 +326,8 @@ namespace Aras.Model.Request
                         ret.PageMax = ioitem.PageMax;
                         pagingset = true;
                     }
-
-                    ItemType itemtype = this.Session.AnyItemType(ioitem.ItemType);
-                    String itemid = ioitem.ID;
-                    Cache.Item item = this.Session.GetItemFromCache(itemtype, itemid);
-
-                    if (item == null)
-                    {
-                        item = new Cache.Item(itemtype);
-                    }
-
-                    foreach (PropertyType proptype in this.Selection)
-                    {
-                        Cache.Property property = item.AddProperty(proptype, null);
-                        property.ValueString = ioitem.GetProperty(proptype.Name);
-                    }
-
-                    this.Session.AddItemToCache(item);
-
-                    Response.Item response = new Response.Item(item);
-                    ret.Add(response);
+        
+                    ret.Add(this.BuildItem(ioitem));
                 }
             }
 
@@ -249,10 +375,13 @@ namespace Aras.Model.Request
 
         internal Item(Cache.Item Cache, Action Action)
         {
+            this._selection = new Dictionary<String, PropertyType>();
+            this._relationships = new List<Relationship>();
+
             this.Cache = Cache;
             this.Action = Action;
             this.Condition = new Conditions.Base(this);
-            this._selection = new Dictionary<String, PropertyType>();
+            
             this.AddSelection("id");
             this.Paging = false;
             this.Page = 1;
