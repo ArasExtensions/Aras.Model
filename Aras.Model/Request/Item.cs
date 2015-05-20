@@ -295,9 +295,9 @@ namespace Aras.Model.Request
             return response;
         }
 
-        private Response.List<Response.Item> BuildResponse(IO.SOAPResponse Response)
+        private Response.Result BuildResponse(IO.SOAPResponse Response)
         {
-            Response.List<Response.Item> ret = new Response.List<Response.Item>();
+            Response.Result ret = new Response.Result(this);
 
             if (Response.IsError)
             {
@@ -308,26 +308,30 @@ namespace Aras.Model.Request
             }
             else
             {
-                Boolean pagingset = false;
+                if (this.Paging)
+                {
+                    if (Response.Items.Count() > 0)
+                    {
+                        ret.ItemMax = Response.Items.First().ItemMax;
+                        ret.Page = Response.Items.First().Page;
+                        ret.PageMax = Response.Items.First().PageMax;
+                    }
+                }
+                else
+                {
+                    ret.ItemMax = Response.Items.Count();
+                }
 
                 foreach (IO.Item ioitem in Response.Items)
-                {
-                    if (this.Paging && !pagingset)
-                    {
-                        ret.ItemMax = ioitem.ItemMax;
-                        ret.Page = ioitem.Page;
-                        ret.PageMax = ioitem.PageMax;
-                        pagingset = true;
-                    }
-        
-                    ret.Add(this.BuildItem(ioitem));
+                {        
+                    ret._items.Add(this.BuildItem(ioitem));
                 }
             }
 
             return ret;
         }
 
-        public async Task<Response.IEnumerable<Response.Item>> ExecuteAsync()
+        public async Task<Response.Result> ExecuteAsync()
         {
             IO.Item item = this.BuildRequest();
             IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, item);
@@ -347,7 +351,7 @@ namespace Aras.Model.Request
             return this.BuildResponse(response);
         }
 
-        public Response.IEnumerable<Response.Item> Execute()
+        public Response.Result Execute()
         {
             IO.Item item = this.BuildRequest();
             IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, item);

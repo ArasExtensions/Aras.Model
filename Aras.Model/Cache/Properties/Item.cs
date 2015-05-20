@@ -109,11 +109,11 @@ namespace Aras.Model.Cache.Properties
         {
             if (this.Object == null)
             {
-                return null;
+                return this.PropertyType.Name + ": null";
             }
             else
             {
-                return ((Model.Cache.Item)this.Object).ToString();
+                return this.PropertyType.Name + ": " + ((Model.Cache.Item)this.Object).ToString();
             }
         }
 

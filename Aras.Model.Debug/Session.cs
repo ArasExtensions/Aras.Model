@@ -49,9 +49,9 @@ namespace Aras.Model.Debug
             partbomrequest.AddSelection("quantity");
             partbomrequest.Related = partrequest;
 
-            Response.IEnumerable<Response.Item> partsresponse = partrequest.Execute();
+            Response.Result partsresponse = partrequest.Execute();
 
-            foreach(Response.Item partresponse in partsresponse)
+            foreach(Response.Item partresponse in partsresponse.Items)
             {
                 Cache.Item part = partresponse.Cache;
 
@@ -64,7 +64,7 @@ namespace Aras.Model.Debug
                 }
             }
 
-            LockTypes testlock = session.Locked(partsresponse.First().Cache);
+            Boolean testlock = session.UnLock(partsresponse.Items.First().Cache);
         }
 
         public Session()

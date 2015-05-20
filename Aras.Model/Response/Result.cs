@@ -1,4 +1,10 @@
-﻿/*  
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+/*  
   Aras.Model provides a .NET cient library for Aras Innovator
 
   Copyright (C) 2015 Processwall Limited.
@@ -22,20 +28,34 @@
   Email:   support@processwall.com
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Aras.Model.Response
 {
-    public interface IEnumerable<T> : System.Collections.Generic.IEnumerable<T>
+    public class Result
     {
-        int ItemMax { get; }
+        public Request.Item Request { get; private set; }
 
-        int PageMax { get; }
+        public int ItemMax { get; internal set; }
 
-        int Page { get; }
+        public int PageMax { get; internal set; }
+
+        public int Page { get; internal set; }
+
+        internal List<Item> _items;
+        public IEnumerable<Item> Items
+        {
+            get
+            {
+                return this._items;
+            }
+        }
+
+        internal Result(Request.Item Request)
+        {
+            this.Request = Request;
+            this._items = new List<Item>();
+            this.ItemMax = 0;
+            this.PageMax = 1;
+            this.Page = 1;
+        }
     }
 }

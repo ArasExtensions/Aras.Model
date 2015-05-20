@@ -238,9 +238,23 @@ namespace Aras.Model.Cache
             }
         }
 
+        public Boolean HasProperty(PropertyType PropertyType)
+        {
+            return this.PropertiesCache.ContainsKey(PropertyType);
+        }
+
         public Boolean HasProperty(String Name)
         {
-            return (this.ItemType.PropertyType(Name) != null);
+            PropertyType propertytype = this.ItemType.PropertyType(Name);
+
+            if (propertytype != null)
+            {
+                return this.HasProperty(propertytype);
+            }
+            else
+            {
+                throw new ArgumentException("Invalid property name: " + Name);
+            }
         }
 
         [System.Runtime.CompilerServices.IndexerName("PropertyValue")]

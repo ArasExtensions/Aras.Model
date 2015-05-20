@@ -120,9 +120,8 @@
     <Compile Include="Cache\Relationship.cs" />
     <Compile Include="Request\Relationship.cs" />
     <Compile Include="RelationshipType.cs" />
-    <Compile Include="Response\IEnumerable.cs" />
     <Compile Include="Response\Item.cs" />
-    <Compile Include="Response\List.cs" />
+    <Compile Include="Response\Result.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="Exceptions\ServerException.cs" />
     <Compile Include="Session.cs" />
