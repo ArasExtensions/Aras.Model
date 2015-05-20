@@ -221,48 +221,6 @@ namespace Aras.Model
             return null;
         }
 
-        private Dictionary<ItemType, Dictionary<String, Cache.Item>> ItemsCache { get; set; }
-
-        internal Cache.Item GetItemFromCache(ItemType ItemType, String ID)
-        {
-            if (this.ItemsCache.ContainsKey(ItemType))
-            {
-                if (this.ItemsCache[ItemType].ContainsKey(ID))
-                {
-                    return this.ItemsCache[ItemType][ID];
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        internal void AddItemToCache(Cache.Item Item)
-        {
-            if (!this.ItemsCache.ContainsKey(Item.ItemType))
-            {
-                this.ItemsCache[Item.ItemType] = new Dictionary<String, Cache.Item>();
-            }
-
-            this.ItemsCache[Item.ItemType][Item.ID] = Item;
-        }
-
-        internal void RemoveItemFromCache(Cache.Item Item)
-        {
-            if (this.ItemsCache.ContainsKey(Item.ItemType))
-            {
-                if (this.ItemsCache[Item.ItemType].ContainsKey(Item.ID))
-                {
-                    this.ItemsCache[Item.ItemType].Remove(Item.ID);
-                }
-            }
-        }
-
         public Request.Item Request(String ItemType, String Action)
         {
             ItemType itemtype = this.ItemType(ItemType);
@@ -285,7 +243,6 @@ namespace Aras.Model
         internal Session(Database Database, String UserID, String Username, String Password)
             :base()
         {
-            this.ItemsCache = new Dictionary<ItemType, Dictionary<String, Cache.Item>>();
             this.Database = Database;
             this.Username = Username;
             this.Password = Password;

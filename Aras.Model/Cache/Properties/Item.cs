@@ -99,17 +99,7 @@ namespace Aras.Model.Cache.Properties
                 {
                     // Add Item from Cache
                     ItemType itemtype = ((PropertyTypes.Item)this.PropertyType).PropertyItemType;
-
-                    Cache.Item item = this.Session.GetItemFromCache(itemtype, value);
-
-                    if (item == null)
-                    {
-                        item = new Cache.Item(itemtype);
-                        item.AddProperty(itemtype.PropertyType("id"), value);
-                        this.Session.AddItemToCache(item);
-
-                    }
-
+                    Cache.Item item = this.Session.Database.ItemFromCache(itemtype, value);
                     this.SetObject(item);
                 }
             }

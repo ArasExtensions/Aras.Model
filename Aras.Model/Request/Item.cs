@@ -250,38 +250,31 @@ namespace Aras.Model.Request
         {
             ItemType itemtype = this.Session.AnyItemType(IOItem.ItemType);
             String itemid = IOItem.ID;
-            Cache.Item item = this.Session.GetItemFromCache(itemtype, itemid);
+            Cache.Item item = null;
 
-            if (item == null)
+            if (itemtype is RelationshipType)
             {
-                if (itemtype is RelationshipType)
+                RelationshipType relationshiptype = (RelationshipType)itemtype;
+                Cache.Item source = this.Session.Database.ItemFromCache(relationshiptype.SourceType, IOItem.GetProperty("source_id"));
+                item = this.Session.Database.RelationshipFromCache(relationshiptype, source, itemid);
+
+                if (relationshiptype.RelatedType != null)
                 {
-                    RelationshipType relationshiptype = (RelationshipType)itemtype;
-                    Cache.Item source = this.Session.GetItemFromCache(relationshiptype.SourceType, IOItem.GetProperty("source_id"));
-                    item = new Cache.Relationship(source, relationshiptype);
+                    IO.Item iorelated = IOItem.GetPropertyItem("related_id");
 
-                    if (relationshiptype.RelatedType != null)
+                    if (iorelated != null)
                     {
-                        IO.Item iorelated = IOItem.GetPropertyItem("related_id");
-
-                        if (iorelated != null)
-                        {
-                            ((Cache.Relationship)item).Related = this.BuildItem(iorelated).Cache;
-                        }
-                        else
-                        {
-                            ((Cache.Relationship)item).Related = null;
-                        }
+                        ((Cache.Relationship)item).Related = this.BuildItem(iorelated).Cache;
+                    }
+                    else
+                    {
+                        ((Cache.Relationship)item).Related = null;
                     }
                 }
-                else
-                {
-                    item = new Cache.Item(itemtype);
-                }
-
-                item.AddProperty("id", itemid);
-
-                this.Session.AddItemToCache(item);
+            }
+            else
+            {
+                item = this.Session.Database.ItemFromCache(itemtype, itemid);
             }
 
             foreach(String propname in IOItem.PropertyNames)

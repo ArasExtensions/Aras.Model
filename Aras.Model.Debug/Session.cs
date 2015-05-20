@@ -44,6 +44,7 @@ namespace Aras.Model.Debug
             Request.Item partrequest = session.Request("Part", "get");
             partrequest.AddSelection("item_number,keyed_name,viewable_file");
             Request.Relationship partbomrequest = partrequest.AddRelationship("Part BOM", "get");
+            partbomrequest.AddSelection("quantity");
             partbomrequest.Related = partrequest;
 
             Response.IEnumerable<Response.Item> partsresponse = partrequest.Execute();
@@ -57,7 +58,7 @@ namespace Aras.Model.Debug
                 foreach(Response.Item partbomresponse in partresponse.Relationships)
                 {
                     Cache.Relationship partbom = (Cache.Relationship)partbomresponse.Cache;
-                    Console.WriteLine(" - " + partbom.Related.Property("item_number").Object);
+                    Console.WriteLine(" - " + partbom.Related.Property("item_number").Object + " " + partbomresponse.Cache.Property("quantity"));
                 }
             }
         }
