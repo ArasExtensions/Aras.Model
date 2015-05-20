@@ -39,6 +39,8 @@ namespace Aras.Model.Debug
             Database database = server.Database("Development100SP4");
             Model.Session session = database.Login("admin", "innovator");
 
+            Console.WriteLine("User: " + session.User.Property("keyed_name").Object);
+
             ItemType parttype = session.ItemType("Part");
 
             Request.Item partrequest = session.Request("Part", "get");
@@ -61,6 +63,8 @@ namespace Aras.Model.Debug
                     Console.WriteLine(" - " + partbom.Related.Property("item_number").Object + " " + partbomresponse.Cache.Property("quantity"));
                 }
             }
+
+            LockTypes testlock = session.Locked(partsresponse.First().Cache);
         }
 
         public Session()

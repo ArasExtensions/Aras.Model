@@ -30,6 +30,8 @@ using System.IO;
 
 namespace Aras.Model
 {
+    public enum LockTypes { None = 0, User = 1, OtherUser = 2 };
+
     public class Session
     {
         private static String[] IgnoreItemTypes = new String[] { "ItemType", "List" };
@@ -233,6 +235,81 @@ namespace Aras.Model
             Cache.Item cacheitem = new Cache.Item(Action.ItemType);
             Request.Item requestitem = new Request.Item(cacheitem, Action);
             return requestitem;
+        }
+
+        public Request.Item Request(Cache.Item Item, Action Action)
+        {
+            Request.Item requestitem = new Request.Item(Item, Action);
+            return requestitem;
+        }
+
+        public LockTypes Locked(Cache.Item Item)
+        {
+            Cache.Item lockedby = this.LockedBy(Item);
+
+            if (lockedby == null)
+            {
+                return LockTypes.None;
+            }
+            else
+            {
+                if (lockedby.Equals(this.User))
+                {
+                    return LockTypes.User;
+                }
+                else
+                {
+                    return LockTypes.OtherUser;
+                }
+            }
+        }
+
+        public Cache.Item LockedBy(Cache.Item Item)
+        {
+            Request.Item lockrequest = this.Request(Item.ItemType.Action("get"));
+            lockrequest.Condition.AddProperty("id", Conditions.Operator.Equals, Item.ID);
+            lockrequest.AddSelection("locked_by_id");
+            Response.IEnumerable<Response.Item> lockresponse = lockrequest.Execute();
+
+            return (Cache.Item)lockresponse.First().Cache.Property("locked_by_id").Object;
+        }
+
+        public Boolean Lock(Cache.Item Item)
+        {
+            Request.Item lockrequest = this.Request(Item.ItemType.Action("lock"));
+            lockrequest.Condition.AddProperty("id", Conditions.Operator.Equals, Item.ID);
+            lockrequest.AddSelection("locked_by_id");
+            Response.IEnumerable<Response.Item> lockresponse = lockrequest.Execute();
+
+            Cache.Item lockedby = (Cache.Item)lockresponse.First().Cache.Property("locked_by_id").Object;
+
+            if (lockedby != null && lockedby.Equals(this.User))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public Boolean UnLock(Cache.Item Item)
+        {
+            Request.Item unlockrequest = this.Request(Item.ItemType.Action("unlock"));
+            unlockrequest.Condition.AddProperty("id", Conditions.Operator.Equals, Item.ID);
+            unlockrequest.AddSelection("locked_by_id");
+            Response.IEnumerable<Response.Item> lockresponse = unlockrequest.Execute();
+
+            Cache.Item lockedby = (Cache.Item)lockresponse.First().Cache.Property("locked_by_id").Object;
+
+            if (lockedby == null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public override string ToString()
