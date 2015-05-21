@@ -27,9 +27,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aras.Model.Cache.Properties
+namespace Aras.Model.Properties
 {
-    public class Integer : Property
+    public class Decimal : Property
     {
         public override object Object
         {
@@ -45,19 +45,19 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    if (value is System.Int32)
+                    if (value is System.Decimal)
                     {
                         base.Object = value;
                     }
                     else
                     {
-                        throw new ArgumentException("Object must be type System.Int32");
+                        throw new ArgumentException("Object must be type System.Decimal");
                     }
                 }
             }
         }
 
-        public System.Int32? Value
+        public System.Decimal? Value
         {
             get
             {
@@ -67,7 +67,7 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    return (System.Int32)this.Object;
+                    return (System.Decimal)this.Object;
                 }
             }
             set
@@ -97,12 +97,12 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    this.SetObject(System.Int32.Parse(value));
+                    this.SetObject(System.Decimal.Parse(value));
                 }
             }
         }
 
-        internal Integer(Model.Cache.Item Item, PropertyTypes.Integer PropertyType)
+        internal Decimal(Model.Item Item, PropertyTypes.Decimal PropertyType)
             : base(Item, PropertyType)
         {
 

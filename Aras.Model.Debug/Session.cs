@@ -53,13 +53,13 @@ namespace Aras.Model.Debug
 
             foreach(Responses.Item partresponse in partsresponse.Items)
             {
-                Cache.Item part = partresponse.Cache;
+                Item part = partresponse.Cache;
 
                 Console.WriteLine(part.Property("item_number").Object);
 
                 foreach(Responses.Item partbomresponse in partresponse.Relationships)
                 {
-                    Cache.Relationship partbom = (Cache.Relationship)partbomresponse.Cache;
+                    Relationship partbom = (Relationship)partbomresponse.Cache;
                     Console.WriteLine(" - " + partbom.Related.Property("item_number").Object + " " + partbomresponse.Cache.Property("quantity"));
                 }
             }

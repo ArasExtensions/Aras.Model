@@ -38,7 +38,7 @@ namespace Aras.Model.Requests
     {
         public Request Request { get; private set; }
 
-        public Cache.Item Cache { get; private set; }
+        public Model.Item Cache { get; private set; }
 
         public Action Action { get; private set; }
 
@@ -156,7 +156,7 @@ namespace Aras.Model.Requests
                         }
                     }
 
-                    Relationship relationship = new Relationship(this.Request, new Model.Cache.Relationship(this.Cache, relationshiptype), Action, this, Related);
+                    Relationship relationship = new Relationship(this.Request, new Model.Relationship(this.Cache, relationshiptype), Action, this, Related);
                     this._relationships.Add(relationship);
                     return relationship;
                 }
@@ -210,7 +210,7 @@ namespace Aras.Model.Requests
             ret.Select = this.SelectionString;
 
             // Add Properties
-            foreach (Cache.Property prop in this.Cache.Properties)
+            foreach (Property prop in this.Cache.Properties)
             {
                 if (!prop.ReadOnly)
                 {
@@ -258,7 +258,7 @@ namespace Aras.Model.Requests
             return await this.Request.ExecuteAsync();
         }
 
-        internal Item(Request Request, Cache.Item Cache, Action Action)
+        internal Item(Request Request, Model.Item Cache, Action Action)
         {
             this._selection = new Dictionary<String, PropertyType>();
             this._relationships = new List<Relationship>();

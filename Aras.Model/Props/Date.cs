@@ -27,9 +27,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aras.Model.Cache.Properties
+namespace Aras.Model.Properties
 {
-    public class List : Property
+    public class Date : Property
     {
         public override object Object
         {
@@ -45,19 +45,19 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    if (value is System.String)
+                    if (value is System.DateTime)
                     {
                         base.Object = value;
                     }
                     else
                     {
-                        throw new ArgumentException("Object must be type System.String");
+                        throw new ArgumentException("Object must be type System.DateTime");
                     }
                 }
             }
         }
 
-        public System.String Value
+        public System.DateTime? Value
         {
             get
             {
@@ -67,7 +67,7 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    return (System.String)this.Object;
+                    return (System.DateTime)this.Object;
                 }
             }
             set
@@ -86,16 +86,23 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    return (System.String)this.Object;
+                    return ((DateTime)this.Object).ToString("yyyy-MM-ddThh:mm:ss");
                 }
             }
             set
             {
-                this.SetObject(value);
+                if (value == null)
+                {
+                    this.SetObject(null);
+                }
+                else
+                {
+                    this.SetObject(DateTime.Parse(value));
+                }
             }
         }
 
-        internal List(Model.Cache.Item Item, PropertyTypes.List PropertyType)
+        internal Date(Model.Item Item, PropertyTypes.Date PropertyType)
             : base(Item, PropertyType)
         {
 

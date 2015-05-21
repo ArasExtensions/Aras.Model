@@ -27,9 +27,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aras.Model.Cache.Properties
+namespace Aras.Model.Properties
 {
-    public class Image : Property
+    public class ColorList : Property
     {
         public override object Object
         {
@@ -95,7 +95,7 @@ namespace Aras.Model.Cache.Properties
             }
         }
 
-        internal Image(Model.Cache.Item Item, PropertyTypes.Image PropertyType)
+        internal ColorList(Model.Item Item, PropertyTypes.ColorList PropertyType)
             : base(Item, PropertyType)
         {
 

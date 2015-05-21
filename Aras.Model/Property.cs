@@ -27,7 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aras.Model.Cache
+namespace Aras.Model
 {
     public abstract class Property
     {

@@ -27,7 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aras.Model.Cache.Properties
+namespace Aras.Model.Properties
 {
     public class Sequence : Property
     {
@@ -95,7 +95,7 @@ namespace Aras.Model.Cache.Properties
             }
         }
 
-        internal Sequence(Model.Cache.Item Item, PropertyTypes.Sequence PropertyType)
+        internal Sequence(Model.Item Item, PropertyTypes.Sequence PropertyType)
             : base(Item, PropertyType)
         {
 

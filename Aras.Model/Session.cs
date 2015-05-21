@@ -50,8 +50,8 @@ namespace Aras.Model
 
         private String UserID { get; set; }
 
-        private Cache.Item _user;
-        public Cache.Item User
+        private Item _user;
+        public Item User
         {
             get
             {
@@ -232,18 +232,18 @@ namespace Aras.Model
 
         public Requests.Item Request(Action Action)
         {
-            Cache.Item cacheitem = new Cache.Item(Action.ItemType);
+            Item cacheitem = new Item(Action.ItemType);
             return new Request(this, cacheitem, Action).Items.First();
         }
 
-        public Requests.Item Request(Cache.Item Item, Action Action)
+        public Requests.Item Request(Item Item, Action Action)
         {
             return new Request(this, Item, Action).Items.First();
         }
 
-        public LockTypes Locked(Cache.Item Item)
+        public LockTypes Locked(Item Item)
         {
-            Cache.Item lockedby = this.LockedBy(Item);
+            Item lockedby = this.LockedBy(Item);
 
             if (lockedby == null)
             {
@@ -262,19 +262,19 @@ namespace Aras.Model
             }
         }
 
-        public Cache.Item LockedBy(Cache.Item Item)
+        public Item LockedBy(Item Item)
         {
             Requests.Item lockrequest = this.Request(Item.ItemType.Action("get"));
             lockrequest.Condition.AddProperty("id", Conditions.Operator.Equals, Item.ID);
             lockrequest.AddSelection("locked_by_id");
             Response lockresponse = lockrequest.Request.Execute();
 
-            return (Cache.Item)lockresponse.Items.First().Cache.Property("locked_by_id").Object;
+            return (Item)lockresponse.Items.First().Cache.Property("locked_by_id").Object;
         }
 
-        public Boolean Lock(Cache.Item Item)
+        public Boolean Lock(Item Item)
         {
-            Cache.Item lockedby = this.LockedBy(Item);
+            Item lockedby = this.LockedBy(Item);
 
             if (lockedby == null)
             {
@@ -283,7 +283,7 @@ namespace Aras.Model
                 lockrequest.AddSelection("locked_by_id");
                 Response lockresponse = lockrequest.Request.Execute();
 
-                lockedby = (Cache.Item)lockresponse.Items.First().Cache.Property("locked_by_id").Object;
+                lockedby = (Item)lockresponse.Items.First().Cache.Property("locked_by_id").Object;
 
                 if (lockedby != null && lockedby.Equals(this.User))
                 {
@@ -304,7 +304,7 @@ namespace Aras.Model
             }
         }
 
-        public Boolean UnLock(Cache.Item Item)
+        public Boolean UnLock(Item Item)
         {
             Requests.Item unlockrequest = this.Request(Item.ItemType.Action("unlock"));
             unlockrequest.Condition.AddProperty("id", Conditions.Operator.Equals, Item.ID);

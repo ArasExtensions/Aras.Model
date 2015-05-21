@@ -58,7 +58,7 @@ namespace Aras.Model.Requests
                 return ret;
             }
         }
-        internal Relationship(Request Request, Cache.Relationship Cache, Action Action, Item Source, Item Related)
+        internal Relationship(Request Request, Model.Relationship Cache, Action Action, Item Source, Item Related)
             :base(Request, Cache, Action)
         {
             this.Source = Source;

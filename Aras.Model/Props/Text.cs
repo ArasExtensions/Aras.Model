@@ -27,9 +27,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aras.Model.Cache.Properties
+namespace Aras.Model.Properties
 {
-    public class Boolean : Property
+    public class Text : Property
     {
         public override object Object
         {
@@ -45,19 +45,19 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    if (value is System.Boolean)
+                    if (value is System.String)
                     {
                         base.Object = value;
                     }
                     else
                     {
-                        throw new ArgumentException("Object must be type System.Boolean");
+                        throw new ArgumentException("Object must be type System.String");
                     }
                 }
             }
         }
 
-        public System.Boolean? Value
+        public System.String Value
         {
             get
             {
@@ -67,7 +67,7 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    return (System.Boolean)this.Object;
+                    return (System.String)this.Object;
                 }
             }
             set
@@ -75,7 +75,7 @@ namespace Aras.Model.Cache.Properties
                 this.Object = value;
             }
         }
-   
+
         internal override System.String ValueString
         {
             get
@@ -86,30 +86,16 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    if (((System.Boolean)this.Object).Equals(true))
-                    {
-                        return "1";
-                    }
-                    else
-                    {
-                        return "0";
-                    }
+                    return (System.String)this.Object;
                 }
             }
             set
             {
-                if (value == null)
-                {
-                    this.SetObject(null);
-                }
-                else
-                {
-                    this.SetObject(value.Equals("1"));
-                }
+                this.SetObject(value);
             }
         }
 
-        internal Boolean(Model.Cache.Item Item, PropertyTypes.Boolean PropertyType)
+        internal Text(Model.Item Item, PropertyTypes.Text PropertyType)
             : base(Item, PropertyType)
         {
 

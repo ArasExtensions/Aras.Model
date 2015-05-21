@@ -32,7 +32,7 @@ namespace Aras.Model.Requests
 {
     public class File : Item
     {
-        internal File(Request Request, Cache.File Cache, Action Action)
+        internal File(Request Request, Model.File Cache, Action Action)
             : base(Request, Cache, Action)
         {
 

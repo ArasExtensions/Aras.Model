@@ -28,7 +28,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Aras.Model.Cache
+namespace Aras.Model
 {
     public class Item : IEquatable<Item>
     {
@@ -50,7 +50,7 @@ namespace Aras.Model.Cache
 
                 if (idproperty != null)
                 {
-                    return ((Model.Cache.Properties.String)idproperty).Value;
+                    return ((Model.Properties.String)idproperty).Value;
                 }
                 else
                 {
@@ -67,7 +67,7 @@ namespace Aras.Model.Cache
 
                 if (knproperty != null)
                 {
-                    return ((Model.Cache.Properties.String)knproperty).Value;
+                    return ((Model.Properties.String)knproperty).Value;
                 }
                 else
                 {

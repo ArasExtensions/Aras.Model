@@ -26,41 +26,52 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Aras.Model.Responses
+namespace Aras.Model
 {
-    public class Item
+    public class Relationship : Item
     {
-        public Model.Item Cache { get; private set; }
-
-        public int ItemMax { get; internal set; }
-
-        public int PageMax { get; internal set; }
-
-        public int Page { get; internal set; }
-
-        private List<Item> _relationships;
-        public IEnumerable<Item> Relationships
+        public RelationshipType RelationshipType
         {
             get
             {
-                return this._relationships;
+                return (RelationshipType)this.ItemType;
             }
         }
 
-        internal void AddRelationship(Item Relationship)
+        private Item _source;
+        public Item Source
         {
-            this._relationships.Add(Relationship);
+            get
+            {
+                return this._source;
+            }
+            private set
+            {
+                if (value != null)
+                {
+                    if (value.ItemType.Equals(this.RelationshipType.SourceType))
+                    {
+                        this._source = value;
+                    }
+                    else
+                    {
+                        throw new Exceptions.ArgumentException("Relationship Source must be type: " + this.RelationshipType.SourceType.Name);
+                    }
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Relationship Source cannot be null");
+                }
+            }
         }
 
-        internal Item(Model.Item Cache)
+        public Item Related { get; set; }
+
+        internal Relationship(Item Source, RelationshipType RelationshipType)
+            : base(RelationshipType)
         {
-            this._relationships = new List<Item>();
-            this.Cache = Cache;
-            this.ItemMax = 0;
-            this.PageMax = 1;
-            this.Page = 1;
+            this.Source = Source;
         }
     }
 }

@@ -73,15 +73,15 @@ namespace Aras.Model
 
         private Object ItemsCacheLock = new Object();
 
-        private Dictionary<ItemType, Dictionary<String, Cache.Item>> ItemsCache { get; set; }
+        private Dictionary<ItemType, Dictionary<String, Item>> ItemsCache { get; set; }
 
-        internal Cache.Item ItemFromCache(ItemType ItemType, String ID)
+        internal Item ItemFromCache(ItemType ItemType, String ID)
         {
             lock (this.ItemsCacheLock)
             {
                 if (!this.ItemsCache.ContainsKey(ItemType))
                 {
-                    this.ItemsCache[ItemType] = new Dictionary<String, Cache.Item>();
+                    this.ItemsCache[ItemType] = new Dictionary<String, Item>();
                 }
 
                 if (this.ItemsCache[ItemType].ContainsKey(ID))
@@ -90,7 +90,7 @@ namespace Aras.Model
                 }
                 else
                 {
-                    Cache.Item item = new Cache.Item(ItemType);
+                    Item item = new Item(ItemType);
                     item.AddProperty("id", ID);
                     this.ItemsCache[ItemType][ID] = item;
                     return item;
@@ -98,22 +98,22 @@ namespace Aras.Model
             }
         }
 
-        internal Cache.Relationship RelationshipFromCache(RelationshipType RelationshipType, Cache.Item Source, String ID)
+        internal Relationship RelationshipFromCache(RelationshipType RelationshipType, Item Source, String ID)
         {
             lock (this.ItemsCacheLock)
             {
                 if (!this.ItemsCache.ContainsKey(RelationshipType))
                 {
-                    this.ItemsCache[RelationshipType] = new Dictionary<String, Cache.Item>();
+                    this.ItemsCache[RelationshipType] = new Dictionary<String, Item>();
                 }
 
                 if (this.ItemsCache[RelationshipType].ContainsKey(ID))
                 {
-                    return (Cache.Relationship)this.ItemsCache[RelationshipType][ID];
+                    return (Relationship)this.ItemsCache[RelationshipType][ID];
                 }
                 else
                 {
-                    Cache.Relationship relationship = new Cache.Relationship(Source, RelationshipType);
+                    Relationship relationship = new Relationship(Source, RelationshipType);
                     relationship.AddProperty("id", ID);
                     this.ItemsCache[RelationshipType][ID] = relationship;
                     return relationship;
@@ -129,7 +129,7 @@ namespace Aras.Model
         internal Database(Server Server, String Name)
             :base()
         {
-            this.ItemsCache = new Dictionary<ItemType, Dictionary<String, Cache.Item>>();
+            this.ItemsCache = new Dictionary<ItemType, Dictionary<String, Item>>();
             this.Server = Server;
             this.Name = Name;
         }

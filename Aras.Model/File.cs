@@ -28,7 +28,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Aras.Model.Cache
+namespace Aras.Model
 {
     public class File : Item
     {

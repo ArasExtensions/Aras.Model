@@ -27,9 +27,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aras.Model.Cache.Properties
+namespace Aras.Model.Properties
 {
-    public class Date : Property
+    public class Integer : Property
     {
         public override object Object
         {
@@ -45,19 +45,19 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    if (value is System.DateTime)
+                    if (value is System.Int32)
                     {
                         base.Object = value;
                     }
                     else
                     {
-                        throw new ArgumentException("Object must be type System.DateTime");
+                        throw new ArgumentException("Object must be type System.Int32");
                     }
                 }
             }
         }
 
-        public System.DateTime? Value
+        public System.Int32? Value
         {
             get
             {
@@ -67,7 +67,7 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    return (System.DateTime)this.Object;
+                    return (System.Int32)this.Object;
                 }
             }
             set
@@ -86,7 +86,7 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    return ((DateTime)this.Object).ToString("yyyy-MM-ddThh:mm:ss");
+                    return this.Object.ToString();
                 }
             }
             set
@@ -97,12 +97,12 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    this.SetObject(DateTime.Parse(value));
+                    this.SetObject(System.Int32.Parse(value));
                 }
             }
         }
 
-        internal Date(Model.Cache.Item Item, PropertyTypes.Date PropertyType)
+        internal Integer(Model.Item Item, PropertyTypes.Integer PropertyType)
             : base(Item, PropertyType)
         {
 

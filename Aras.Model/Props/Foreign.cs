@@ -27,9 +27,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aras.Model.Cache.Properties
+namespace Aras.Model.Properties
 {
-    public class Text : Property
+    public class Foreign : Property
     {
         public override object Object
         {
@@ -95,7 +95,7 @@ namespace Aras.Model.Cache.Properties
             }
         }
 
-        internal Text(Model.Cache.Item Item, PropertyTypes.Text PropertyType)
+        internal Foreign(Model.Item Item, PropertyTypes.Foreign PropertyType)
             : base(Item, PropertyType)
         {
 

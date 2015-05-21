@@ -27,9 +27,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aras.Model.Cache.Properties
+namespace Aras.Model.Properties
 {
-    public class Decimal : Property
+    public class Item : Property
     {
         public override object Object
         {
@@ -45,19 +45,19 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    if (value is System.Decimal)
+                    if (value is Aras.Model.Item)
                     {
                         base.Object = value;
                     }
                     else
                     {
-                        throw new ArgumentException("Object must be type System.Decimal");
+                        throw new ArgumentException("Object must be type Aras.Model.Item");
                     }
                 }
             }
         }
 
-        public System.Decimal? Value
+        public Model.Item Value
         {
             get
             {
@@ -67,7 +67,7 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    return (System.Decimal)this.Object;
+                    return (Model.Item)this.Object;
                 }
             }
             set
@@ -86,23 +86,38 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    return this.Object.ToString();
+                    return ((Model.Item)this.Object).ID;
                 }
             }
             set
             {
-                if (value == null)
+                if (System.String.IsNullOrEmpty(value))
                 {
                     this.SetObject(null);
                 }
                 else
                 {
-                    this.SetObject(System.Decimal.Parse(value));
+                    // Add Item from Cache
+                    ItemType itemtype = ((PropertyTypes.Item)this.PropertyType).PropertyItemType;
+                    Model.Item item = this.Session.Database.ItemFromCache(itemtype, value);
+                    this.SetObject(item);
                 }
             }
         }
 
-        internal Decimal(Model.Cache.Item Item, PropertyTypes.Decimal PropertyType)
+        public override string ToString()
+        {
+            if (this.Object == null)
+            {
+                return this.PropertyType.Name + ": null";
+            }
+            else
+            {
+                return this.PropertyType.Name + ": " + ((Model.Item)this.Object).ToString();
+            }
+        }
+
+        internal Item(Model.Item Item, PropertyTypes.Item PropertyType)
             : base(Item, PropertyType)
         {
 

@@ -27,51 +27,78 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aras.Model.Cache
+namespace Aras.Model.Properties
 {
-    public class Relationship : Item
+    public class Image : Property
     {
-        public RelationshipType RelationshipType
+        public override object Object
         {
             get
             {
-                return (RelationshipType)this.ItemType;
+                return base.Object;
             }
-        }
-
-        private Item _source;
-        public Item Source
-        {
-            get
+            set
             {
-                return this._source;
-            }
-            private set
-            {
-                if (value != null)
+                if (value == null)
                 {
-                    if (value.ItemType.Equals(this.RelationshipType.SourceType))
-                    {
-                        this._source = value;
-                    }
-                    else
-                    {
-                        throw new Exceptions.ArgumentException("Relationship Source must be type: " + this.RelationshipType.SourceType.Name);
-                    }
+                    base.Object = value;
                 }
                 else
                 {
-                    throw new Exceptions.ArgumentException("Relationship Source cannot be null");
+                    if (value is System.String)
+                    {
+                        base.Object = value;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Object must be type System.String");
+                    }
                 }
             }
         }
 
-        public Item Related { get; set; }
-
-        internal Relationship(Item Source, RelationshipType RelationshipType)
-            : base(RelationshipType)
+        public System.String Value
         {
-            this.Source = Source;
+            get
+            {
+                if (this.Object == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return (System.String)this.Object;
+                }
+            }
+            set
+            {
+                this.Object = value;
+            }
+        }
+
+        internal override System.String ValueString
+        {
+            get
+            {
+                if (this.Object == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return (System.String)this.Object;
+                }
+            }
+            set
+            {
+                this.SetObject(value);
+            }
+        }
+
+        internal Image(Model.Item Item, PropertyTypes.Image PropertyType)
+            : base(Item, PropertyType)
+        {
+
         }
     }
 }

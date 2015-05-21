@@ -27,9 +27,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aras.Model.Cache.Properties
+namespace Aras.Model.Properties
 {
-    public class String : Property
+    public class Float : Property
     {
         public override object Object
         {
@@ -45,19 +45,19 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    if (value is System.String)
+                    if (value is System.Double)
                     {
                         base.Object = value;
                     }
                     else
                     {
-                        throw new ArgumentException("Object must be type System.String");
+                        throw new ArgumentException("Object must be type System.Double");
                     }
                 }
             }
         }
 
-        public System.String Value
+        public System.Double? Value
         {
             get
             {
@@ -67,7 +67,7 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    return (System.String)this.Object;
+                    return (System.Double)this.Object;
                 }
             }
             set
@@ -86,16 +86,23 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    return (System.String)this.Object;
+                    return this.Object.ToString();
                 }
             }
             set
             {
-                this.SetObject(value);
+                if (value == null)
+                {
+                    this.SetObject(null);
+                }
+                else
+                {
+                    this.SetObject(System.Double.Parse(value));
+                }
             }
         }
 
-        internal String(Model.Cache.Item Item, PropertyTypes.String PropertyType)
+        internal Float(Model.Item Item, PropertyTypes.Float PropertyType)
             : base(Item, PropertyType)
         {
 

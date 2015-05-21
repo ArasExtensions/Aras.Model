@@ -27,9 +27,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aras.Model.Cache.Properties
+namespace Aras.Model.Properties
 {
-    public class ColorList : Property
+    public class List : Property
     {
         public override object Object
         {
@@ -95,7 +95,7 @@ namespace Aras.Model.Cache.Properties
             }
         }
 
-        internal ColorList(Model.Cache.Item Item, PropertyTypes.ColorList PropertyType)
+        internal List(Model.Item Item, PropertyTypes.List PropertyType)
             : base(Item, PropertyType)
         {
 

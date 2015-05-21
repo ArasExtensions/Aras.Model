@@ -21,13 +21,13 @@ namespace Aras.Model
 
         public Requests.Item AddItem(Action Action)
         {
-            Cache.Item cacheitem = new Cache.Item(Action.ItemType);
+            Item cacheitem = new Item(Action.ItemType);
             Requests.Item requestitem = new Requests.Item(this, cacheitem, Action);
             this._items.Add(requestitem);
             return requestitem;
         }
 
-        public Requests.Item AddItem(Cache.Item Item, Action Action)
+        public Requests.Item AddItem(Item Item, Action Action)
         {
             Requests.Item requestitem = new Requests.Item(this, Item, Action);
             this._items.Add(requestitem);
@@ -45,12 +45,12 @@ namespace Aras.Model
         {
             ItemType itemtype = this.Session.AnyItemType(IOItem.ItemType);
             String itemid = IOItem.ID;
-            Cache.Item item = null;
+            Item item = null;
 
             if (itemtype is RelationshipType)
             {
                 RelationshipType relationshiptype = (RelationshipType)itemtype;
-                Cache.Item source = this.Session.Database.ItemFromCache(relationshiptype.SourceType, IOItem.GetProperty("source_id"));
+                Item source = this.Session.Database.ItemFromCache(relationshiptype.SourceType, IOItem.GetProperty("source_id"));
                 item = this.Session.Database.RelationshipFromCache(relationshiptype, source, itemid);
 
                 if (relationshiptype.RelatedType != null)
@@ -59,11 +59,11 @@ namespace Aras.Model
 
                     if (iorelated != null)
                     {
-                        ((Cache.Relationship)item).Related = this.BuildItem(iorelated).Cache;
+                        ((Model.Relationship)item).Related = this.BuildItem(iorelated).Cache;
                     }
                     else
                     {
-                        ((Cache.Relationship)item).Related = null;
+                        ((Model.Relationship)item).Related = null;
                     }
                 }
             }
@@ -75,7 +75,7 @@ namespace Aras.Model
             foreach (String propname in IOItem.PropertyNames)
             {
                 PropertyType proptype = itemtype.PropertyType(propname);
-                Cache.Property property = item.AddProperty(proptype, null);
+                Property property = item.AddProperty(proptype, null);
                 property.ValueString = IOItem.GetProperty(proptype.Name);
             }
 
@@ -165,7 +165,7 @@ namespace Aras.Model
             return this.BuildResponse(response);
         }
 
-        internal Request(Session Session, Cache.Item Item, Action Action)
+        internal Request(Session Session, Item Item, Action Action)
         {
             this._items = new List<Requests.Item>();
             this.Session = Session;

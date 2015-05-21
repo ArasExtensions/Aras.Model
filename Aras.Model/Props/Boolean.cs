@@ -27,9 +27,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aras.Model.Cache.Properties
+namespace Aras.Model.Properties
 {
-    public class Item : Property
+    public class Boolean : Property
     {
         public override object Object
         {
@@ -45,19 +45,19 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    if (value is Aras.Model.Cache.Item)
+                    if (value is System.Boolean)
                     {
                         base.Object = value;
                     }
                     else
                     {
-                        throw new ArgumentException("Object must be type Aras.Model.Cache.Item");
+                        throw new ArgumentException("Object must be type System.Boolean");
                     }
                 }
             }
         }
 
-        public Model.Cache.Item Value
+        public System.Boolean? Value
         {
             get
             {
@@ -67,7 +67,7 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    return (Model.Cache.Item)this.Object;
+                    return (System.Boolean)this.Object;
                 }
             }
             set
@@ -75,7 +75,7 @@ namespace Aras.Model.Cache.Properties
                 this.Object = value;
             }
         }
-
+   
         internal override System.String ValueString
         {
             get
@@ -86,38 +86,30 @@ namespace Aras.Model.Cache.Properties
                 }
                 else
                 {
-                    return ((Model.Cache.Item)this.Object).ID;
+                    if (((System.Boolean)this.Object).Equals(true))
+                    {
+                        return "1";
+                    }
+                    else
+                    {
+                        return "0";
+                    }
                 }
             }
             set
             {
-                if (System.String.IsNullOrEmpty(value))
+                if (value == null)
                 {
                     this.SetObject(null);
                 }
                 else
                 {
-                    // Add Item from Cache
-                    ItemType itemtype = ((PropertyTypes.Item)this.PropertyType).PropertyItemType;
-                    Cache.Item item = this.Session.Database.ItemFromCache(itemtype, value);
-                    this.SetObject(item);
+                    this.SetObject(value.Equals("1"));
                 }
             }
         }
 
-        public override string ToString()
-        {
-            if (this.Object == null)
-            {
-                return this.PropertyType.Name + ": null";
-            }
-            else
-            {
-                return this.PropertyType.Name + ": " + ((Model.Cache.Item)this.Object).ToString();
-            }
-        }
-
-        internal Item(Model.Cache.Item Item, PropertyTypes.Item PropertyType)
+        internal Boolean(Model.Item Item, PropertyTypes.Boolean PropertyType)
             : base(Item, PropertyType)
         {
 
