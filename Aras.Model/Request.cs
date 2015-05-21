@@ -50,8 +50,8 @@ namespace Aras.Model
             if (itemtype is RelationshipType)
             {
                 RelationshipType relationshiptype = (RelationshipType)itemtype;
-                Item source = this.Session.Database.ItemFromCache(relationshiptype.SourceType, IOItem.GetProperty("source_id"));
-                item = this.Session.Database.RelationshipFromCache(relationshiptype, source, itemid);
+                Item source = this.Session.ItemFromCache(relationshiptype.SourceType, IOItem.GetProperty("source_id"));
+                item = this.Session.RelationshipFromCache(relationshiptype, source, itemid);
 
                 if (relationshiptype.RelatedType != null)
                 {
@@ -69,7 +69,7 @@ namespace Aras.Model
             }
             else
             {
-                item = this.Session.Database.ItemFromCache(itemtype, itemid);
+                item = this.Session.ItemFromCache(itemtype, itemid);
             }
 
             foreach (String propname in IOItem.PropertyNames)

@@ -223,6 +223,56 @@ namespace Aras.Model
             return null;
         }
 
+        private Object ItemsCacheLock = new Object();
+
+        private Dictionary<ItemType, Dictionary<String, Item>> ItemsCache { get; set; }
+
+        internal Item ItemFromCache(ItemType ItemType, String ID)
+        {
+            lock (this.ItemsCacheLock)
+            {
+                if (!this.ItemsCache.ContainsKey(ItemType))
+                {
+                    this.ItemsCache[ItemType] = new Dictionary<String, Item>();
+                }
+
+                if (this.ItemsCache[ItemType].ContainsKey(ID))
+                {
+                    return this.ItemsCache[ItemType][ID];
+                }
+                else
+                {
+                    Item item = new Item(ItemType);
+                    item.AddProperty("id", ID);
+                    this.ItemsCache[ItemType][ID] = item;
+                    return item;
+                }
+            }
+        }
+
+        internal Relationship RelationshipFromCache(RelationshipType RelationshipType, Item Source, String ID)
+        {
+            lock (this.ItemsCacheLock)
+            {
+                if (!this.ItemsCache.ContainsKey(RelationshipType))
+                {
+                    this.ItemsCache[RelationshipType] = new Dictionary<String, Item>();
+                }
+
+                if (this.ItemsCache[RelationshipType].ContainsKey(ID))
+                {
+                    return (Relationship)this.ItemsCache[RelationshipType][ID];
+                }
+                else
+                {
+                    Relationship relationship = new Relationship(Source, RelationshipType);
+                    relationship.AddProperty("id", ID);
+                    this.ItemsCache[RelationshipType][ID] = relationship;
+                    return relationship;
+                }
+            }
+        }
+
         public Requests.Item Request(String ItemType, String Action)
         {
             ItemType itemtype = this.ItemType(ItemType);
@@ -330,6 +380,7 @@ namespace Aras.Model
         internal Session(Database Database, String UserID, String Username, String Password)
             :base()
         {
+            this.ItemsCache = new Dictionary<ItemType, Dictionary<String, Item>>();
             this.Database = Database;
             this.Username = Username;
             this.Password = Password;
