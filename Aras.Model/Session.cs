@@ -362,7 +362,7 @@ namespace Aras.Model
 
             if (Item.HasProperty("locked_by_id"))
             {
-                Item.Property("locked_by_id").Object = null;
+                Item.Property("locked_by_id").ValueString = null;
             }
             else
             {

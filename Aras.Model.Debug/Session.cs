@@ -41,8 +41,6 @@ namespace Aras.Model.Debug
 
             Console.WriteLine("User: " + session.User.Property("keyed_name").Object);
 
-            ItemType parttype = session.ItemType("Part");
-
             Requests.Item partrequest = session.Request("Part", "get");
             partrequest.AddSelection("item_number,keyed_name,viewable_file");
             Requests.Relationship partbomrequest = partrequest.AddRelationship("Part BOM", "get");
@@ -64,7 +62,8 @@ namespace Aras.Model.Debug
                 }
             }
 
-            //Boolean testlock = session.UnLock(partsresponse.Items.First().Cache);
+            Boolean testlock = session.Lock(partsresponse.Items.First().Cache);
+            Boolean testunlock = session.UnLock(partsresponse.Items.First().Cache);
         }
 
         public Session()
