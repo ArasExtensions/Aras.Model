@@ -68,7 +68,7 @@ namespace Aras.Model.Conditions
             }
         }
 
-        internal Base(Request.Item Item)
+        internal Base(Requests.Item Item)
             :base(Item)
         {
             this._children = new List<Condition>();

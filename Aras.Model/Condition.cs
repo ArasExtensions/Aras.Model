@@ -32,7 +32,7 @@ namespace Aras.Model
 {
     public abstract class Condition
     {
-        public Request.Item Item { get; private set; }
+        public Requests.Item Item { get; private set; }
 
         public ItemType ItemType
         {
@@ -90,7 +90,7 @@ namespace Aras.Model
 
         internal abstract String WhereClause { get; }
 
-        internal Condition(Request.Item Item)
+        internal Condition(Requests.Item Item)
         {
             this.Item = Item;
         }

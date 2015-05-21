@@ -28,7 +28,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model.Request
+namespace Aras.Model.Requests
 {
     public class Relationship : Item
     {
@@ -58,8 +58,8 @@ namespace Aras.Model.Request
                 return ret;
             }
         }
-        internal Relationship(Cache.Relationship Cache, Action Action, Item Source, Item Related)
-            :base(Cache, Action)
+        internal Relationship(Request Request, Cache.Relationship Cache, Action Action, Item Source, Item Related)
+            :base(Request, Cache, Action)
         {
             this.Source = Source;
             this.Related = Related;

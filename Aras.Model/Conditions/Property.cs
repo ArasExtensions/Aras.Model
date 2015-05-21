@@ -103,7 +103,7 @@ namespace Aras.Model.Conditions
 
         public Operator Operator { get; private set; }
 
-        internal Property(Request.Item Item, PropertyType PropertyType, Operator Operator)
+        internal Property(Requests.Item Item, PropertyType PropertyType, Operator Operator)
             :base(Item)
         {
             this.PropertyType = PropertyType;

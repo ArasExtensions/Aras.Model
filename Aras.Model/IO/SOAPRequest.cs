@@ -33,7 +33,7 @@ using System.IO;
 
 namespace Aras.Model.IO
 {
-    internal enum SOAPOperation { ValidateUser, ApplyItem };
+    internal enum SOAPOperation { ValidateUser, ApplyItem, ApplyAML };
 
     internal class SOAPRequest
     {
@@ -45,7 +45,7 @@ namespace Aras.Model.IO
 
         internal String Password { get; private set; }
 
-        internal Item Item { get; private set; }
+        internal IEnumerable<Item> Items { get; private set; }
 
         private HttpWebRequest _request;
         private HttpWebRequest Request
@@ -68,30 +68,51 @@ namespace Aras.Model.IO
                     this._request.Headers.Add("TIMEZONE_NAME", "GMT Standard Time");
 
                     // Get bytes for SOAP Header
-                    byte[] header = System.Text.Encoding.ASCII.GetBytes("<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\"><SOAP-ENV:Body><" + this.Operation.ToString() + ">");
+                    String headerstring = "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\"><SOAP-ENV:Body><" + this.Operation.ToString() + ">";
+
+                    if (this.Operation == SOAPOperation.ApplyAML)
+                    {
+                        headerstring += "<AML>";
+                    }
+
+                    byte[] header = System.Text.Encoding.ASCII.GetBytes(headerstring);
                     
                     // Get bytes for SOAP Data
-                    byte[] data = null;
+                    List<byte[]> datalist = new List<byte[]>();
+                    int datalength = 0;
 
-                    if (this.Item != null)
+                    if (this.Items != null)
                     {
-                        data = this.Item.GetBytes();
-                    }
-                    else
-                    {
-                        data = new byte[0];
+                        foreach (Item item in this.Items)
+                        {
+                            byte[] thisdata = item.GetBytes();
+                            datalength += thisdata.Length;
+                            datalist.Add(thisdata);
+                        }
                     }
 
                     // Get Bytes for SOAP Footer
-                    byte[] footer = System.Text.Encoding.ASCII.GetBytes("</" + this.Operation.ToString() + "></SOAP-ENV:Body></SOAP-ENV:Envelope>");
+                    String footerstring = "</" + this.Operation.ToString() + "></SOAP-ENV:Body></SOAP-ENV:Envelope>";
+
+                    if (this.Operation == SOAPOperation.ApplyAML)
+                    {
+                        footerstring = "</AML>" + footerstring;
+                    }
+
+                    byte[] footer = System.Text.Encoding.ASCII.GetBytes(footerstring);
 
                     // Write SOAP Message to Request and update length
-                    this._request.ContentLength = header.Length + data.Length + footer.Length;
+                    this._request.ContentLength = header.Length + datalength + footer.Length;
 
                     using (Stream poststream = this._request.GetRequestStream())
                     {
                         poststream.Write(header, 0, header.Length);
-                        poststream.Write(data, 0, data.Length);
+
+                        foreach (byte[] data in datalist)
+                        {
+                            poststream.Write(data, 0, data.Length);
+                        }
+
                         poststream.Write(footer, 0, footer.Length);
                     }
                 }
@@ -148,7 +169,16 @@ namespace Aras.Model.IO
             this.Database = Session.Database;
             this.Username = Session.Username;
             this.Password = Session.Password;
-            this.Item = Item;
+            this.Items  = new List<Item>() { Item };
+        }
+
+        internal SOAPRequest(SOAPOperation Operation, Session Session, IEnumerable<Item> Items)
+        {
+            this.Operation = Operation;
+            this.Database = Session.Database;
+            this.Username = Session.Username;
+            this.Password = Session.Password;
+            this.Items = Items;
         }
 
         internal SOAPRequest(SOAPOperation Operation, Database Database, String Username, String Password)
@@ -157,6 +187,7 @@ namespace Aras.Model.IO
             this.Database = Database;
             this.Username = Username;
             this.Password = Password;
+            this.Items = null;
         }
     }
 }

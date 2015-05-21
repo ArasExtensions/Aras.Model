@@ -32,15 +32,21 @@ using System.Xml;
 using System.Net;
 using System.IO;
 
-namespace Aras.Model.Request
+namespace Aras.Model.Requests
 {
     public class Item
     {
+        public Request Request { get; private set; }
+
+        public Cache.Item Cache { get; private set; }
+
+        public Action Action { get; private set; }
+
         public Session Session
         {
             get
             {
-                return this.Cache.Session;
+                return this.Request.Session;
             }
         }
 
@@ -52,15 +58,11 @@ namespace Aras.Model.Request
             }
         }
 
-        public Action Action { get; private set; }
-
         public Boolean Paging { get; set; }
 
         public int Page { get; set; }
 
         public int PageSize { get; set; }
-
-        public Cache.Item Cache { get; private set; }
 
         private Dictionary<String, PropertyType> _selection;
         public IEnumerable<PropertyType> Selection
@@ -154,7 +156,7 @@ namespace Aras.Model.Request
                         }
                     }
 
-                    Relationship relationship = new Relationship(new Model.Cache.Relationship(this.Cache, relationshiptype), Action, this, Related);
+                    Relationship relationship = new Relationship(this.Request, new Model.Cache.Relationship(this.Cache, relationshiptype), Action, this, Related);
                     this._relationships.Add(relationship);
                     return relationship;
                 }
@@ -202,7 +204,7 @@ namespace Aras.Model.Request
             return this.AddRelationship(RelationshipType, Action, null);
         }
 
-        private IO.Item BuildRequest()
+        internal IO.Item BuildRequest()
         {
             IO.Item ret = new IO.Item(this.ItemType.Name, this.Action.Name);
             ret.Select = this.SelectionString;
@@ -237,7 +239,7 @@ namespace Aras.Model.Request
             }
 
             // Relationships
-            foreach(Relationship relationship in this.Relationships)
+            foreach (Requests.Relationship relationship in this.Relationships)
             {
                 IO.Item relitem = relationship.BuildRequest();
                 ret.AddRelationship(relitem);
@@ -246,135 +248,22 @@ namespace Aras.Model.Request
             return ret;
         }
 
-        private Response.Item BuildItem(IO.Item IOItem)
+        public Response Execute()
         {
-            ItemType itemtype = this.Session.AnyItemType(IOItem.ItemType);
-            String itemid = IOItem.ID;
-            Cache.Item item = null;
-
-            if (itemtype is RelationshipType)
-            {
-                RelationshipType relationshiptype = (RelationshipType)itemtype;
-                Cache.Item source = this.Session.Database.ItemFromCache(relationshiptype.SourceType, IOItem.GetProperty("source_id"));
-                item = this.Session.Database.RelationshipFromCache(relationshiptype, source, itemid);
-
-                if (relationshiptype.RelatedType != null)
-                {
-                    IO.Item iorelated = IOItem.GetPropertyItem("related_id");
-
-                    if (iorelated != null)
-                    {
-                        ((Cache.Relationship)item).Related = this.BuildItem(iorelated).Cache;
-                    }
-                    else
-                    {
-                        ((Cache.Relationship)item).Related = null;
-                    }
-                }
-            }
-            else
-            {
-                item = this.Session.Database.ItemFromCache(itemtype, itemid);
-            }
-
-            foreach(String propname in IOItem.PropertyNames)
-            {
-                PropertyType proptype = itemtype.PropertyType(propname);
-                Cache.Property property = item.AddProperty(proptype, null);
-                property.ValueString = IOItem.GetProperty(proptype.Name);
-            }
-
-            Response.Item response = new Response.Item(item);
-
-            foreach(IO.Item iorelationship in IOItem.Relationships)
-            {
-                Response.Item relationship = this.BuildItem(iorelationship);
-                response.AddRelationship(relationship);
-            }
-
-            return response;
+            return this.Request.Execute();
         }
 
-        private Response.Result BuildResponse(IO.SOAPResponse Response)
+        public async Task<Response> ExecuteAsync()
         {
-            Response.Result ret = new Response.Result(this);
-
-            if (Response.IsError)
-            {
-                if (!Response.ErrorMessage.StartsWith("No items of type "))
-                {
-                    throw new Exceptions.ServerException(Response.ErrorMessage);
-                }
-            }
-            else
-            {
-                if (this.Paging)
-                {
-                    if (Response.Items.Count() > 0)
-                    {
-                        ret.ItemMax = Response.Items.First().ItemMax;
-                        ret.Page = Response.Items.First().Page;
-                        ret.PageMax = Response.Items.First().PageMax;
-                    }
-                }
-                else
-                {
-                    ret.ItemMax = Response.Items.Count();
-                }
-
-                foreach (IO.Item ioitem in Response.Items)
-                {        
-                    ret._items.Add(this.BuildItem(ioitem));
-                }
-            }
-
-            return ret;
+            return await this.Request.ExecuteAsync();
         }
 
-        public async Task<Response.Result> ExecuteAsync()
-        {
-            IO.Item item = this.BuildRequest();
-            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, item);
-            IO.SOAPResponse response = null;
-
-            try
-            {
-                Task<IO.SOAPResponse> task = request.ExecuteAsync();
-                response = await task;
-            }
-            catch (Exception ex)
-            {
-                throw new Exceptions.ServerException("Unable to connect to Server", ex);
-            }
-
-            // Process Response
-            return this.BuildResponse(response);
-        }
-
-        public Response.Result Execute()
-        {
-            IO.Item item = this.BuildRequest();
-            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, item);
-            IO.SOAPResponse response = null;
-
-            try
-            {
-                response = request.Execute();
-            }
-            catch (Exception ex)
-            {
-                throw new Exceptions.ServerException("Unable to connect to Server", ex);
-            }
-
-            // Process Response
-            return this.BuildResponse(response);
-        }
-
-        internal Item(Cache.Item Cache, Action Action)
+        internal Item(Request Request, Cache.Item Cache, Action Action)
         {
             this._selection = new Dictionary<String, PropertyType>();
             this._relationships = new List<Relationship>();
 
+            this.Request = Request;
             this.Cache = Cache;
             this.Action = Action;
             this.Condition = new Conditions.Base(this);

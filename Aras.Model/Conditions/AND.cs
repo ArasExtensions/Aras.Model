@@ -80,7 +80,7 @@ namespace Aras.Model.Conditions
             }
         }
 
-        internal AND(Request.Item Item)
+        internal AND(Requests.Item Item)
             :base(Item)
         {
             this._children = new List<Condition>();

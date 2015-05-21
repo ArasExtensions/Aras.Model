@@ -28,11 +28,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model.Response
+namespace Aras.Model.Responses
 {
     public class Item
     {
         public Cache.Item Cache { get; private set; }
+
+        public int ItemMax { get; internal set; }
+
+        public int PageMax { get; internal set; }
+
+        public int Page { get; internal set; }
 
         private List<Item> _relationships;
         public IEnumerable<Item> Relationships
@@ -52,6 +58,9 @@ namespace Aras.Model.Response
         {
             this._relationships = new List<Item>();
             this.Cache = Cache;
+            this.ItemMax = 0;
+            this.PageMax = 1;
+            this.Page = 1;
         }
     }
 }

@@ -57,10 +57,10 @@ namespace Aras.Model
             {
                 if (this._user == null)
                 {
-                    Request.Item request = this.Request(this.ItemType("User").Action("get"));
-                    request.AddSelection("keyed_name");
-                    request.Condition.AddProperty("id", Conditions.Operator.Equals, this.UserID);
-                    Response.Result response = request.Execute();
+                    Requests.Item userrequest = this.Request(this.ItemType("User").Action("get"));
+                    userrequest.AddSelection("keyed_name");
+                    userrequest.Condition.AddProperty("id", Conditions.Operator.Equals, this.UserID);
+                    Response response = userrequest.Request.Execute();
                     this._user = response.Items.First().Cache;
                 }
 
@@ -223,24 +223,22 @@ namespace Aras.Model
             return null;
         }
 
-        public Request.Item Request(String ItemType, String Action)
+        public Requests.Item Request(String ItemType, String Action)
         {
             ItemType itemtype = this.ItemType(ItemType);
             Action action = itemtype.Action(Action);
             return this.Request(action);
         }
 
-        public Request.Item Request(Action Action)
+        public Requests.Item Request(Action Action)
         {
             Cache.Item cacheitem = new Cache.Item(Action.ItemType);
-            Request.Item requestitem = new Request.Item(cacheitem, Action);
-            return requestitem;
+            return new Request(this, cacheitem, Action).Items.First();
         }
 
-        public Request.Item Request(Cache.Item Item, Action Action)
+        public Requests.Item Request(Cache.Item Item, Action Action)
         {
-            Request.Item requestitem = new Request.Item(Item, Action);
-            return requestitem;
+            return new Request(this, Item, Action).Items.First();
         }
 
         public LockTypes Locked(Cache.Item Item)
@@ -266,10 +264,10 @@ namespace Aras.Model
 
         public Cache.Item LockedBy(Cache.Item Item)
         {
-            Request.Item lockrequest = this.Request(Item.ItemType.Action("get"));
+            Requests.Item lockrequest = this.Request(Item.ItemType.Action("get"));
             lockrequest.Condition.AddProperty("id", Conditions.Operator.Equals, Item.ID);
             lockrequest.AddSelection("locked_by_id");
-            Response.Result lockresponse = lockrequest.Execute();
+            Response lockresponse = lockrequest.Request.Execute();
 
             return (Cache.Item)lockresponse.Items.First().Cache.Property("locked_by_id").Object;
         }
@@ -280,10 +278,10 @@ namespace Aras.Model
 
             if (lockedby == null)
             {
-                Request.Item lockrequest = this.Request(Item.ItemType.Action("lock"));
+                Requests.Item lockrequest = this.Request(Item.ItemType.Action("lock"));
                 lockrequest.Condition.AddProperty("id", Conditions.Operator.Equals, Item.ID);
                 lockrequest.AddSelection("locked_by_id");
-                Response.Result lockresponse = lockrequest.Execute();
+                Response lockresponse = lockrequest.Request.Execute();
 
                 lockedby = (Cache.Item)lockresponse.Items.First().Cache.Property("locked_by_id").Object;
 
@@ -308,9 +306,9 @@ namespace Aras.Model
 
         public Boolean UnLock(Cache.Item Item)
         {
-            Request.Item unlockrequest = this.Request(Item.ItemType.Action("unlock"));
+            Requests.Item unlockrequest = this.Request(Item.ItemType.Action("unlock"));
             unlockrequest.Condition.AddProperty("id", Conditions.Operator.Equals, Item.ID);
-            Response.Result unlockresponse = unlockrequest.Execute();
+            Response unlockresponse = unlockrequest.Request.Execute();
 
             if (Item.HasProperty("locked_by_id"))
             {

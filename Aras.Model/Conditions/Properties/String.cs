@@ -55,7 +55,7 @@ namespace Aras.Model.Conditions.Properties
             }
         }
 
-        internal String(Request.Item Item, PropertyType PropertyType, Operator Operator, System.String Value)
+        internal String(Requests.Item Item, PropertyType PropertyType, Operator Operator, System.String Value)
             :base(Item, PropertyType, Operator)
         {
             this.Value = Value;
