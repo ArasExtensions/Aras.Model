@@ -49,7 +49,7 @@ namespace Aras.Model.Conditions
             }
             else
             {
-                throw new Exceptions.ArgumentException("Base Condition can only have ine Child");
+                throw new Exceptions.ArgumentException("Base Condition can only have one Child");
             }
         }
 

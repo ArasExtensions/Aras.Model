@@ -32,9 +32,14 @@ namespace Aras.Model.Requests
 {
     public class Relationship : Item
     {
-        public Item Source { get; private set; }
+        public Requests.Item Source { get; private set; }
 
-        public Item Related { get; set; }
+        public Requests.Item Related { get; set; }
+
+        public override void CreateCache()
+        {
+            this.Cache = new Model.Relationship(this.Source.Cache, (Model.RelationshipType)this.ItemType);
+        }
 
         internal override string SelectionString
         {
@@ -58,8 +63,9 @@ namespace Aras.Model.Requests
                 return ret;
             }
         }
-        internal Relationship(Request Request, Model.Relationship Cache, Action Action, Item Source, Item Related)
-            :base(Request, Cache, Action)
+
+        internal Relationship(Request Request, Action Action, Requests.Item Source, Requests.Item Related, Model.Relationship Cache)
+            :base(Request, Action, Cache)
         {
             this.Source = Source;
             this.Related = Related;

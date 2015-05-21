@@ -38,7 +38,12 @@ namespace Aras.Model.Requests
     {
         public Request Request { get; private set; }
 
-        public Model.Item Cache { get; private set; }
+        public Model.Item Cache { get; protected set; }
+
+        public virtual void CreateCache()
+        {
+            this.Cache = new Model.Item(this.ItemType);
+        }
 
         public Action Action { get; private set; }
 
@@ -54,7 +59,7 @@ namespace Aras.Model.Requests
         {
             get
             {
-                return this.Cache.ItemType;
+                return this.Action.ItemType;
             }
         }
 
@@ -140,7 +145,7 @@ namespace Aras.Model.Requests
             }
         }
 
-        public Relationship AddRelationship(Action Action, Item Related)
+        public Relationship AddRelationship(Action Action, Item Related, Model.Relationship Relationship)
         {
             if (Action.ItemType is RelationshipType)
             {
@@ -156,7 +161,7 @@ namespace Aras.Model.Requests
                         }
                     }
 
-                    Relationship relationship = new Relationship(this.Request, new Model.Relationship(this.Cache, relationshiptype), Action, this, Related);
+                    Relationship relationship = new Relationship(this.Request, Action, this, Related, Relationship);
                     this._relationships.Add(relationship);
                     return relationship;
                 }
@@ -173,7 +178,7 @@ namespace Aras.Model.Requests
 
         public Relationship AddRelationship(Action Action)
         {
-            return this.AddRelationship(Action, null);
+            return this.AddRelationship(Action, null, null);
         }
 
         public Relationship AddRelationship(String RelationshipType, String Action, Item Related)
@@ -186,7 +191,7 @@ namespace Aras.Model.Requests
 
                 if (action != null)
                 {
-                    return this.AddRelationship(action, Related);
+                    return this.AddRelationship(action, Related, null);
                 }
                 else
                 {
@@ -210,16 +215,20 @@ namespace Aras.Model.Requests
             ret.Select = this.SelectionString;
 
             // Add Properties
-            foreach (Property prop in this.Cache.Properties)
+
+            if (this.Cache != null)
             {
-                if (!prop.ReadOnly)
+                foreach (Property prop in this.Cache.Properties)
                 {
-                    ret.SetProperty(prop.Name, prop.ValueString);
+                    if (!prop.ReadOnly)
+                    {
+                        ret.SetProperty(prop.Name, prop.ValueString);
+                    }
                 }
             }
 
             // Where
-            if (this.Cache.ID != null)
+            if (this.Cache != null && this.Cache.ID != null)
             {
                 ret.ID = this.Cache.ID;
             }
@@ -258,7 +267,7 @@ namespace Aras.Model.Requests
             return await this.Request.ExecuteAsync();
         }
 
-        internal Item(Request Request, Model.Item Cache, Action Action)
+        internal Item(Request Request, Action Action, Model.Item Cache)
         {
             this._selection = new Dictionary<String, PropertyType>();
             this._relationships = new List<Relationship>();
@@ -273,5 +282,6 @@ namespace Aras.Model.Requests
             this.Page = 1;
             this.PageSize = 25;
         }
+
     }
 }

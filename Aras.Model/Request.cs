@@ -21,17 +21,30 @@ namespace Aras.Model
 
         public Requests.Item AddItem(Action Action)
         {
-            Item cacheitem = new Item(Action.ItemType);
-            Requests.Item requestitem = new Requests.Item(this, cacheitem, Action);
+            Requests.Item requestitem = new Requests.Item(this, Action, null);
             this._items.Add(requestitem);
             return requestitem;
         }
 
-        public Requests.Item AddItem(Item Item, Action Action)
+        public Requests.Item AddItem(Action Action, Model.Item Item)
         {
-            Requests.Item requestitem = new Requests.Item(this, Item, Action);
+            Requests.Item requestitem = new Requests.Item(this, Action, Item);
             this._items.Add(requestitem);
             return requestitem;
+        }
+
+        public Requests.Item AddItem(String Action, Model.Item Item)
+        {
+            Action action = Item.ItemType.Action(Action);
+
+            if (action != null)
+            {
+                return this.AddItem(action, Item);
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid Action: " + Action);
+            }
         }
 
         public Requests.Item AddItem(String ItemType, String Action)
@@ -165,11 +178,18 @@ namespace Aras.Model
             return this.BuildResponse(response);
         }
 
-        internal Request(Session Session, Item Item, Action Action)
+        internal Request(Session Session, Action Action, Item Item)
         {
             this._items = new List<Requests.Item>();
             this.Session = Session;
-            this.AddItem(Item, Action);
+            this.AddItem(Action, Item);
+        }
+
+        internal Request(Session Session, String Action, Item Item)
+        {
+            this._items = new List<Requests.Item>();
+            this.Session = Session;
+            this.AddItem(Action, Item);
         }
 
         internal Request(Session Session, Action Action)
