@@ -26,10 +26,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.ComponentModel;
 
 namespace Aras.Model
 {
-    public abstract class Property
+    public abstract class Property : INotifyPropertyChanged
     {
         public Session Session
         {
@@ -68,6 +69,8 @@ namespace Aras.Model
                 if (this._object != null)
                 {
                     this._object = null;
+                    this.OnPropertyChanged("Object");
+                    this.OnPropertyChanged("Value");
                 }
             }
             else
@@ -75,12 +78,16 @@ namespace Aras.Model
                 if (this._object == null)
                 {
                     this._object = Value;
+                    this.OnPropertyChanged("Object");
+                    this.OnPropertyChanged("Value");
                 }
                 else
                 {
                     if (!this._object.Equals(Value))
                     {
                         this._object = Value;
+                        this.OnPropertyChanged("Object");
+                        this.OnPropertyChanged("Value");
                     }
                 }
             }
@@ -106,6 +113,26 @@ namespace Aras.Model
         }
 
         internal abstract String ValueString { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(String Name)
+        {
+            if (this.PropertyChanged != null)
+            {
+                PropertyChangedEventArgs args = new PropertyChangedEventArgs(Name);
+                this.PropertyChanged(this, args);
+            }
+        }
+
+        protected void OnAllPropertiesChanged()
+        {
+            if (this.PropertyChanged != null)
+            {
+                PropertyChangedEventArgs args = new PropertyChangedEventArgs(String.Empty);
+                this.PropertyChanged(this, args);
+            }
+        }
 
         public override string ToString()
         {

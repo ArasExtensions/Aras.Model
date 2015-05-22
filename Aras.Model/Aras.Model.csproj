@@ -79,6 +79,9 @@
     <Compile Include="IO\Item.cs" />
     <Compile Include="IO\SOAPRequest.cs" />
     <Compile Include="IO\SOAPResponse.cs" />
+    <Compile Include="ObservableList.cs" />
+    <Compile Include="ObservableLists\Item.cs" />
+    <Compile Include="ObservableLists\PropertyType.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="Requests\File.cs" />
     <Compile Include="Requests\Item.cs" />
