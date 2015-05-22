@@ -38,7 +38,23 @@ namespace Aras.Model.Requests
     {
         public Request Request { get; private set; }
 
-        public Model.Item Cache { get; protected set; }
+        private Model.Item _cache;
+        public Model.Item Cache 
+        { 
+            get
+            {
+                return this._cache;
+            }
+            protected set
+            {
+                this._cache = value;
+
+                if (this._cache != null)
+                {
+                    this._iD = this._cache.ID;
+                }
+            }
+        }
 
         public virtual void CreateCache()
         {
@@ -60,6 +76,26 @@ namespace Aras.Model.Requests
             get
             {
                 return this.Action.ItemType;
+            }
+        }
+
+        private String _iD;
+        public String ID 
+        { 
+            get
+            {
+                return this._iD;
+            }
+            set
+            {
+                if (this._cache == null)
+                {
+                    this._iD = value;
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Not able to set ID when Cache specified");
+                }
             }
         }
 
@@ -220,10 +256,26 @@ namespace Aras.Model.Requests
             {
                 foreach (Property prop in this.Cache.Properties)
                 {
-                    if (!prop.ReadOnly)
+                    if (prop.Name == "id")
                     {
+                        ret.ID = prop.ValueString;
                         ret.SetProperty(prop.Name, prop.ValueString);
                     }
+                    else
+                    {
+                        if (!prop.ReadOnly)
+                        {
+                            ret.SetProperty(prop.Name, prop.ValueString);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (this.ID != null)
+                {
+                    ret.ID = this.ID;
+                    ret.SetProperty("id", this.ID);
                 }
             }
 

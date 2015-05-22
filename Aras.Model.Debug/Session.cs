@@ -70,6 +70,7 @@ namespace Aras.Model.Debug
                 Requests.Item updaterequest = session.Request("update", assembly);
                 assembly.Property("description").Object = "Testing 9999";
                 Response updateresponse = updaterequest.Execute();
+                assembly = updateresponse.Items.First().Cache;
                 session.UnLock(assembly);
             }
             

@@ -333,7 +333,7 @@ namespace Aras.Model
             if (lockedby == null)
             {
                 Requests.Item lockrequest = this.Request(Item.ItemType.Action("lock"));
-                lockrequest.Condition.AddProperty("id", Conditions.Operator.Equals, Item.ID);
+                lockrequest.ID = Item.ID;
                 lockrequest.AddSelection("locked_by_id");
                 Response lockresponse = lockrequest.Execute();
 
@@ -361,7 +361,8 @@ namespace Aras.Model
         public Boolean UnLock(Item Item)
         {
             Requests.Item unlockrequest = this.Request(Item.ItemType.Action("unlock"));
-            unlockrequest.Condition.AddProperty("id", Conditions.Operator.Equals, Item.ID);
+            unlockrequest.ID = Item.ID;
+            unlockrequest.AddSelection("locked_by_id");
             Response unlockresponse = unlockrequest.Execute();
 
             if (Item.HasProperty("locked_by_id"))
