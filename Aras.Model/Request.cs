@@ -88,8 +88,7 @@ namespace Aras.Model
             foreach (String propname in IOItem.PropertyNames)
             {
                 PropertyType proptype = itemtype.PropertyType(propname);
-                Property property = item.AddProperty(proptype, null);
-                property.ValueString = IOItem.GetProperty(proptype.Name);
+                Property property = item.AddProperty(proptype, IOItem.GetProperty(proptype.Name));
             }
 
             Responses.Item response = new Responses.Item(item);

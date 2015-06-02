@@ -105,7 +105,7 @@ namespace Aras.Model
 
         private Dictionary<PropertyType, Property> PropertiesCache;
 
-        public Property AddProperty(PropertyType PropertyType, object Value)
+        private Property AddProperty(PropertyType PropertyType)
         {
             if (this.ItemType.Equals(PropertyType.ItemType))
             {
@@ -157,14 +157,19 @@ namespace Aras.Model
                     }
                 }
 
-                this.PropertiesCache[PropertyType].SetObject(Value);
-
                 return this.PropertiesCache[PropertyType];
             }
             else
             {
                 throw new Exceptions.ArgumentException("PropertyType is not associated with the ItemType of the Item");
             }
+        }
+
+        public Property AddProperty(PropertyType PropertyType, object Value)
+        {
+            Property prop = this.AddProperty(PropertyType);
+            prop.SetObject(Value);
+            return prop;
         }
 
         public Property AddProperty(String Name, object Value)
@@ -187,7 +192,7 @@ namespace Aras.Model
 
             if (proptype != null)
             {
-                Property property = this.AddProperty(proptype, null);
+                Property property = this.AddProperty(proptype);
                 property.ValueString = ValueString;
                 return property;
             }
