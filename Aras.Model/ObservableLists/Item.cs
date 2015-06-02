@@ -32,6 +32,17 @@ namespace Aras.Model.ObservableLists
 {
     public class Item : ObservableList<Model.Item>
     {
+        public void Replace(Model.Response Response)
+        {
+            List<Model.Item> items = new List<Model.Item>();
+
+            foreach(Responses.Item responseitem in Response.Items)
+            {
+                items.Add(responseitem.Cache);
+            }
+
+            this.Replace(items);
+        }
 
         public Item()
         {

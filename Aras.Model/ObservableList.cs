@@ -165,6 +165,35 @@ namespace Aras.Model
             this.OnListChanged();
         }
 
+        public void Replace(IEnumerable<T> Values)
+        {
+            List<T> newvalues = Values.ToList();
+
+            int thislength = this.Count();
+            int newvalueslength = newvalues.Count();
+
+            if (thislength > newvalueslength)
+            {
+                this.RemoveRange(newvalueslength, (thislength - newvalueslength));
+            }
+
+            for (int i = 0; i < newvalueslength; i++)
+            {
+                if (i < thislength)
+                {
+                    if (!this[i].Equals(newvalues[i]))
+                    {
+                        this[i] = newvalues[i];
+                        this.OnListChanged();
+                    }
+                }
+                else
+                {
+                    this.Add(newvalues[i]);
+                }
+            }
+        }
+
         public ObservableList()
         {
             this.NotifyListChanged = true;
