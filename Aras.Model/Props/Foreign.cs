@@ -76,7 +76,7 @@ namespace Aras.Model.Properties
             }
         }
 
-        internal override System.String ValueString
+        public override System.String ValueString
         {
             get
             {

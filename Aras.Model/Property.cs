@@ -112,7 +112,7 @@ namespace Aras.Model
             }
         }
 
-        internal abstract String ValueString { get; set; }
+        public abstract String ValueString { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
