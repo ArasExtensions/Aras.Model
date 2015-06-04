@@ -186,15 +186,20 @@ namespace Aras.Model
             }
         }
 
+        internal Property AddProperty(PropertyType PropertyType, String ValueString)
+        {
+            Property property = this.AddProperty(PropertyType);
+            property.ValueString = ValueString;
+            return property;
+        }
+
         internal Property AddProperty(String Name, String ValueString)
         {
             PropertyType proptype = this.ItemType.PropertyType(Name);
 
             if (proptype != null)
             {
-                Property property = this.AddProperty(proptype);
-                property.ValueString = ValueString;
-                return property;
+                return this.AddProperty(proptype, ValueString);
             }
             else
             {
