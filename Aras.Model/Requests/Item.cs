@@ -155,7 +155,15 @@ namespace Aras.Model.Requests
                 for (int i = 1; i < proptypes.Count(); i++)
                 {
                     ret.Append(',');
-                    ret.Append(proptypes[i].Name);
+
+                    if (proptypes[i].Name == "related_id")
+                    {
+                        ret.Append("related_id(id)");
+                    }
+                    else
+                    {
+                        ret.Append(proptypes[i].Name);
+                    }
                 }
 
                 return ret.ToString();
@@ -330,6 +338,12 @@ namespace Aras.Model.Requests
             this.Condition = new Conditions.Base(this);
             
             this.AddSelection("id");
+
+            if (this.ItemType is RelationshipType)
+            {
+                this.AddSelection("source_id,related_id");
+            }
+
             this.Paging = false;
             this.Page = 1;
             this.PageSize = 25;

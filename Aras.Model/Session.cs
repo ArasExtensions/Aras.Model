@@ -109,6 +109,49 @@ namespace Aras.Model
             }
         }
 
+        private Object ListsCacheLock = new Object();
+        private Dictionary<String, List> ListsCache;
+        internal List List(String ID)
+        {
+            lock (this.ListsCacheLock)
+            {
+                if (!this.ListsCache.ContainsKey(ID))
+                {
+                    IO.Item listrequest = new IO.Item("List", "get");
+                    listrequest.Select = "id,name";
+                    listrequest.ID = ID;
+                    IO.Item listvaluerequest = new IO.Item("Value", "get");
+                    listvaluerequest.Select = "value,label";
+                    listvaluerequest.OrderBy = "sort_order";
+                    listrequest.AddRelationship(listvaluerequest);
+
+                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, listrequest);
+                    IO.SOAPResponse response = request.Execute();
+
+                    if (response.IsError)
+                    {
+                        throw new Exceptions.ServerException(response.ErrorMessage);
+                    }
+
+                    if (response.Items.Count() == 1)
+                    {
+                        this.ListsCache[ID] = new List(this, ID, response.Items.First().GetProperty("name"));
+
+                        foreach(IO.Item value in response.Items.First().Relationships)
+                        {
+                            ListValue listvalue = new ListValue(this.ListsCache[ID], value.GetProperty("value"), value.GetProperty("label"));
+                        }
+                    }
+                    else
+                    {
+                        throw new Exceptions.ServerException("Failed to get List: " + ID);
+                    }
+                }
+
+                return this.ListsCache[ID];
+            }
+        }
+
         private Dictionary<String, ItemType> _itemTypesCache;
         internal Dictionary<String, ItemType> ItemTypesCache
         {
@@ -386,6 +429,7 @@ namespace Aras.Model
             :base()
         {
             this.ItemsCache = new Dictionary<ItemType, Dictionary<String, Item>>();
+            this.ListsCache = new Dictionary<String, List>();
             this.Database = Database;
             this.Username = Username;
             this.Password = Password;

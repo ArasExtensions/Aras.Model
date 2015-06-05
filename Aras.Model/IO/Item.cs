@@ -131,6 +131,35 @@ namespace Aras.Model.IO
             }
         }
 
+        internal String OrderBy
+        {
+            get
+            {
+                XmlAttribute orderBy = this.Node.Attributes["orderBy"];
+
+                if (orderBy != null)
+                {
+                    return orderBy.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            set
+            {
+                XmlAttribute orderBy = this.Node.Attributes["orderBy"];
+
+                if (orderBy == null)
+                {
+                    orderBy = this.Doc.CreateAttribute("orderBy");
+                    this.Node.Attributes.Append(orderBy);
+                }
+
+                orderBy.Value = value;
+            }
+        }
+
         internal String Where
         {
             get

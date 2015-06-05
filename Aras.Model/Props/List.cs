@@ -45,19 +45,26 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    if (value is System.String)
+                    if (value is ListValue)
                     {
-                        base.Object = value;
+                        if (((Model.PropertyTypes.List)this.PropertyType).Values.Equals(((ListValue)value).List))
+                        {
+                            base.Object = value;
+                        }
+                        else
+                        {
+                            throw new ArgumentException("ListValue is not from the List specified on the PropertyType");
+                        }
                     }
                     else
                     {
-                        throw new ArgumentException("Object must be type System.String");
+                        throw new ArgumentException("Object must be type Aras.Model.ListValue");
                     }
                 }
             }
         }
 
-        public System.String Value
+        public ListValue Value
         {
             get
             {
@@ -67,7 +74,7 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    return (System.String)this.Object;
+                    return (ListValue)this.Object;
                 }
             }
             set
@@ -86,12 +93,19 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    return (System.String)this.Object;
+                    return this.Value.Value;
                 }
             }
             set
             {
-                this.SetObject(value);
+                if (value == null)
+                {
+                    this.Object = null;
+                }
+                else
+                {
+                    this.Object = ((Model.PropertyTypes.List)this.PropertyType).Values.Value(value);
+                }
             }
         }
 

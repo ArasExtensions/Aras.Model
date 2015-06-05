@@ -26,17 +26,29 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Aras.Model.PropertyTypes
+namespace Aras.Model
 {
-    public class List : PropertyType
+    public class ListValue
     {
-        public Model.List Values { get; private set; }
+        public List List { get; private set; }
 
-        internal List(ItemType ItemType, System.String Name, System.String Label, System.Boolean ReadOnly, Model.List Values)
-            : base(ItemType, Name, Label, ReadOnly)
+        public String Value { get; private set; }
+
+        public String Label { get; private set; }
+
+        public override string ToString()
         {
-            this.Values = Values;
+            return this.Label;
+        }
+
+        internal ListValue(List List, String Value, String Label)
+        {
+            this.List = List;
+            this.Value = Value;
+            this.Label = Label;
+            this.List.ValuesCache.Add(this);
         }
     }
 }
