@@ -46,26 +46,73 @@ namespace Aras.Model
             }
         }
 
-        internal Class Search(String Name)
+        public Class Search(String Name)
         {
-            if (Name == this.Name)
+            if (!String.IsNullOrEmpty(Name))
             {
-                return this;
-            }
-            else
-            {
-                foreach (Class subclass in this.Children)
+                if (this.Parent == null)
                 {
-                    Class result = subclass.Search(Name);
+                    // Base Class, search Children
 
-                    if (result != null)
+                    foreach (Class subclass in this.Children)
                     {
-                        return result;
+                        Class result = subclass.Search(Name);
+
+                        if (result != null)
+                        {
+                            return result;
+                        }
+                    }
+
+                    return null;
+                }
+                else
+                {
+                    String name = null;
+                    String remaining = null;
+                    int seppos = Name.IndexOf('/');
+
+                    if (seppos > 0)
+                    {
+                        name = Name.Substring(0, seppos);
+                        remaining = Name.Substring(seppos + 1, Name.Length - seppos - 1);
+                    }
+                    else
+                    {
+                        name = Name;
+                    }
+
+                    if (name == this.Name)
+                    {
+                        if (remaining == null)
+                        {
+                            return this;
+                        }
+                        else
+                        {
+                            foreach (Class subclass in this.Children)
+                            {
+                                Class result = subclass.Search(remaining);
+
+                                if (result != null)
+                                {
+                                    return result;
+                                }
+                            }
+
+                            return null;
+                        }
+                    }
+                    else
+                    {
+                        return null;
                     }
                 }
             }
-
-            return null;
+            else
+            {
+                return null;
+            }
         }
 
         public String Name

@@ -32,6 +32,10 @@ namespace Aras.Model
 {
     public class Item : IEquatable<Item>
     {
+        private const String id = "id";
+        private const String keyed_name = "keyed_name";
+        private const String classification = "classification";
+
         public ItemType ItemType { get; private set; }
 
         public Session Session
@@ -46,16 +50,8 @@ namespace Aras.Model
         {
             get
             {
-                Property idproperty = this.Property("id");
-
-                if (idproperty != null)
-                {
-                    return ((Model.Properties.String)idproperty).Value;
-                }
-                else
-                {
-                    return null;
-                }
+                Property idproperty = this.Property(id);
+                return ((Model.Properties.String)idproperty).Value;
             }
         }
 
@@ -63,25 +59,17 @@ namespace Aras.Model
         {
             get
             {
-                Property knproperty = this.Property("keyed_name");
-
-                if (knproperty != null)
-                {
-                    return ((Model.Properties.String)knproperty).Value;
-                }
-                else
-                {
-                    return null;
-                }
+                Property knproperty = this.Property(keyed_name);
+                return ((Model.Properties.String)knproperty).Value;
             }
         }
 
-        private Class _class;
         public Class Class 
         {
             get
             {
-                return this._class;
+                Property classproperty = this.Property(classification);
+                return this.ItemType.ClassStructure.Search(classproperty.ValueString);
             }
             set
             {
@@ -89,7 +77,14 @@ namespace Aras.Model
                 {
                     if (value.ItemType.Equals(this.ItemType))
                     {
-                        this._class = value;
+                        if (!this.HasProperty(classification))
+                        {
+                            this.AddProperty(classification, value.Fullname);
+                        }
+                        else
+                        {
+                            this.Property(classification).ValueString = value.Fullname;
+                        }
                     }
                     else
                     {
@@ -98,7 +93,14 @@ namespace Aras.Model
                 }
                 else
                 {
-                    throw new Exceptions.ArgumentException("Class cannot be null");
+                    if (!this.HasProperty(classification))
+                    {
+                        this.AddProperty(classification, null);
+                    }
+                    else
+                    {
+                        this.Property(classification).ValueString = null;
+                    }
                 }
             }
         }
@@ -265,6 +267,46 @@ namespace Aras.Model
             {
                 throw new ArgumentException("Invalid property name: " + Name);
             }
+        }
+
+        public Boolean HasProperties(String Names)
+        {
+            String[] namelist = Names.Split(',');
+
+            foreach(String name in namelist)
+            {
+                if (!this.HasProperty(name))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public void Refresh()
+        {
+            // Refesh current Properties
+            this.Refresh(null);
+        }
+
+        public void Refresh(String Properties)
+        {
+            // Refresh current Properties, plus the Additional Properties
+            Requests.Item request = this.Session.Request(this.ItemType.Action("get"));
+            request.ID = this.ID;
+            
+            foreach(PropertyType proptype in this.PropertiesCache.Keys)
+            {
+                request.AddSelection(proptype);
+            }
+
+            if (Properties != null)
+            {
+                request.AddSelection(Properties);
+            }
+
+            request.Execute();
         }
 
         [System.Runtime.CompilerServices.IndexerName("PropertyValue")]
