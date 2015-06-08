@@ -239,7 +239,7 @@ namespace Aras.Model
                                     this._propertyTypesCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly);
                                     break;
                                 case "list":
-                                    this._propertyTypesCache[name] = new PropertyTypes.List(this, name, label, ReadOnly, this.Session.List(property.GetProperty("data_source")));
+                                    this._propertyTypesCache[name] = new PropertyTypes.List(this, name, label, ReadOnly, this.Session.ListFromCache(property.GetProperty("data_source")));
                                     break;
                                 case "image":
                                     this._propertyTypesCache[name] = new PropertyTypes.Image(this, name, label, ReadOnly);

@@ -30,13 +30,15 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public class List : IEquatable<List>
+    public class List : Item
     {
-        public Session Session { get; private set; }
-
-        public String ID { get; private set; }
-
-        public String Name { get; private set; }
+        public String Name
+        {
+            get
+            {
+                return this.Property("name").ValueString;
+            }
+        }
 
         internal List<ListValue> ValuesCache { get; private set; }
 
@@ -61,52 +63,14 @@ namespace Aras.Model
             return null;
         }
 
-        public bool Equals(List other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-            else
-            {
-                return this.ID.Equals(other.ID);
-            }
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null)
-            {
-                return false;
-            }
-            else
-            {
-                if (obj is List)
-                {
-                    return this.Equals((List)obj);
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
-        public override int GetHashCode()
-        {
-            return this.ID.GetHashCode();
-        }
-
         public override string ToString()
         {
             return this.Name;
         }
 
-        internal List(Session Session, String ID, String Name)
+        internal List(ItemType ItemType)
+            :base(ItemType)
         {
-            this.Session = Session;
-            this.ID = ID;
-            this.Name = Name;
             this.ValuesCache = new List<ListValue>();
         }
 

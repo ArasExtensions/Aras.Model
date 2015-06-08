@@ -35,45 +35,19 @@ namespace Aras.Model.Debug
       
         public void Execute()
         {
-            Server server = new Server("http://localhost/innovatorserver100sp4");
-            Database database = server.Database("Development100SP4");
+            Server server = new Server("http://localhost/InnovatorServer10SP4");
+            Database database = server.Database("CMB");
             Model.Session session = database.Login("admin", "innovator");
 
             Console.WriteLine("User: " + session.User.Property("keyed_name").Object);
 
-            Requests.Item partrequest = session.Request("get", "Part");
-            partrequest.AddSelection("item_number,description,keyed_name,viewable_file");
-            Requests.Relationship partbomrequest = partrequest.AddRelationship("Part BOM", "get");
-            partbomrequest.AddSelection("quantity");
-            partbomrequest.Related = partrequest;
+            Requests.Item partrequest = session.Request("get", "Variant Context");
+            partrequest.AddSelection("list,context_type");
+            Response response = partrequest.Execute();
+            Item context = response.Items.First().Cache;
+            Model.Properties.Item test = (Model.Properties.Item)context.Property("list");
+            Item testitem = test.Value;
 
-            Response partsresponse = partrequest.Execute();
-
-            foreach(Responses.Item partresponse in partsresponse.Items)
-            {
-                Item part = partresponse.Cache;
-
-                Console.WriteLine(part.Property("item_number").Object);
-
-                foreach(Responses.Item partbomresponse in partresponse.Relationships)
-                {
-                    Relationship partbom = (Relationship)partbomresponse.Cache;
-                    Console.WriteLine(" - " + partbom.Related.Property("item_number").Object + " " + partbomresponse.Cache.Property("quantity"));
-                }
-            }
-
-            // Update Description of Assembly
-            Item assembly = partsresponse.Items.First().Cache;
-
-            if (session.Lock(assembly))
-            {
-                Requests.Item updaterequest = session.Request("update", assembly);
-                assembly.Property("description").Object = "Testing 9999";
-                Response updateresponse = updaterequest.Execute();
-                assembly = updateresponse.Items.First().Cache;
-                session.UnLock(assembly);
-            }
-            
         }
 
         public Session()
