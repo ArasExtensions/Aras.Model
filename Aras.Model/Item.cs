@@ -60,6 +60,13 @@ namespace Aras.Model
             get
             {
                 Property knproperty = this.Property(keyed_name);
+
+                if (knproperty == null)
+                {
+                    this.Refresh(keyed_name);
+                    knproperty = this.Property(keyed_name);
+                }
+
                 return ((Model.Properties.String)knproperty).Value;
             }
         }
@@ -69,6 +76,13 @@ namespace Aras.Model
             get
             {
                 Property classproperty = this.Property(classification);
+
+                if (classproperty == null)
+                {
+                    this.Refresh(classification);
+                    classproperty = this.Property(classification);
+                }
+
                 return this.ItemType.ClassStructure.Search(classproperty.ValueString);
             }
             set
