@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public class ObservableList<T> : List<T>
+    public class ObservableList<T> : List<T>, IEnumerable<T>
     {
         private int NotifyCount;
         private Boolean _notifiyListChanged;
