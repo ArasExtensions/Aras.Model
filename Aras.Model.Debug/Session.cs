@@ -37,7 +37,7 @@ namespace Aras.Model.Debug
         {
             Server server = new Server("http://localhost/InnovatorServer10SP4");
             Database database = server.Database("CMB");
-            Model.Session session = database.Login("admin", "innovator");
+            Model.Session session = database.Login("admin", Model.Database.PasswordHash("innovator"));
 
             Console.WriteLine("User: " + session.User.Property("keyed_name").Object);
 
