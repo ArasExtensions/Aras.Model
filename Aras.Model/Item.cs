@@ -301,9 +301,9 @@ namespace Aras.Model
             return true;
         }
 
-        public LockTypes Locked()
+        public LockTypes Locked(Boolean Refresh)
         {
-            Item lockedby = this.LockedBy();
+            Item lockedby = this.LockedBy(Refresh);
 
             if (lockedby == null)
             {
@@ -322,15 +322,19 @@ namespace Aras.Model
             }
         }
 
-        public Item LockedBy()
+        public Item LockedBy(Boolean Refresh)
         {
-            this.Refresh(locked_by_id);
+            if (Refresh || !this.HasProperty(locked_by_id))
+            {
+                this.Refresh(locked_by_id);
+            }
+
             return (Item)this.Property(locked_by_id).Object;
         }
 
         public Boolean Lock()
         {
-            Item lockedby = this.LockedBy();
+            Item lockedby = this.LockedBy(true);
 
             if (lockedby == null)
             {
