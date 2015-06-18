@@ -30,11 +30,14 @@ using System.IO;
 
 namespace Aras.Model
 {
+    public enum LockTypes { None = 0, User = 1, OtherUser = 2 };
+
     public class Item : IEquatable<Item>
     {
         private const String id = "id";
         private const String keyed_name = "keyed_name";
         private const String classification = "classification";
+        private const String locked_by_id = "locked_by_id";
 
         public ItemType ItemType { get; private set; }
 
@@ -293,6 +296,84 @@ namespace Aras.Model
                 {
                     return false;
                 }
+            }
+
+            return true;
+        }
+
+        public LockTypes Locked()
+        {
+            Item lockedby = this.LockedBy();
+
+            if (lockedby == null)
+            {
+                return LockTypes.None;
+            }
+            else
+            {
+                if (lockedby.Equals(this.Session.User))
+                {
+                    return LockTypes.User;
+                }
+                else
+                {
+                    return LockTypes.OtherUser;
+                }
+            }
+        }
+
+        public Item LockedBy()
+        {
+            this.Refresh(locked_by_id);
+            return (Item)this.Property(locked_by_id).Object;
+        }
+
+        public Boolean Lock()
+        {
+            Item lockedby = this.LockedBy();
+
+            if (lockedby == null)
+            {
+                Requests.Item lockrequest = this.Session.Request(this.ItemType.Action("lock"));
+                lockrequest.ID = this.ID;
+                lockrequest.AddSelection(locked_by_id);
+                Response lockresponse = lockrequest.Execute();
+
+                lockedby = (Item)this.Property("locked_by_id").Object;
+
+                if (lockedby != null && lockedby.Equals(this.Session.User))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else if (lockedby.Equals(this.Session.User))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public Boolean UnLock()
+        {
+            Requests.Item unlockrequest = this.Session.Request(this.ItemType.Action("unlock"));
+            unlockrequest.ID = this.ID;
+            unlockrequest.AddSelection(locked_by_id);
+            Response unlockresponse = unlockrequest.Execute();
+
+            if (this.HasProperty(locked_by_id))
+            {
+                this.Property(locked_by_id).Object = null;
+            }
+            else
+            {
+                this.AddProperty(locked_by_id, null);
             }
 
             return true;

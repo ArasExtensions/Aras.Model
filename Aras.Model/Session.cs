@@ -30,7 +30,6 @@ using System.IO;
 
 namespace Aras.Model
 {
-    public enum LockTypes { None = 0, User = 1, OtherUser = 2 };
 
     public class Session
     {
@@ -341,88 +340,6 @@ namespace Aras.Model
         public Requests.Item Request(String Action, Item Item)
         {
             return new Request(this, Action, Item).Items.First();
-        }
-
-        public LockTypes Locked(Item Item)
-        {
-            Item lockedby = this.LockedBy(Item);
-
-            if (lockedby == null)
-            {
-                return LockTypes.None;
-            }
-            else
-            {
-                if (lockedby.Equals(this.User))
-                {
-                    return LockTypes.User;
-                }
-                else
-                {
-                    return LockTypes.OtherUser;
-                }
-            }
-        }
-
-        public Item LockedBy(Item Item)
-        {
-            Requests.Item lockrequest = this.Request(Item.ItemType.Action("get"));
-            lockrequest.Condition.AddProperty("id", Conditions.Operator.Equals, Item.ID);
-            lockrequest.AddSelection("locked_by_id");
-            Response lockresponse = lockrequest.Execute();
-
-            return (Item)lockresponse.Items.First().Cache.Property("locked_by_id").Object;
-        }
-
-        public Boolean Lock(Item Item)
-        {
-            Item lockedby = this.LockedBy(Item);
-
-            if (lockedby == null)
-            {
-                Requests.Item lockrequest = this.Request(Item.ItemType.Action("lock"));
-                lockrequest.ID = Item.ID;
-                lockrequest.AddSelection("locked_by_id");
-                Response lockresponse = lockrequest.Execute();
-
-                lockedby = (Item)lockresponse.Items.First().Cache.Property("locked_by_id").Object;
-
-                if (lockedby != null && lockedby.Equals(this.User))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else if (lockedby.Equals(this.User))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public Boolean UnLock(Item Item)
-        {
-            Requests.Item unlockrequest = this.Request(Item.ItemType.Action("unlock"));
-            unlockrequest.ID = Item.ID;
-            unlockrequest.AddSelection("locked_by_id");
-            Response unlockresponse = unlockrequest.Execute();
-
-            if (Item.HasProperty("locked_by_id"))
-            {
-                Item.Property("locked_by_id").ValueString = null;
-            }
-            else
-            {
-                Item.AddProperty("locked_by_id", null);
-            }
-
-            return true;
         }
 
         public override string ToString()
