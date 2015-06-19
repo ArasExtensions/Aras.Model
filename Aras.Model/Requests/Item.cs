@@ -220,6 +220,27 @@ namespace Aras.Model.Requests
             }
         }
 
+        public Relationship AddRelationship(String Action, Item Related, Model.Relationship Relationship)
+        {
+            if (Relationship != null)
+            {
+                Action action = Relationship.RelationshipType.Action(Action);
+
+                if (action != null)
+                {
+                    return this.AddRelationship(action, Related, Relationship);
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Invalid Action");
+                }
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid Relationship");
+            }
+        }
+
         public Relationship AddRelationship(Action Action)
         {
             return this.AddRelationship(Action, null, null);
