@@ -76,6 +76,11 @@ namespace Aras.Model.Properties
             }
         }
 
+        public static implicit operator System.String(Model.Properties.Image Property)
+        {
+            return Property.Value;
+        }
+
         public override System.String ValueString
         {
             get

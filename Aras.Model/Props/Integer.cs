@@ -76,6 +76,11 @@ namespace Aras.Model.Properties
             }
         }
 
+        public static implicit operator System.Int32?(Model.Properties.Integer Property)
+        {
+            return Property.Value;
+        }
+
         public override System.String ValueString
         {
             get

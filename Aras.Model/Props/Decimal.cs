@@ -76,6 +76,11 @@ namespace Aras.Model.Properties
             }
         }
 
+        public static implicit operator System.Decimal?(Model.Properties.Decimal Property)
+        {
+            return Property.Value;
+        }
+
         public override System.String ValueString
         {
             get

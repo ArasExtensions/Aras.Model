@@ -76,6 +76,11 @@ namespace Aras.Model.Properties
             }
         }
 
+        public static implicit operator Model.Item(Model.Properties.Item Property)
+        {
+            return Property.Value;
+        }
+
         public override System.String ValueString
         {
             get

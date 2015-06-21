@@ -76,6 +76,11 @@ namespace Aras.Model.Properties
             }
         }
 
+        public static implicit operator System.DateTime?(Model.Properties.Date Property)
+        {
+            return Property.Value;
+        }
+
         public override System.String ValueString
         {
             get

@@ -46,7 +46,7 @@ namespace Aras.Model.Debug
             Response response = partrequest.Execute();
             Item context = response.Items.First().Cache;
             Model.Properties.Item test = (Model.Properties.Item)context.Property("list");
-            Item testitem = test.Value;
+            Item testitem = test;
 
         }
 

@@ -75,7 +75,12 @@ namespace Aras.Model.Properties
                 this.Object = value;
             }
         }
-   
+
+        public static implicit operator System.Boolean?(Model.Properties.Boolean Property)
+        {
+            return Property.Value;
+        }
+
         public override System.String ValueString
         {
             get
