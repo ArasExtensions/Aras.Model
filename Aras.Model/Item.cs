@@ -54,7 +54,15 @@ namespace Aras.Model
             get
             {
                 Property idproperty = this.Property(id);
-                return ((Model.Properties.String)idproperty).Value;
+
+                if (idproperty != null)
+                {
+                    return ((Model.Properties.String)idproperty).Value;
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
 

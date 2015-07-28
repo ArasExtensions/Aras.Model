@@ -41,6 +41,21 @@ namespace Aras.Model.Requests
             this.Cache = new Model.Relationship(this.Source.Cache, (Model.RelationshipType)this.ItemType);
         }
 
+        internal override IO.Item BuildRequest()
+        {
+            IO.Item item = base.BuildRequest();
+
+            if (this.Related != null)
+            {
+                if (this.Related.ID != null)
+                {
+                    item.SetProperty("related_id", this.Related.ID);
+                }
+            }
+
+            return item;
+        }
+
         internal override string SelectionString
         {
             get

@@ -274,7 +274,7 @@ namespace Aras.Model.Requests
             return this.AddRelationship(RelationshipType, Action, null);
         }
 
-        internal IO.Item BuildRequest()
+        internal virtual IO.Item BuildRequest()
         {
             IO.Item ret = new IO.Item(this.ItemType.Name, this.Action.Name);
             ret.Select = this.SelectionString;
