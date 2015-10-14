@@ -143,6 +143,11 @@ namespace Aras.Model
 
         public Action Action(String Name)
         {
+            if (!this.ActionCache.ContainsKey(Name))
+            {
+                this.ActionCache[Name] = new Action(this, Name);
+            }
+
             return this.ActionCache[Name];
         }
 
