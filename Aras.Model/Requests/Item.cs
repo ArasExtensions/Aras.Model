@@ -220,6 +220,36 @@ namespace Aras.Model.Requests
             }
         }
 
+        public Relationship AddRelationship(Action Action, Model.Relationship Relationship)
+        {
+            if (Action.ItemType is RelationshipType)
+            {
+                RelationshipType relationshiptype = (RelationshipType)Action.ItemType;
+
+                if (relationshiptype.SourceType.Equals(this.ItemType))
+                {
+                    Item Related = null;
+
+                    if (Relationship.Related != null)
+                    {
+                        Related = new Item(this.Request, Action, Relationship.Related);
+                    }
+
+                    Relationship relationship = new Relationship(this.Request, Action, this, Related, Relationship);
+                    this._relationships.Add(relationship);
+                    return relationship;
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Source Type of RelationshipType must be: " + this.ItemType.Name);
+                }
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Action must be from a RelationshipType");
+            }
+        }
+
         public Relationship AddRelationship(String Action, Item Related, Model.Relationship Relationship)
         {
             if (Relationship != null)
@@ -229,6 +259,27 @@ namespace Aras.Model.Requests
                 if (action != null)
                 {
                     return this.AddRelationship(action, Related, Relationship);
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Invalid Action");
+                }
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid Relationship");
+            }
+        }
+
+        public Relationship AddRelationship(String Action, Model.Relationship Relationship)
+        {
+            if (Relationship != null)
+            {
+                Action action = Relationship.RelationshipType.Action(Action);
+
+                if (action != null)
+                {
+                    return this.AddRelationship(action, Relationship);
                 }
                 else
                 {
