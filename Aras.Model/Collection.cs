@@ -30,14 +30,36 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public abstract class Relationship : Item
+    public abstract class Collection<T>: List<T> where T:Item
     {
-        public Item Source { get; private set; }
+        public Session Session { get; private set; }
 
-        public Relationship(Session Session, Item Source)
-            :base(Session)
+        private String _itemType;
+        internal String ItemType
         {
-            this.Source = Source;
+            get
+            {
+                if (this._itemType == null)
+                {
+                    object[] attributes = typeof(T).GetCustomAttributes(typeof(Attributes.ItemType), true);
+
+                    if (attributes.Length == 1)
+                    {
+                        this._itemType = ((Attributes.ItemType)attributes[0]).Name;
+                    }
+                    else
+                    {
+                        throw new NotImplementedException("Class must have ItemType Attribute: " + typeof(T).FullName);
+                    }
+                }
+
+                return _itemType;
+            }
+        }
+
+        public Collection(Session Session)
+        {
+            this.Session = Session;
         }
     }
 }

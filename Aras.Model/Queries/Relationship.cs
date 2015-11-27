@@ -28,13 +28,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Queries
 {
-    public abstract class Relationship : Item
+    public class Relationship<T> : Query<T> where T:Relationship
     {
-        public Item Source { get; private set; }
+        public Model.Item Source { get; private set; }
 
-        public Relationship(Session Session, Item Source)
+        public override void Execute()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Relationship(Session Session, Model.Item Source)
             :base(Session)
         {
             this.Source = Source;

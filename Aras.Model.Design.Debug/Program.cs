@@ -28,16 +28,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Design.Debug
 {
-    public abstract class Relationship : Item
+    class Program
     {
-        public Item Source { get; private set; }
-
-        public Relationship(Session Session, Item Source)
-            :base(Session)
+        static void Main(string[] args)
         {
-            this.Source = Source;
+            Server server = new Server("http://localhost/11SP1");
+            Database database = server.Database("VariantsDemo11SP1");
+            Session session = database.Login("admin", "innovator");
+
+            Queries.Item<Part> parts = new Queries.Item<Part>(session);
+            parts.Execute();
+
         }
     }
 }

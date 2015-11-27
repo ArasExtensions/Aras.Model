@@ -30,14 +30,15 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public abstract class Relationship : Item
+    [Attributes.ItemType("User")]
+    public class User : Item
     {
-        public Item Source { get; private set; }
+        public String login_name { get; set; }
 
-        public Relationship(Session Session, Item Source)
+        public User(Session Session)
             :base(Session)
         {
-            this.Source = Source;
+
         }
     }
 }

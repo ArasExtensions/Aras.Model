@@ -20,24 +20,45 @@
   Address: The Winnowing House, Mill Lane, Askham Richard, York, YO23 3NW, United Kingdom
   Tel:     +44 113 815 3440
   Email:   support@processwall.com
+ * 
 */
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Queries
 {
-    public abstract class Relationship : Item
+    public class Item<T> : Query<T> where T:Model.Item
     {
-        public Item Source { get; private set; }
+        public override void Execute()
+        {
+            Aras.IOM.Item request = this.Session.Innovator.newItem(this.ItemType, "get");
+            request.setAttribute("select", "id,config_id,keyed_name");
+            Aras.IOM.Item response = request.apply();
 
-        public Relationship(Session Session, Item Source)
+            if (!response.isError())
+            {
+                this.Clear();
+
+                for(int i=0; i<response.getItemCount(); i++)
+                {
+                    Aras.IOM.Item thisitem = response.getItemByIndex(i);
+                    T item = (T)this.Session.ItemFromCache(typeof(T), thisitem.getID(), thisitem.getProperty("config_id"), thisitem.getProperty("keyed_name"));
+                    this.Add(item);
+                }
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public Item(Session Session)
             :base(Session)
         {
-            this.Source = Source;
+
         }
     }
 }

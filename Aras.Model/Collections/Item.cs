@@ -28,16 +28,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Collections
 {
-    public abstract class Relationship : Item
+    public class Item<T> : Collection<T> where T:Model.Item
     {
-        public Item Source { get; private set; }
-
-        public Relationship(Session Session, Item Source)
+        public Item(Session Session)
             :base(Session)
         {
-            this.Source = Source;
+
         }
     }
 }

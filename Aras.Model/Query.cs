@@ -30,14 +30,14 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public abstract class Relationship : Item
+    public abstract class Query<T> : Collection<T> where T: Item
     {
-        public Item Source { get; private set; }
+        public abstract void Execute();
 
-        public Relationship(Session Session, Item Source)
+        public Query(Session Session)
             :base(Session)
         {
-            this.Source = Source;
+
         }
     }
 }

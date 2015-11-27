@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Aras Model Debug")]
+[assembly: AssemblyTitle("Aras Model Design")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Processwall Limited")]
-[assembly: AssemblyProduct("Aras Model Debug")]
+[assembly: AssemblyProduct("Aras Model Design")]
 [assembly: AssemblyCopyright("Copyright © Processwall Limited 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("f55f7b4d-6240-4d17-ab7f-9e16072e7d69")]
+[assembly: Guid("6e1799f2-9fe7-4d19-8daa-a75aceb7805e")]
 
 // Version information for an assembly consists of the following four values:
 //

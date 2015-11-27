@@ -38,40 +38,35 @@ namespace Aras.Model
 
         public String Name { get; private set; }
 
-        public static String PasswordHash(String Password)
+        public Session Login()
         {
-            String md5password = null;
+            Aras.IOM.HttpServerConnection connection = Aras.IOM.IomFactory.CreateWinAuthHttpServerConnection(this.Server.URL, this.Name);
+            Aras.IOM.Item user = connection.Login();
 
-            using (MD5 md5 = MD5.Create())
+            if (!user.isError())
             {
-                byte[] data = md5.ComputeHash(Encoding.UTF8.GetBytes(Password));
-                StringBuilder md5string = new StringBuilder();
-
-                for (int i = 0; i < data.Length; i++)
-                {
-                    md5string.Append(data[i].ToString("x2"));
-                }
-
-                md5password = md5string.ToString();
+                Aras.IOM.Innovator innovator = Aras.IOM.IomFactory.CreateInnovator(connection);
+                return new Session(this, user, innovator);
             }
-
-            return md5password;
+            else
+            {
+                return null;
+            }
         }
 
         public Session Login(String Username, String Password)
         {
-            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ValidateUser, this, Username, Password);
-            IO.SOAPResponse response = request.Execute();
+            Aras.IOM.HttpServerConnection connection = Aras.IOM.IomFactory.CreateHttpServerConnection(this.Server.URL, this.Name, Username, Password);
+            Aras.IOM.Item user = connection.Login();
 
-            if (!response.IsError)
+            if (!user.isError())
             {
-                String id = response.Result.SelectSingleNode("id").InnerText;
-                Session session = new Session(this, id, Username, Password);
-                return session;
+                Aras.IOM.Innovator innovator = Aras.IOM.IomFactory.CreateInnovator(connection);
+                return new Session(this, user, innovator);
             }
             else
             {
-                throw new Exceptions.ServerException(response.ErrorMessage);
+                return null;
             }
         }
 
@@ -81,7 +76,7 @@ namespace Aras.Model
         }
 
         internal Database(Server Server, String Name)
-            :base()
+            : base()
         {
             this.Server = Server;
             this.Name = Name;

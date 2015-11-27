@@ -20,24 +20,24 @@
   Address: The Winnowing House, Mill Lane, Askham Richard, York, YO23 3NW, United Kingdom
   Tel:     +44 113 815 3440
   Email:   support@processwall.com
+ * 
 */
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Attributes
 {
-    public abstract class Relationship : Item
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple=false)]
+    public class PropertyType : Attribute
     {
-        public Item Source { get; private set; }
+        public String Name { get; private set; }
 
-        public Relationship(Session Session, Item Source)
-            :base(Session)
+        public PropertyType(String Name)
         {
-            this.Source = Source;
+            this.Name = Name;
         }
     }
 }
