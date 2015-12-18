@@ -28,28 +28,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model.Debug
+namespace Aras.Model
 {
-    class Program
+    public class Transaction : IDisposable
     {
-        static void Main(string[] args)
+        public Session Session { get; private set; }
+
+        private List<Item> _items;
+
+        internal void Add(Item Item)
         {
-            Server server = new Server("http://localhost/11SP1");
-            Database database = server.Database("VariantsDemo11SP1");
-            Session session = database.Login("admin", "innovator");
-            Queries.Item partquery = session.Query("Part");
-            partquery.Select = "item_number,cmb_name";
-            IEnumerable<Item> parts = partquery.Execute();
+            this._items.Add(Item);
+        }
 
-            String test = (String)parts.First().Property("item_number").Value;
-            String test2 = (String)parts.First().Property("cmb_name").Value;
-            Int32 test3 = (Int32)parts.First().Property("generation").Value;
+        public void Commit()
+        {
 
-            using(Transaction transaction = session.BeginTransaction())
-            {
-                Item item = session.Create("Part", transaction);
-                transaction.Commit();
-            }
+        }
+
+        public void Dispose()
+        {
+
+        }
+
+        internal Transaction(Session Session)
+        {
+            this.Session = Session;
+            this._items = new List<Item>();
         }
     }
 }

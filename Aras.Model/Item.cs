@@ -32,6 +32,10 @@ namespace Aras.Model
 {
     public class Item
     {
+        public enum States { Create, Read, Update, Delete };
+
+        public States State { get; private set; }
+
         public String ID { get; private set; }
 
         public String ConfigID { get; private set; }
@@ -82,6 +86,15 @@ namespace Aras.Model
             this.ID = ID;
             this.ConfigID = ConfigID;
             this.Type = Type;
+            this.State = States.Read;
+        }
+
+        public Item(ItemType Type)
+        {
+            this.Type = Type;
+            this.ID = this.Type.Session.Innovator.getNewID();
+            this.ConfigID = this.ID;
+            this.State = States.Create;
         }
     }
 }

@@ -77,6 +77,29 @@ namespace Aras.Model
             return new Queries.Item(Type);
         }
 
+        public Queries.Item Query(String ItemTypeName)
+        {
+            return new Queries.Item(this.ItemType(ItemTypeName));
+        }
+
+        public Transaction BeginTransaction()
+        {
+            return new Transaction(this);
+        }
+
+        public Item Create(String Type, Transaction Transaction)
+        {
+            return this.Create(this.ItemType(Type), Transaction);
+        }
+
+        public Item Create(ItemType Type, Transaction Transaction)
+        {
+            Item item = new Item(Type);
+            this.ItemCache[item.ID] = item;
+            Transaction.Add(item);
+            return item;
+        }
+
         internal Session(Database Database, Aras.IOM.Item User, Aras.IOM.Innovator Innovator)
         {
             this.Database = Database;

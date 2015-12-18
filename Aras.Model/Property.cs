@@ -27,11 +27,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace Aras.Model
 {
-    public abstract class Property
+    public abstract class Property : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(String Name)
+        {
+            if (this.PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(Name));
+            }
+        }
+
         public Boolean Loaded { get; private set; }
 
         public Item Item { get; private set; }
@@ -43,7 +54,7 @@ namespace Aras.Model
         { 
             get
             {
-                if (!this.Loaded)
+                if (!this.Loaded && this.Item.State == Model.Item.States.Read)
                 {
                     Aras.IOM.Item request = this.Item.Type.Session.Innovator.newItem(this.Item.Type.Name, "get");
                     request.setID(this.Item.ID);
@@ -67,6 +78,7 @@ namespace Aras.Model
                 if (this._value != value)
                 {
                     this._value = value;
+                    this.OnPropertyChanged("Value");
                 }
             }
         }
