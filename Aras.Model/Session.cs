@@ -40,23 +40,41 @@ namespace Aras.Model
 
         internal Aras.IOM.Innovator Innovator { get; private set; }
 
+        private Dictionary<String, ItemType> ItemTypeCache;
+
+        public ItemType ItemType(String Name)
+        {
+            if (!this.ItemTypeCache.ContainsKey(Name))
+            {
+                Aras.IOM.Item request = this.Innovator.newItem("ItemType", "get");
+                request.setProperty("name", Name);
+                request.setAttribute("select", "id,name");
+                Aras.IOM.Item response = request.apply();
+
+                if (!response.isError())
+                {
+                    this.ItemTypeCache[Name] = new ItemType(this, response.getID(), response.getProperty("name"));
+                }
+            }
+
+            return this.ItemTypeCache[Name];
+        }
+
         private Dictionary<String, Item> ItemCache;
 
-        internal Item ItemFromCache(Type Type, String id, String config_id, String keyed_name)
+        internal Item ItemFromCache(String ID, String ConfigID, ItemType Type)
         {
-            if (this.ItemCache.ContainsKey(id))
+            if (!this.ItemCache.ContainsKey(ID))
             {
-                return this.ItemCache[id];
+                this.ItemCache[ID] = new Item(ID, ConfigID, Type);
             }
-            else
-            {
-                Item item = (Item)Activator.CreateInstance(Type, new object[] { this });
-                item.id = id;
-                item.config_id = config_id;
-                item.keyed_name = keyed_name;
-                this.ItemCache[id] = item;
-                return item;
-            }
+
+            return this.ItemCache[ID];
+        }
+
+        public Queries.Item Query(ItemType Type)
+        {
+            return new Queries.Item(Type);
         }
 
         internal Session(Database Database, Aras.IOM.Item User, Aras.IOM.Innovator Innovator)
@@ -64,17 +82,8 @@ namespace Aras.Model
             this.Database = Database;
             this.GUID = Guid.NewGuid();
             this.Innovator = Innovator;
+            this.ItemTypeCache = new Dictionary<String, ItemType>();
             this.ItemCache = new Dictionary<String, Item>();
-
-            Aras.IOM.Item userrequest = this.Innovator.newItem("User", "get");
-            userrequest.setID(User.getID());
-            userrequest.setAttribute("select", "id,config_id,keyed_name");
-            Aras.IOM.Item userresponse = userrequest.apply();
-
-            if (!userresponse.isError())
-            {
-                this.User = (User)this.ItemFromCache(typeof(User), userresponse.getID(), userresponse.getProperty("config_id"), userresponse.getProperty("keyed_name"));
-            }
         }
     }
 }

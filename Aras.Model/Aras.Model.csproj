@@ -44,16 +44,21 @@
   <ItemGroup>
     <Compile Include="Attributes\PropertyType.cs" />
     <Compile Include="Attributes\ItemType.cs" />
-    <Compile Include="Collection.cs" />
-    <Compile Include="Collections\Relationship.cs" />
-    <Compile Include="Collections\Item.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="Exceptions\ArgumentException.cs" />
     <Compile Include="Exceptions\ServerException.cs" />
-    <Compile Include="Item.cs" />
+    <Compile Include="PropertyType.cs" />
+    <Compile Include="Property.cs" />
+    <Compile Include="PropertyTypes\Integer.cs" />
+    <Compile Include="PropertyTypes\String.cs" />
+    <Compile Include="Props\Integer.cs" />
+    <Compile Include="Props\String.cs" />
+    <Compile Include="RelationshipType.cs" />
+    <Compile Include="ItemType.cs" />
     <Compile Include="Queries\Item.cs" />
     <Compile Include="Queries\Relationship.cs" />
     <Compile Include="Query.cs" />
+    <Compile Include="Item.cs" />
     <Compile Include="Relationship.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="Session.cs" />

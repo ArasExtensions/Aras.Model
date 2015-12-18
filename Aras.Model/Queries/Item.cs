@@ -30,33 +30,50 @@ using System.Threading.Tasks;
 
 namespace Aras.Model.Queries
 {
-    public class Item<T> : Query<T> where T:Model.Item
+    public class Item : Query
     {
-        public override void Execute()
+        public IEnumerable<Model.Item> Execute()
         {
-            Aras.IOM.Item request = this.Session.Innovator.newItem(this.ItemType, "get");
-            request.setAttribute("select", "id,config_id,keyed_name");
+            List<Model.Item> ret = new List<Model.Item>();
+
+            Aras.IOM.Item request = this.Type.Session.Innovator.newItem(this.Type.Name, "get");
+
+            if (this.SelectPropertyTypes.Count() > 0)
+            {
+                request.setAttribute("select", "id,config_id," + this.Select);
+            }
+            else
+            {
+                request.setAttribute("select", "id,config_id");
+            }
+            
             Aras.IOM.Item response = request.apply();
 
             if (!response.isError())
             {
-                this.Clear();
-
                 for(int i=0; i<response.getItemCount(); i++)
                 {
-                    Aras.IOM.Item thisitem = response.getItemByIndex(i);
-                    T item = (T)this.Session.ItemFromCache(typeof(T), thisitem.getID(), thisitem.getProperty("config_id"), thisitem.getProperty("keyed_name"));
-                    this.Add(item);
+                    Aras.IOM.Item dbitem = response.getItemByIndex(i);
+                    Model.Item item = this.Type.Session.ItemFromCache(dbitem.getID(), dbitem.getProperty("config_id"), this.Type);
+
+                    foreach(PropertyType proptype in this.SelectPropertyTypes)
+                    {
+                        item.Property(proptype).Load(dbitem.getProperty(proptype.Name));
+                    }
+
+                    ret.Add(item);
                 }
             }
             else
             {
-                throw new NotImplementedException();
+
             }
+
+            return ret;
         }
 
-        public Item(Session Session)
-            :base(Session)
+        internal Item(ItemType Type)
+            :base(Type)
         {
 
         }

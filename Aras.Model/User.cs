@@ -30,13 +30,11 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    [Attributes.ItemType("User")]
+
     public class User : Item
     {
-        public String login_name { get; set; }
-
-        public User(Session Session)
-            :base(Session)
+        public User(String ID, String ConfigID, ItemType Type)
+            :base(ID, ConfigID, Type)
         {
 
         }

@@ -28,14 +28,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model.Collections
+namespace Aras.Model.PropertyTypes
 {
-    public class Item<T> : Collection<T> where T:Model.Item
+    public class Integer : PropertyType
     {
-        public Item(Session Session)
-            :base(Session)
+        internal Integer(ItemType Type, System.String Name)
+            :base(Type, Name)
         {
-
+  
         }
     }
 }

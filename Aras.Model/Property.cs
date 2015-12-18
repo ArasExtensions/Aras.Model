@@ -30,53 +30,57 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public abstract class Query
+    public abstract class Property
     {
-        public ItemType Type { get; private set; }
+        public Boolean Loaded { get; private set; }
 
-        private List<PropertyType> SelectCache;
+        public Item Item { get; private set; }
 
-        public IEnumerable<PropertyType> SelectPropertyTypes
-        {
+        public PropertyType Type { get; private set; }
+
+        private Object _value;
+        public virtual Object Value 
+        { 
             get
             {
-                return this.SelectCache;
-            }
-        }
-
-        public String Select
-        {
-            get
-            {
-                List<String> names = new List<String>();
-
-                foreach (PropertyType proptype in this.SelectCache)
+                if (!this.Loaded)
                 {
-                    names.Add(proptype.Name);
+                    Aras.IOM.Item request = this.Item.Type.Session.Innovator.newItem(this.Item.Type.Name, "get");
+                    request.setID(this.Item.ID);
+                    request.setAttribute("select", this.Type.Name);
+                    Aras.IOM.Item response = request.apply();
+
+                    if (!response.isError())
+                    {
+                        this.Load(response.getProperty(this.Type.Name));
+                    }
+                    else
+                    {
+                        throw new Exceptions.ServerException(response.getErrorString());
+                    }
                 }
 
-                return String.Join(",", names);
+                return this._value;
             }
             set
             {
-                this.SelectCache.Clear();
-
-                foreach (String name in value.Split(','))
+                if (this._value != value)
                 {
-                    PropertyType proptype = this.Type.PropertyType(name);
-
-                    if (!this.SelectCache.Contains(proptype))
-                    {
-                        this.SelectCache.Add(proptype);
-                    }
+                    this._value = value;
                 }
             }
         }
 
-        internal Query(ItemType Type)
+        internal virtual void Load(String Value)
         {
+            this.Loaded = true;
+        }
+
+        internal Property(Item Item, PropertyType Type)
+        {
+            this.Loaded = false;
+            this.Item = Item;
             this.Type = Type;
-            this.SelectCache = new List<PropertyType>();
         }
     }
 }

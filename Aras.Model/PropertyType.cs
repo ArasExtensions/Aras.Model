@@ -28,16 +28,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model.Collections
+namespace Aras.Model
 {
-    public class Relationship<T> : Collection<T> where T:Model.Relationship
+    public abstract class PropertyType
     {
-        public Aras.Model.Item Source { get; private set; }
+        public ItemType Type { get; private set; }
 
-        public Relationship(Session Session, Aras.Model.Item Source)
-            :base(Session)
+        public String Name { get; private set; }
+
+        public override string ToString()
         {
-            this.Source = Source;
+            return this.Name;
+        }
+
+        internal PropertyType(ItemType Type, String Name)
+        {
+            this.Type = Type;
+            this.Name = Name;
         }
     }
 }

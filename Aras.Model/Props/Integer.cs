@@ -28,38 +28,48 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Properties
 {
-    public abstract class Collection<T>: List<T> where T:Item
+    public class Integer : Property
     {
-        public Session Session { get; private set; }
-
-        private String _itemType;
-        internal String ItemType
+        public override Object Value
         {
             get
             {
-                if (this._itemType == null)
+                return base.Value;
+            }
+            set
+            {
+                if ((value == null) || (value is System.Int32))
                 {
-                    object[] attributes = typeof(T).GetCustomAttributes(typeof(Attributes.ItemType), true);
-
-                    if (attributes.Length == 1)
-                    {
-                        this._itemType = ((Attributes.ItemType)attributes[0]).Name;
-                    }
-                    else
-                    {
-                        throw new NotImplementedException("Class must have ItemType Attribute: " + typeof(T).FullName);
-                    }
+                    base.Value = value;
                 }
-
-                return _itemType;
+                else
+                {
+                    throw new Exceptions.ArgumentException("Value must be a System.Int32");
+                }
             }
         }
 
-        public Collection(Session Session)
+        internal override void Load(System.String Value)
         {
-            this.Session = Session;
+            base.Load(Value);
+
+            if (Value == null)
+            {
+                this.Value = null;
+            }
+            else
+            {
+                this.Value = System.Int32.Parse(Value);
+            }
+            
+        }
+
+        internal Integer(Model.Item Item, PropertyTypes.Integer Type)
+            :base(Item, Type)
+        {
+
         }
     }
 }

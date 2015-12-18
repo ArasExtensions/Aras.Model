@@ -30,64 +30,58 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public abstract class Item
+    public class Item
     {
-        public Session Session { get; private set; }
+        public String ID { get; private set; }
 
-        public Guid GUID { get; private set; }
+        public String ConfigID { get; private set; }
 
-        public String id { get; internal set; }
+        public ItemType Type { get; private set; }
 
-        public String config_id { get; internal set; }
-
-        public String keyed_name { get; internal set; }
-
-        private String _major_rev;
-        [Attributes.PropertyType("major_rev")]
-        public String major_rev
+        private Dictionary<PropertyType, Property> _propertyCache;
+        private Dictionary<PropertyType, Property> PropertyCache
         {
             get
             {
-                return this._major_rev;
-            }
-            set
-            {
-                this._major_rev = value;
-            }
-        }
-
-        private String _itemType;
-        internal String ItemType
-        {
-            get
-            {
-                if (this._itemType == null)
+                if (this._propertyCache == null)
                 {
-                    object[] attributes = this.GetType().GetCustomAttributes(typeof(Attributes.ItemType), true);
+                    this._propertyCache = new Dictionary<PropertyType, Property>();
 
-                    if (attributes.Length == 1)
+                    foreach(PropertyType proptype in this.Type.PropertyTypes)
                     {
-                        this._itemType = ((Attributes.ItemType)attributes[0]).Name;
-                    }
-                    else
-                    {
-                        throw new NotImplementedException("Class must have ItemType Attribute: " + this.GetType().FullName);
+                        switch(proptype.GetType().Name)
+                        {
+                            case "String":
+                                this._propertyCache[proptype] = new Properties.String(this, (PropertyTypes.String)proptype);
+                                break;
+                            case "Integer":
+                                this._propertyCache[proptype] = new Properties.Integer(this, (PropertyTypes.Integer)proptype);
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
 
-                return this._itemType;
+                return this._propertyCache;
             }
         }
 
-        public override string ToString()
+        public Property Property(PropertyType PropertType)
         {
-            return this.keyed_name;
+            return this.PropertyCache[PropertType];
         }
 
-        public Item(Session Session)
+        public Property Property(String Name)
         {
-            this.Session = Session;
-            this.GUID = Guid.NewGuid();
+            return this.PropertyCache[this.Type.PropertyType(Name)];
+        }
+
+        public Item(String ID, String ConfigID, ItemType Type)
+        {
+            this.ID = ID;
+            this.ConfigID = ConfigID;
+            this.Type = Type;
         }
     }
 }

@@ -30,17 +30,17 @@ using System.Threading.Tasks;
 
 namespace Aras.Model.Queries
 {
-    public class Relationship<T> : Query<T> where T:Relationship
+    public class Relationship : Query
     {
         public Model.Item Source { get; private set; }
 
-        public override void Execute()
+        public IEnumerable<Relationship> Execute()
         {
             throw new NotImplementedException();
         }
 
-        public Relationship(Session Session, Model.Item Source)
-            :base(Session)
+        internal Relationship(RelationshipType Type, Model.Item Source)
+            :base(Type)
         {
             this.Source = Source;
         }

@@ -28,55 +28,39 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Properties
 {
-    public abstract class Query
+    public class String : Property
     {
-        public ItemType Type { get; private set; }
-
-        private List<PropertyType> SelectCache;
-
-        public IEnumerable<PropertyType> SelectPropertyTypes
+        public override Object Value
         {
             get
             {
-                return this.SelectCache;
-            }
-        }
-
-        public String Select
-        {
-            get
-            {
-                List<String> names = new List<String>();
-
-                foreach (PropertyType proptype in this.SelectCache)
-                {
-                    names.Add(proptype.Name);
-                }
-
-                return String.Join(",", names);
+                return base.Value;
             }
             set
             {
-                this.SelectCache.Clear();
-
-                foreach (String name in value.Split(','))
+                if ((value == null) || (value is System.String))
                 {
-                    PropertyType proptype = this.Type.PropertyType(name);
-
-                    if (!this.SelectCache.Contains(proptype))
-                    {
-                        this.SelectCache.Add(proptype);
-                    }
+                    base.Value = value;
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Value must be a System.String");
                 }
             }
         }
 
-        internal Query(ItemType Type)
+        internal override void Load(System.String Value)
         {
-            this.Type = Type;
-            this.SelectCache = new List<PropertyType>();
+            base.Load(Value);
+            this.Value = Value;
+        }
+
+        internal String(Model.Item Item, PropertyTypes.String Type)
+            :base(Item, Type)
+        {
+
         }
     }
 }

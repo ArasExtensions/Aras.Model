@@ -28,15 +28,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.PropertyTypes
 {
-    public class Relationship : Item
+    public class String : PropertyType
     {
- 
-        public Relationship(String ID, String ConfigID, ItemType Type)
-            :base(ID, ConfigID, Type)
-        {
+        public System.Int32 Length { get; private set; }
 
+        internal String(ItemType Type, System.String Name, System.Int32 Length)
+            :base(Type, Name)
+        {
+            this.Length = Length;
         }
     }
 }

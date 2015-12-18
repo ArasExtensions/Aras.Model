@@ -30,13 +30,12 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public class Relationship : Item
+    public class RelationshipType : ItemType
     {
- 
-        public Relationship(String ID, String ConfigID, ItemType Type)
-            :base(ID, ConfigID, Type)
+        internal RelationshipType(Session Session, String ID, String Name)
+            :base(Session, ID, Name)
         {
-
+     
         }
     }
 }
