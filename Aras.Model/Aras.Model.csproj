@@ -68,6 +68,7 @@
     <Compile Include="Props\Integer.cs" />
     <Compile Include="Props\List.cs" />
     <Compile Include="Props\Item.cs" />
+    <Compile Include="Props\Image.cs" />
     <Compile Include="Props\Text.cs" />
     <Compile Include="Props\String.cs" />
     <Compile Include="RelationshipType.cs" />

@@ -74,6 +74,9 @@ namespace Aras.Model
                     case "Boolean":
                         this.PropertyCache[PropertyType] = new Properties.Boolean(this, (PropertyTypes.Boolean)PropertyType);
                         break;
+                    case "Image":
+                        this.PropertyCache[PropertyType] = new Properties.Image(this, (PropertyTypes.Image)PropertyType);
+                        break;
                     default:
                         throw new NotImplementedException("Property Type not implmented: " + PropertyType.GetType().Name);
                 }
@@ -143,19 +146,33 @@ namespace Aras.Model
 
         internal Boolean UnLock()
         {
-            IO.Item unlockitem = new IO.Item(this.Type.Name, "unlock");
-            unlockitem.ID = this.ID;
-            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, unlockitem);
-            IO.SOAPResponse response = request.Execute();
+            Item lockedby = (Item)this.Property("locked_by_id").Value;
 
-            if (!response.IsError)
+            if (lockedby.ID.Equals(this.Type.Session.UserID))
             {
-                this.UpdateProperties(response.Items.First());
+                IO.Item unlockitem = new IO.Item(this.Type.Name, "unlock");
+                unlockitem.ID = this.ID;
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, unlockitem);
+                IO.SOAPResponse response = request.Execute();
+
+                if (!response.IsError)
+                {
+                    this.UpdateProperties(response.Items.First());
+                    this.State = States.Read;
+                    return true;
+                }
+                else
+                {
+                    throw new Exceptions.ServerException(response.ErrorMessage);
+                }
+            }
+            else if (lockedby == null)
+            {
                 return true;
             }
             else
             {
-                throw new Exceptions.ServerException(response.ErrorMessage);
+                return false;
             }
         }
 

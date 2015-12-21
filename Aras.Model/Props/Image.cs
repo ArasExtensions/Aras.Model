@@ -28,29 +28,45 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model.Debug
+namespace Aras.Model.Properties
 {
-    class Program
+    public class Image : Property
     {
-        static void Main(string[] args)
+        public override Object Value
         {
-            Server server = new Server("http://localhost/11SP1");
-            Database database = server.Database("VariantsDemo11SP1");
-            Session session = database.Login("admin", Server.PasswordHash("innovator"));
-            Queries.Item partquery = session.Query("Part");
-            partquery.Select = "item_number,cmb_name";
-            IEnumerable<Item> parts = partquery.Execute();
-
-            using (Transaction transaction = session.BeginTransaction())
+            get
             {
-                foreach (Item testpart in parts)
-                {
-                    testpart.Update(transaction);
-                    testpart.Property("cmb_name").Value = "Test Name 99";
-                }
-
-                transaction.Commit();
+                return base.Value;
             }
+            set
+            {
+                if ((value == null) || (value is System.String))
+                {
+                    base.Value = value;
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Value must be a System.String");
+                }
+            }
+        }
+
+        internal override string DBValue
+        {
+            get
+            {
+                return this.Value.ToString();
+            }
+            set
+            {
+                this.SetValue(value);
+            }
+        }
+
+        internal Image(Model.Item Item, PropertyTypes.Image Type)
+            :base(Item, Type)
+        {
+
         }
     }
 }

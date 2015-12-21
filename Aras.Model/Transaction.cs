@@ -61,35 +61,49 @@ namespace Aras.Model
                         dbitem.ID = action.Item.ID;
                         dbitem.ConfigID = action.Item.ConfigID;
 
+                        Boolean modified = false;
+
                         foreach (Property prop in action.Item.Properties)
                         {
                             if (!prop.Type.ReadOnly && (prop.Modified))
                             {
                                 dbitem.SetProperty(prop.Type.Name, prop.DBValue);
+                                modified = true;
                             }
                         }
 
-                        dbitems.Add(dbitem);
+                        if (modified)
+                        {
+                            dbitems.Add(dbitem);
+                        }
+                        else
+                        {
+                            action.Item.UnLock();
+                        }
                     }
                 }
 
-                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, dbitems);
-                IO.SOAPResponse response = request.Execute();
-
-                if (!response.IsError)
+                foreach(IO.Item dbrequestitem in dbitems)
                 {
-                    foreach (IO.Item dbitem in response.Items)
+                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, dbrequestitem);
+                    IO.SOAPResponse response = request.Execute();
+
+                    if (!response.IsError)
                     {
-                        ItemType itemtype = Session.ItemType(dbitem.ItemType);
-                        Item item = this.Session.ItemFromCache(dbitem.ID, dbitem.ConfigID, itemtype);
-                        item.UpdateProperties(dbitem);
-                        item.UnLock();
+                        foreach (IO.Item dbitem in response.Items)
+                        {
+                            ItemType itemtype = Session.ItemType(dbitem.ItemType);
+                            Item item = this.Session.ItemFromCache(dbitem.ID, dbitem.ConfigID, itemtype);
+                            item.UpdateProperties(dbitem);
+                            item.UnLock();
+                        }
+                    }
+                    else
+                    {
+                        throw new Exceptions.ServerException(response.ErrorMessage);
                     }
                 }
-                else
-                {
-                    throw new Exceptions.ServerException(response.ErrorMessage);
-                }
+
             }
 
             this.Committed = true;

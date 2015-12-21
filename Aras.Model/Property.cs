@@ -115,11 +115,23 @@ namespace Aras.Model
             {
                 if (!this.ReadOnly)
                 {
-                    if (this._value != value)
+                    if (this._value == null)
                     {
-                        this._value = value;
-                        this.Modified = true;
-                        this.OnPropertyChanged("Value");
+                        if (value != null)
+                        {
+                            this._value = value;
+                            this.Modified = true;
+                            this.OnPropertyChanged("Value");
+                        }
+                    }
+                    else
+                    {
+                        if (!this._value.Equals(value))
+                        {
+                            this._value = value;
+                            this.Modified = true;
+                            this.OnPropertyChanged("Value");
+                        }
                     }
                 }
                 else
