@@ -36,15 +36,21 @@ namespace Aras.Model
 
         public String Name { get; private set; }
 
+        public Boolean ReadOnly { get; private set; }
+
+        public Object Default { get; private set; }
+
         public override string ToString()
         {
             return this.Name;
         }
 
-        internal PropertyType(ItemType Type, String Name)
+        internal PropertyType(ItemType Type, String Name, System.Boolean ReadOnly, Object Default)
         {
             this.Type = Type;
             this.Name = Name;
+            this.ReadOnly = ReadOnly;
+            this.Default = Default;
         }
     }
 }

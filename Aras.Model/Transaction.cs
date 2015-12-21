@@ -34,27 +34,78 @@ namespace Aras.Model
     {
         public Session Session { get; private set; }
 
-        private List<Item> _items;
+        private List<Action> _actions;
 
-        internal void Add(Item Item)
+        internal void Add(String Name, Item Item)
         {
-            this._items.Add(Item);
+            this._actions.Add(new Action(Name, Item));
         }
 
         public void Commit()
+        {
+            List<IO.Item> dbitems = new List<IO.Item>();
+
+            foreach(Action action in this._actions)
+            {
+                if (action.Item is Relationship)
+                {
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    IO.Item dbitem = new IO.Item(action.Item.Type.Name, action.Name);
+                    dbitem.ID = action.Item.ID;
+                    dbitem.ConfigID = action.Item.ConfigID;
+                    dbitem.Select = action.Item.Select;
+
+                    foreach(Property prop in action.Item.Properties)
+                    {
+                        if (!prop.Type.ReadOnly && (prop.Modified))
+                        {
+                            dbitem.SetProperty(prop.Type.Name, prop.DBValue);
+                        }
+                    }
+
+                    dbitems.Add(dbitem);
+                }
+            }
+
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, dbitems);
+            IO.SOAPResponse response = request.Execute();
+
+            if (!response.IsError)
+            {
+                foreach(IO.Item dbitem in response.Items)
+                {
+                    ItemType itemtype = Session.ItemType(dbitem.ItemType);
+                    Item item = this.Session.ItemFromCache(dbitem.ID, dbitem.ConfigID, itemtype);
+
+                    foreach(String propname in dbitem.PropertyNames)
+                    {
+                        item.Property(propname).DBValue = dbitem.GetProperty(propname);
+                    }
+                }
+            }
+            else
+            {
+                throw new Exceptions.ServerException(response.ErrorMessage);
+            }
+        }
+
+        public void RollBack()
         {
 
         }
 
         public void Dispose()
         {
-
+            this.RollBack();
         }
 
         internal Transaction(Session Session)
         {
             this.Session = Session;
-            this._items = new List<Item>();
+            this._actions = new List<Action>();
         }
     }
 }

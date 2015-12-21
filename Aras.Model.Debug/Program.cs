@@ -47,7 +47,8 @@ namespace Aras.Model.Debug
 
             using(Transaction transaction = session.BeginTransaction())
             {
-                Item item = session.Create("Part", transaction);
+                Item item = session.Create("Part", "item_number,cmb_name", transaction);
+                item.Property("item_number").Value = "99999";
                 transaction.Commit();
             }
         }

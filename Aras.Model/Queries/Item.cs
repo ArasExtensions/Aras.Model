@@ -54,11 +54,11 @@ namespace Aras.Model.Queries
             {
                 foreach(IO.Item dbitem in response.Items)
                 {
-                    Model.Item cacheitem = this.Type.Session.ItemFromCache(dbitem.GetProperty("id"), dbitem.GetProperty("config_id"), this.Type);
+                    Model.Item cacheitem = this.Type.Session.ItemFromCache(dbitem.ID, dbitem.ConfigID, this.Type);
 
                     foreach(PropertyType proptype in this.SelectPropertyTypes)
                     {
-                        cacheitem.Property(proptype).Load(dbitem.GetProperty(proptype.Name));
+                        cacheitem.Property(proptype).DBValue = dbitem.GetProperty(proptype.Name);
                     }
 
                     ret.Add(cacheitem);

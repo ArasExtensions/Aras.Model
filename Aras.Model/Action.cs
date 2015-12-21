@@ -28,16 +28,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model.PropertyTypes
+namespace Aras.Model
 {
-    public class String : PropertyType
+    internal class Action
     {
-        public System.Int32 Length { get; private set; }
+        internal String Name { get; private set; }
 
-        internal String(ItemType Type, System.String Name, Boolean ReadOnly, System.String Default, System.Int32 Length)
-            :base(Type, Name, ReadOnly, Default)
+        internal Item Item { get; private set; }
+
+        internal Action(String Name, Item Item)
         {
-            this.Length = Length;
+            this.Name = Name;
+            this.Item = Item;
         }
     }
 }

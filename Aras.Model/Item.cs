@@ -32,9 +32,7 @@ namespace Aras.Model
 {
     public class Item
     {
-        public enum States { Create, Read, Update, Delete };
-
-        public States State { get; private set; }
+        public Boolean IsNew { get; private set; }
 
         public String ID { get; private set; }
 
@@ -81,12 +79,48 @@ namespace Aras.Model
             return this.PropertyCache[this.Type.PropertyType(Name)];
         }
 
+        public IEnumerable<Property> Properties
+        {
+            get
+            {
+                return this.PropertyCache.Values;
+            }
+        }
+
+        internal String Select
+        {
+            get
+            {
+                List<String> names = new List<String>();
+
+                foreach(Property prop in this.PropertyCache.Values)
+                {
+                    if (prop.Select)
+                    {
+                        names.Add(prop.Type.Name);
+                    }
+                }
+
+                return String.Join(",", names);
+            }
+            set
+            {
+                if (value != null)
+                {
+                    foreach (String name in value.Split(','))
+                    {
+                        this.PropertyCache[this.Type.PropertyType(name)].Select = true;
+                    }
+                }
+            }
+        }
+
         public Item(String ID, String ConfigID, ItemType Type)
         {
             this.ID = ID;
             this.ConfigID = ConfigID;
             this.Type = Type;
-            this.State = States.Read;
+            this.IsNew = false;
         }
 
         public Item(ItemType Type)
@@ -94,7 +128,7 @@ namespace Aras.Model
             this.Type = Type;
             this.ID = Server.NewID();
             this.ConfigID = this.ID;
-            this.State = States.Create;
+            this.IsNew = true;
         }
     }
 }

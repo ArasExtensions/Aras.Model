@@ -94,16 +94,17 @@ namespace Aras.Model
             return new Transaction(this);
         }
 
-        public Item Create(String Type, Transaction Transaction)
+        public Item Create(String Type, String Select, Transaction Transaction)
         {
-            return this.Create(this.ItemType(Type), Transaction);
+            return this.Create(this.ItemType(Type), Select, Transaction);
         }
 
-        public Item Create(ItemType Type, Transaction Transaction)
+        public Item Create(ItemType Type, String Select, Transaction Transaction)
         {
             Item item = new Item(Type);
+            item.Select = Select;
             this.ItemCache[item.ID] = item;
-            Transaction.Add(item);
+            Transaction.Add("add", item);
             return item;
         }
 

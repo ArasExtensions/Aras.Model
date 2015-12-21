@@ -50,7 +50,7 @@ namespace Aras.Model
                     this._propertyTypeCache = new Dictionary<String, PropertyType>();
 
                     IO.Item props = new IO.Item("Property", "get");
-                    props.Select = "name,data_type,stored_length";
+                    props.Select = "name,data_type,stored_length,readonly,default_value";
                     props.SetProperty("source_id", this.ID);
                     IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, props);
                     IO.SOAPResponse response = request.Execute();
@@ -60,6 +60,8 @@ namespace Aras.Model
                         foreach(IO.Item thisprop in response.Items)
                         {
                             String name = thisprop.GetProperty("name");
+                            Boolean ReadOnly = "1".Equals(thisprop.GetProperty("readonly"));
+                            String DefaultString = thisprop.GetProperty("default_value");
 
                             if (!SystemProperties.Contains(name))
                             {
@@ -68,10 +70,21 @@ namespace Aras.Model
                                     case "string":
                                         Int32 length = 32;
                                         Int32.TryParse(thisprop.GetProperty("stored_length"), out length);
-                                        this._propertyTypeCache[name] = new PropertyTypes.String(this, name, length);
+                                        this._propertyTypeCache[name] = new PropertyTypes.String(this, name, ReadOnly, DefaultString, length);
                                         break;
                                     case "integer":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name);
+                                        
+                                        if (DefaultString != null)
+                                        {
+                                            Int32 DefaultInteger = 0;
+                                            Int32.TryParse(DefaultString, out DefaultInteger);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, ReadOnly, DefaultInteger);
+                                        }
+                                        else
+                                        {
+                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, ReadOnly, null);
+                                        }
+
                                         break;
                                     default:
                                         break;

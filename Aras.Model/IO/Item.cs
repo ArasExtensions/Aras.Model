@@ -33,7 +33,7 @@ namespace Aras.Model.IO
 {
     internal class Item
     {
-        private static String[] SystemChildNodeNames = new String[5] { "id", "itemtype", "source_id", "related_id", "Relationships" };
+        private static String[] SystemChildNodeNames = new String[6] { "id", "config_id", "itemtype", "source_id", "related_id", "Relationships" };
 
         internal XmlDocument Doc { get; private set; }
 
@@ -66,6 +66,35 @@ namespace Aras.Model.IO
                 if (id == null)
                 {
                     id = this.Doc.CreateAttribute("id");
+                    this.Node.Attributes.Append(id);
+                }
+
+                id.Value = value;
+            }
+        }
+
+        internal String ConfigID
+        {
+            get
+            {
+                XmlAttribute id = this.Node.Attributes["config_id"];
+
+                if (id != null)
+                {
+                    return id.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            set
+            {
+                XmlAttribute id = this.Node.Attributes["config_id"];
+
+                if (id == null)
+                {
+                    id = this.Doc.CreateAttribute("config_id");
                     this.Node.Attributes.Append(id);
                 }
 

@@ -51,10 +51,16 @@ namespace Aras.Model.Properties
             }
         }
 
-        internal override void Load(System.String Value)
+        internal override string DBValue
         {
-            base.Load(Value);
-            this.Value = Value;
+            get
+            {
+                return this.Value.ToString();
+            }
+            set
+            {
+                this.SetValue(value);
+            }
         }
 
         internal String(Model.Item Item, PropertyTypes.String Type)

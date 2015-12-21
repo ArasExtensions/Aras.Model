@@ -43,7 +43,9 @@ namespace Aras.Model
             }
         }
 
-        public Boolean Loaded { get; private set; }
+        public Boolean Select { get; internal set; }
+
+        public Boolean Modified { get; private set; }
 
         public Item Item { get; private set; }
 
@@ -54,7 +56,7 @@ namespace Aras.Model
         { 
             get
             {
-                if (!this.Loaded && this.Item.State == Model.Item.States.Read)
+                if (!this.Select && !this.Item.IsNew)
                 {
                     IO.Item prop = new IO.Item(this.Item.Type.Name, "get");
                     prop.Select = this.Type.Name;
@@ -65,7 +67,8 @@ namespace Aras.Model
 
                     if (!response.IsError)
                     {
-                        this.Load(response.Items.First().GetProperty(this.Type.Name));
+                        this.DBValue = response.Items.First().GetProperty(this.Type.Name);
+                        this.Select = true;
                     }
                     else
                     {
@@ -80,21 +83,41 @@ namespace Aras.Model
                 if (this._value != value)
                 {
                     this._value = value;
+                    this.Modified = true;
                     this.OnPropertyChanged("Value");
                 }
             }
         }
 
-        internal virtual void Load(String Value)
+        protected void SetValue(Object Value)
         {
-            this.Loaded = true;
+            this._value = Value;
+            this.Select = true;
+            this.OnPropertyChanged("Value");
+        }
+
+        internal abstract String DBValue { get; set; }
+
+        public override string ToString()
+        {
+            if (this.Value == null)
+            {
+                return this.Type.Name + ": null";
+            }
+            else
+            {
+                return this.Type.Name + ": " + this.Value.ToString();
+            }
         }
 
         internal Property(Item Item, PropertyType Type)
         {
-            this.Loaded = false;
+            this.Select = false;
             this.Item = Item;
             this.Type = Type;
+
+            // Set Default Value
+            this._value = this.Type.Default;
         }
     }
 }
