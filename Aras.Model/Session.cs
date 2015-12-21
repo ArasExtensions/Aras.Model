@@ -32,13 +32,15 @@ namespace Aras.Model
 {
     public class Session
     {
+        public String ID { get; private set; }
+
         public Database Database { get; private set; }
 
-        public Guid GUID { get; private set; }
+        public String UserID { get; private set; }
 
-        public User User { get; private set; }
+        public String Username { get; private set; }
 
-        internal Aras.IOM.Innovator Innovator { get; private set; }
+        public String Password { get; private set; }
 
         private Dictionary<String, ItemType> ItemTypeCache;
 
@@ -46,14 +48,19 @@ namespace Aras.Model
         {
             if (!this.ItemTypeCache.ContainsKey(Name))
             {
-                Aras.IOM.Item request = this.Innovator.newItem("ItemType", "get");
-                request.setProperty("name", Name);
-                request.setAttribute("select", "id,name");
-                Aras.IOM.Item response = request.apply();
+                IO.Item itemtype = new IO.Item("ItemType", "get");
+                itemtype.Select = "id,name";
+                itemtype.SetProperty("name", Name);
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, itemtype);
+                IO.SOAPResponse response = request.Execute();
 
-                if (!response.isError())
+                if (!response.IsError)
                 {
-                    this.ItemTypeCache[Name] = new ItemType(this, response.getID(), response.getProperty("name"));
+                    this.ItemTypeCache[Name] = new ItemType(this, response.Items.First().GetProperty("id"), response.Items.First().GetProperty("name"));
+                }
+                else
+                {
+                    throw new Exceptions.ServerException(response.ErrorMessage);
                 }
             }
 
@@ -100,11 +107,13 @@ namespace Aras.Model
             return item;
         }
 
-        internal Session(Database Database, Aras.IOM.Item User, Aras.IOM.Innovator Innovator)
+        internal Session(Database Database, String UserID, String Username, String Password)
         {
+            this.ID = Server.NewID();
             this.Database = Database;
-            this.GUID = Guid.NewGuid();
-            this.Innovator = Innovator;
+            this.UserID = UserID;
+            this.Username = Username;
+            this.Password = Password;
             this.ItemTypeCache = new Dictionary<String, ItemType>();
             this.ItemCache = new Dictionary<String, Item>();
         }

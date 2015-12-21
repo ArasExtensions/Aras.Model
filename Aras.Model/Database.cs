@@ -27,7 +27,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Security.Cryptography;
 using System.Xml;
 
 namespace Aras.Model
@@ -38,35 +37,20 @@ namespace Aras.Model
 
         public String Name { get; private set; }
 
-        public Session Login()
-        {
-            Aras.IOM.HttpServerConnection connection = Aras.IOM.IomFactory.CreateWinAuthHttpServerConnection(this.Server.URL, this.Name);
-            Aras.IOM.Item user = connection.Login();
-
-            if (!user.isError())
-            {
-                Aras.IOM.Innovator innovator = Aras.IOM.IomFactory.CreateInnovator(connection);
-                return new Session(this, user, innovator);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         public Session Login(String Username, String Password)
         {
-            Aras.IOM.HttpServerConnection connection = Aras.IOM.IomFactory.CreateHttpServerConnection(this.Server.URL, this.Name, Username, Password);
-            Aras.IOM.Item user = connection.Login();
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ValidateUser, this, Username, Password);
+            IO.SOAPResponse response = request.Execute();
 
-            if (!user.isError())
+            if (!response.IsError)
             {
-                Aras.IOM.Innovator innovator = Aras.IOM.IomFactory.CreateInnovator(connection);
-                return new Session(this, user, innovator);
+                String id = response.Result.SelectSingleNode("id").InnerText;
+                Session session = new Session(this, id, Username, Password);
+                return session;
             }
             else
             {
-                return null;
+                throw new Exceptions.ServerException(response.ErrorMessage);
             }
         }
 

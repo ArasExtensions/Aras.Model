@@ -29,12 +29,45 @@ using System.Text;
 using System.Net;
 using System.IO;
 using System.Xml;
+using System.Security.Cryptography;
 
 namespace Aras.Model
 {
     public class Server
     {
         public String URL { get; private set; }
+
+        public static String PasswordHash(String Password)
+        {
+            String md5password = null;
+
+            using (MD5 md5 = MD5.Create())
+            {
+                byte[] data = md5.ComputeHash(Encoding.UTF8.GetBytes(Password));
+                StringBuilder md5string = new StringBuilder();
+
+                for (int i = 0; i < data.Length; i++)
+                {
+                    md5string.Append(data[i].ToString("x2"));
+                }
+
+                md5password = md5string.ToString();
+            }
+
+            return md5password;
+        }
+
+        internal static String NewID()
+        {
+            StringBuilder ret = new StringBuilder(32);
+
+            foreach (byte b in Guid.NewGuid().ToByteArray())
+            {
+                ret.AppendFormat("{0:X2}", b);
+            }
+
+            return ret.ToString();
+        }
 
         private object _databasesCacheLock = new object();
         private Dictionary<String, Database> _databasesCache;

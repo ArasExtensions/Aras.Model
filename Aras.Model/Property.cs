@@ -56,18 +56,20 @@ namespace Aras.Model
             {
                 if (!this.Loaded && this.Item.State == Model.Item.States.Read)
                 {
-                    Aras.IOM.Item request = this.Item.Type.Session.Innovator.newItem(this.Item.Type.Name, "get");
-                    request.setID(this.Item.ID);
-                    request.setAttribute("select", this.Type.Name);
-                    Aras.IOM.Item response = request.apply();
+                    IO.Item prop = new IO.Item(this.Item.Type.Name, "get");
+                    prop.Select = this.Type.Name;
+                    prop.SetProperty("id", this.Item.ID);
 
-                    if (!response.isError())
+                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Item.Type.Session, prop);
+                    IO.SOAPResponse response = request.Execute();
+
+                    if (!response.IsError)
                     {
-                        this.Load(response.getProperty(this.Type.Name));
+                        this.Load(response.Items.First().GetProperty(this.Type.Name));
                     }
                     else
                     {
-                        throw new Exceptions.ServerException(response.getErrorString());
+                        throw new Exceptions.ServerException(response.ErrorMessage);
                     }
                 }
 

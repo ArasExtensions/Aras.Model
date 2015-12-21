@@ -49,25 +49,25 @@ namespace Aras.Model
                 {
                     this._propertyTypeCache = new Dictionary<String, PropertyType>();
 
-                    Aras.IOM.Item request = this.Session.Innovator.newItem("Property", "get");
-                    request.setAttribute("select", "name,data_type,stored_length");
-                    request.setProperty("source_id", this.ID);
-                    Aras.IOM.Item response = request.apply();
+                    IO.Item props = new IO.Item("Property", "get");
+                    props.Select = "name,data_type,stored_length";
+                    props.SetProperty("source_id", this.ID);
+                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, props);
+                    IO.SOAPResponse response = request.Execute();
 
-                    if (!response.isError())
+                    if (!response.IsError)
                     {
-                        for(int i=0; i<response.getItemCount(); i++)
+                        foreach(IO.Item thisprop in response.Items)
                         {
-                            Aras.IOM.Item thisprop = response.getItemByIndex(i);
-                            String name = thisprop.getProperty("name");
+                            String name = thisprop.GetProperty("name");
 
                             if (!SystemProperties.Contains(name))
                             {
-                                switch (thisprop.getProperty("data_type"))
+                                switch (thisprop.GetProperty("data_type"))
                                 {
                                     case "string":
                                         Int32 length = 32;
-                                        Int32.TryParse(thisprop.getProperty("stored_length"), out length);
+                                        Int32.TryParse(thisprop.GetProperty("stored_length"), out length);
                                         this._propertyTypeCache[name] = new PropertyTypes.String(this, name, length);
                                         break;
                                     case "integer":
@@ -81,7 +81,7 @@ namespace Aras.Model
                     }
                     else
                     {
-                        throw new Exceptions.ServerException(response.getErrorString());
+                        throw new Exceptions.ServerException(response.ErrorMessage);
                     }
                 }
 

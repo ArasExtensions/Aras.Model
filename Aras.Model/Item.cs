@@ -92,7 +92,7 @@ namespace Aras.Model
         public Item(ItemType Type)
         {
             this.Type = Type;
-            this.ID = this.Type.Session.Innovator.getNewID();
+            this.ID = Server.NewID();
             this.ConfigID = this.ID;
             this.State = States.Create;
         }

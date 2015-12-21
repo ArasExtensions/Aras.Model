@@ -36,37 +36,37 @@ namespace Aras.Model.Queries
         {
             List<Model.Item> ret = new List<Model.Item>();
 
-            Aras.IOM.Item request = this.Type.Session.Innovator.newItem(this.Type.Name, "get");
+            IO.Item item = new IO.Item(this.Type.Name, "get");
 
             if (this.SelectPropertyTypes.Count() > 0)
             {
-                request.setAttribute("select", "id,config_id," + this.Select);
+                item.Select = "id,config_id," + this.Select;
             }
             else
             {
-                request.setAttribute("select", "id,config_id");
+                item.Select = "id,config_id";
             }
-            
-            Aras.IOM.Item response = request.apply();
 
-            if (!response.isError())
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, item);
+            IO.SOAPResponse response = request.Execute();
+
+            if (!response.IsError)
             {
-                for(int i=0; i<response.getItemCount(); i++)
+                foreach(IO.Item dbitem in response.Items)
                 {
-                    Aras.IOM.Item dbitem = response.getItemByIndex(i);
-                    Model.Item item = this.Type.Session.ItemFromCache(dbitem.getID(), dbitem.getProperty("config_id"), this.Type);
+                    Model.Item cacheitem = this.Type.Session.ItemFromCache(dbitem.GetProperty("id"), dbitem.GetProperty("config_id"), this.Type);
 
                     foreach(PropertyType proptype in this.SelectPropertyTypes)
                     {
-                        item.Property(proptype).Load(dbitem.getProperty(proptype.Name));
+                        cacheitem.Property(proptype).Load(dbitem.GetProperty(proptype.Name));
                     }
 
-                    ret.Add(item);
+                    ret.Add(cacheitem);
                 }
             }
             else
             {
-
+                throw new Exceptions.ServerException(response.ErrorMessage);
             }
 
             return ret;

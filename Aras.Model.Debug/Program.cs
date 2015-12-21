@@ -36,7 +36,7 @@ namespace Aras.Model.Debug
         {
             Server server = new Server("http://localhost/11SP1");
             Database database = server.Database("VariantsDemo11SP1");
-            Session session = database.Login("admin", "innovator");
+            Session session = database.Login("admin", Server.PasswordHash("innovator"));
             Queries.Item partquery = session.Query("Part");
             partquery.Select = "item_number,cmb_name";
             IEnumerable<Item> parts = partquery.Execute();
