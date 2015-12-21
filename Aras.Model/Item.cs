@@ -32,7 +32,9 @@ namespace Aras.Model
 {
     public class Item
     {
-        public Boolean IsNew { get; private set; }
+        public enum States { Create, Read, Update, Deleted };
+
+        public States State { get; private set; }
 
         public String ID { get; private set; }
 
@@ -93,6 +95,85 @@ namespace Aras.Model
             }
         }
 
+        public void Update(Transaction Transaction)
+        {
+            if (this.Lock())
+            {
+                Transaction.Add("update", this);
+                this.State = States.Update;
+            }
+            else
+            {
+                throw new Exceptions.ServerException("Failed to lock Item");
+            }
+        }
+
+        private Boolean Lock()
+        {
+            this.Property("locked_by_id").Refresh();
+            Item lockedby = (Item)this.Property("locked_by_id").Value;
+
+            if (lockedby == null)
+            {
+                IO.Item lockitem = new IO.Item(this.Type.Name, "lock");
+                lockitem.ID = this.ID;
+                lockitem.Select = "locked_by_id";
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, lockitem);
+                IO.SOAPResponse response = request.Execute();
+
+                if (!response.IsError)
+                {
+                    this.UpdateProperties(response.Items.First());
+                    return true;
+                }
+                else
+                {
+                    throw new Exceptions.ServerException(response.ErrorMessage);
+                }
+            }
+            else if (lockedby.ID.Equals(this.Type.Session.UserID))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        internal Boolean UnLock()
+        {
+            IO.Item unlockitem = new IO.Item(this.Type.Name, "unlock");
+            unlockitem.ID = this.ID;
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, unlockitem);
+            IO.SOAPResponse response = request.Execute();
+
+            if (!response.IsError)
+            {
+                this.UpdateProperties(response.Items.First());
+                return true;
+            }
+            else
+            {
+                throw new Exceptions.ServerException(response.ErrorMessage);
+            }
+        }
+
+        internal void UpdateProperties(IO.Item DBItem)
+        {
+            if (this.ID == DBItem.ID)
+            {
+                foreach (String propname in DBItem.PropertyNames)
+                {
+                    this.Property(propname).DBValue = DBItem.GetProperty(propname);
+                }
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid Item ID");
+            }
+        }
+
         public Item(String ID, String ConfigID, ItemType Type)
         {
             this.PropertyCache = new Dictionary<PropertyType, Property>();
@@ -102,13 +183,13 @@ namespace Aras.Model
             {
                 this.ID = Server.NewID();
                 this.ConfigID = this.ID;
-                this.IsNew = true;
+                this.State = States.Create;
             }
             else
             {
                 this.ID = ID;
                 this.ConfigID = ConfigID;
-                this.IsNew = false;
+                this.State = States.Read;
             }
 
         }

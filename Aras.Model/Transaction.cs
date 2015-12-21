@@ -41,54 +41,58 @@ namespace Aras.Model
             this._actions.Add(new Action(Name, Item));
         }
 
+        public Boolean Committed { get; private set; }
+
         public void Commit()
         {
-            List<IO.Item> dbitems = new List<IO.Item>();
-
-            foreach(Action action in this._actions)
+            if (!this.Committed && this._actions.Count() > 0)
             {
-                if (action.Item is Relationship)
+                List<IO.Item> dbitems = new List<IO.Item>();
+
+                foreach (Action action in this._actions)
                 {
-                    throw new NotImplementedException();
+                    if (action.Item is Relationship)
+                    {
+                        throw new NotImplementedException();
+                    }
+                    else
+                    {
+                        IO.Item dbitem = new IO.Item(action.Item.Type.Name, action.Name);
+                        dbitem.ID = action.Item.ID;
+                        dbitem.ConfigID = action.Item.ConfigID;
+
+                        foreach (Property prop in action.Item.Properties)
+                        {
+                            if (!prop.Type.ReadOnly && (prop.Modified))
+                            {
+                                dbitem.SetProperty(prop.Type.Name, prop.DBValue);
+                            }
+                        }
+
+                        dbitems.Add(dbitem);
+                    }
+                }
+
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, dbitems);
+                IO.SOAPResponse response = request.Execute();
+
+                if (!response.IsError)
+                {
+                    foreach (IO.Item dbitem in response.Items)
+                    {
+                        ItemType itemtype = Session.ItemType(dbitem.ItemType);
+                        Item item = this.Session.ItemFromCache(dbitem.ID, dbitem.ConfigID, itemtype);
+                        item.UpdateProperties(dbitem);
+                        item.UnLock();
+                    }
                 }
                 else
                 {
-                    IO.Item dbitem = new IO.Item(action.Item.Type.Name, action.Name);
-                    dbitem.ID = action.Item.ID;
-                    dbitem.ConfigID = action.Item.ConfigID;
-                    
-                    foreach(Property prop in action.Item.Properties)
-                    {
-                        if (!prop.Type.ReadOnly && (prop.Modified))
-                        {
-                            dbitem.SetProperty(prop.Type.Name, prop.DBValue);
-                        }
-                    }
-
-                    dbitems.Add(dbitem);
+                    throw new Exceptions.ServerException(response.ErrorMessage);
                 }
             }
 
-            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, dbitems);
-            IO.SOAPResponse response = request.Execute();
-
-            if (!response.IsError)
-            {
-                foreach(IO.Item dbitem in response.Items)
-                {
-                    ItemType itemtype = Session.ItemType(dbitem.ItemType);
-                    Item item = this.Session.ItemFromCache(dbitem.ID, dbitem.ConfigID, itemtype);
-
-                    foreach(String propname in dbitem.PropertyNames)
-                    {
-                        item.Property(propname).DBValue = dbitem.GetProperty(propname);
-                    }
-                }
-            }
-            else
-            {
-                throw new Exceptions.ServerException(response.ErrorMessage);
-            }
+            this.Committed = true;
         }
 
         public void RollBack()
@@ -98,13 +102,17 @@ namespace Aras.Model
 
         public void Dispose()
         {
-            this.RollBack();
+            if (!this.Committed)
+            {
+                this.RollBack();
+            }
         }
 
         internal Transaction(Session Session)
         {
             this.Session = Session;
             this._actions = new List<Action>();
+            this.Committed = false;
         }
     }
 }

@@ -26,29 +26,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Aras.Model.Debug
+namespace Aras.Model.Exceptions
 {
-    class Program
+    public class ReadOnlyException : Exception
     {
-        static void Main(string[] args)
+        internal ReadOnlyException()
+            : base()
         {
-            Server server = new Server("http://localhost/11SP1");
-            Database database = server.Database("VariantsDemo11SP1");
-            Session session = database.Login("admin", Server.PasswordHash("innovator"));
-            Queries.Item partquery = session.Query("Part");
-            partquery.Select = "item_number,cmb_name";
-            IEnumerable<Item> parts = partquery.Execute();
-
-            Item testpart = parts.First();
-
-            using(Transaction transaction = session.BeginTransaction())
-            {
-                testpart.Update(transaction);
-                testpart.Property("cmb_name").Value = "Test Name 99";
-                transaction.Commit();
-            }
         }
     }
 }

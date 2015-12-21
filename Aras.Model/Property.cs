@@ -45,17 +45,19 @@ namespace Aras.Model
 
         public Boolean Modified { get; private set; }
 
+        private Boolean Loaded { get; set; }
+
         public Item Item { get; private set; }
 
         public PropertyType Type { get; private set; }
 
-        private Object _value;
-        public virtual Object Value 
-        { 
-            get
+        public void Refresh()
+        {
+            switch (this.Item.State)
             {
-                if (!this.Item.IsNew)
-                {
+                case Model.Item.States.Read:
+                case Model.Item.States.Update:
+                case Model.Item.States.Deleted:
                     IO.Item prop = new IO.Item(this.Item.Type.Name, "get");
                     prop.Select = this.Type.Name;
                     prop.SetProperty("id", this.Item.ID);
@@ -71,25 +73,72 @@ namespace Aras.Model
                     {
                         throw new Exceptions.ServerException(response.ErrorMessage);
                     }
+
+                    break;
+
+                default:
+                    break;
+            }
+
+            this.Loaded = true;
+            this.Modified = false;
+        }
+
+        public Boolean ReadOnly
+        {
+            get
+            {
+                if (this.Type.ReadOnly || this.Item.State == Model.Item.States.Read || this.Item.State == Model.Item.States.Deleted)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        private Object _value;
+        public virtual Object Value 
+        { 
+            get
+            {
+                if (!this.Loaded)
+                {
+                    this.Refresh();
                 }
 
                 return this._value;
             }
             set
             {
-                if (this._value != value)
+                if (!this.ReadOnly)
                 {
-                    this._value = value;
-                    this.Modified = true;
-                    this.OnPropertyChanged("Value");
+                    if (this._value != value)
+                    {
+                        this._value = value;
+                        this.Modified = true;
+                        this.OnPropertyChanged("Value");
+                    }
+                }
+                else
+                {
+                    throw new Exceptions.ReadOnlyException();
                 }
             }
         }
 
         protected void SetValue(Object Value)
         {
-            this._value = Value;
-            this.OnPropertyChanged("Value");
+            if (this._value != Value)
+            {
+                this._value = Value;
+                this.OnPropertyChanged("Value");
+            }
+
+            this.Loaded = true;
+            this.Modified = false;            
         }
 
         internal abstract String DBValue { get; set; }

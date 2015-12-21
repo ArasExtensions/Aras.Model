@@ -43,6 +43,7 @@
     <Compile Include="Attributes\PropertyType.cs" />
     <Compile Include="Attributes\ItemType.cs" />
     <Compile Include="Database.cs" />
+    <Compile Include="Exceptions\ReadOnlyException.cs" />
     <Compile Include="Exceptions\ArgumentException.cs" />
     <Compile Include="Exceptions\ServerException.cs" />
     <Compile Include="IO\Item.cs" />
