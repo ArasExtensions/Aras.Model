@@ -28,29 +28,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model.Debug
+namespace Aras.Model.PropertyTypes
 {
-    class Program
+    public class Item : PropertyType
     {
-        static void Main(string[] args)
+        public ItemType ValueType { get; private set; }
+
+        internal Item(ItemType Type, System.String Name, System.Boolean ReadOnly, ItemType ValueType)
+            :base(Type, Name, ReadOnly, null)
         {
-            Server server = new Server("http://localhost/11SP1");
-            Database database = server.Database("VariantsDemo11SP1");
-            Session session = database.Login("admin", Server.PasswordHash("innovator"));
-            Queries.Item partquery = session.Query("Part");
-            partquery.Select = "item_number,cmb_name";
-            IEnumerable<Item> parts = partquery.Execute();
-
-            String test = (String)parts.First().Property("item_number").Value;
-            String test2 = (String)parts.First().Property("cmb_name").Value;
-            Int32 test3 = (Int32)parts.First().Property("generation").Value;
-
-            using(Transaction transaction = session.BeginTransaction())
-            {
-                Item item = session.Create("Part", transaction);
-                item.Property("item_number").Value = "99999";
-                transaction.Commit();
-            }
+            this.ValueType = ValueType;
         }
     }
 }

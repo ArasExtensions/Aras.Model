@@ -43,8 +43,6 @@ namespace Aras.Model
             }
         }
 
-        public Boolean Select { get; internal set; }
-
         public Boolean Modified { get; private set; }
 
         public Item Item { get; private set; }
@@ -56,7 +54,7 @@ namespace Aras.Model
         { 
             get
             {
-                if (!this.Select && !this.Item.IsNew)
+                if (!this.Item.IsNew)
                 {
                     IO.Item prop = new IO.Item(this.Item.Type.Name, "get");
                     prop.Select = this.Type.Name;
@@ -68,7 +66,6 @@ namespace Aras.Model
                     if (!response.IsError)
                     {
                         this.DBValue = response.Items.First().GetProperty(this.Type.Name);
-                        this.Select = true;
                     }
                     else
                     {
@@ -92,7 +89,6 @@ namespace Aras.Model
         protected void SetValue(Object Value)
         {
             this._value = Value;
-            this.Select = true;
             this.OnPropertyChanged("Value");
         }
 
@@ -112,7 +108,6 @@ namespace Aras.Model
 
         internal Property(Item Item, PropertyType Type)
         {
-            this.Select = false;
             this.Item = Item;
             this.Type = Type;
 

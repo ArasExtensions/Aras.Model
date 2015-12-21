@@ -56,8 +56,7 @@ namespace Aras.Model
                     IO.Item dbitem = new IO.Item(action.Item.Type.Name, action.Name);
                     dbitem.ID = action.Item.ID;
                     dbitem.ConfigID = action.Item.ConfigID;
-                    dbitem.Select = action.Item.Select;
-
+                    
                     foreach(Property prop in action.Item.Properties)
                     {
                         if (!prop.Type.ReadOnly && (prop.Modified))

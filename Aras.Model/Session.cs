@@ -42,11 +42,12 @@ namespace Aras.Model
 
         public String Password { get; private set; }
 
-        private Dictionary<String, ItemType> ItemTypeCache;
+        private Dictionary<String, ItemType> ItemTypeNameCache;
+        private Dictionary<String, ItemType> ItemTypeIDCache;
 
         public ItemType ItemType(String Name)
         {
-            if (!this.ItemTypeCache.ContainsKey(Name))
+            if (!this.ItemTypeNameCache.ContainsKey(Name))
             {
                 IO.Item itemtype = new IO.Item("ItemType", "get");
                 itemtype.Select = "id,name";
@@ -56,7 +57,8 @@ namespace Aras.Model
 
                 if (!response.IsError)
                 {
-                    this.ItemTypeCache[Name] = new ItemType(this, response.Items.First().GetProperty("id"), response.Items.First().GetProperty("name"));
+                    this.ItemTypeNameCache[Name] = new ItemType(this, response.Items.First().GetProperty("id"), response.Items.First().GetProperty("name"));
+                    this.ItemTypeIDCache[this.ItemTypeNameCache[Name].ID] = this.ItemTypeNameCache[Name];
                 }
                 else
                 {
@@ -64,7 +66,56 @@ namespace Aras.Model
                 }
             }
 
-            return this.ItemTypeCache[Name];
+            return this.ItemTypeNameCache[Name];
+        }
+
+        internal ItemType ItemTypeByID(String ID)
+        {
+            if (!this.ItemTypeIDCache.ContainsKey(ID))
+            {
+                IO.Item itemtype = new IO.Item("ItemType", "get");
+                itemtype.Select = "id,name";
+                itemtype.ID = ID;
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, itemtype);
+                IO.SOAPResponse response = request.Execute();
+
+                if (!response.IsError)
+                {
+                    this.ItemTypeIDCache[ID] = new ItemType(this, response.Items.First().ID, response.Items.First().GetProperty("name"));
+                    this.ItemTypeNameCache[this.ItemTypeIDCache[ID].Name] = this.ItemTypeIDCache[ID];
+                }
+                else
+                {
+                    throw new Exceptions.ServerException(response.ErrorMessage);
+                }
+            }
+
+            return this.ItemTypeIDCache[ID];
+        }
+
+        private Dictionary<String, List> ListCache;
+
+        internal List ListByID(String ID)
+        {
+            if (!this.ListCache.ContainsKey(ID))
+            {
+                IO.Item list = new IO.Item("List", "get");
+                list.Select = "id,name";
+                list.ID = ID;
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, list);
+                IO.SOAPResponse response = request.Execute();
+
+                if (!response.IsError)
+                {
+                    this.ListCache[ID] = new List(this, response.Items.First().ID, response.Items.First().GetProperty("name"));
+                }
+                else
+                {
+                    throw new Exceptions.ServerException(response.ErrorMessage);
+                }
+            }
+
+            return this.ListCache[ID];
         }
 
         private Dictionary<String, Item> ItemCache;
@@ -74,6 +125,28 @@ namespace Aras.Model
             if (!this.ItemCache.ContainsKey(ID))
             {
                 this.ItemCache[ID] = new Item(ID, ConfigID, Type);
+            }
+
+            return this.ItemCache[ID];
+        }
+
+        internal Item ItemFromCache(String ID, ItemType Type)
+        {
+            if (!this.ItemCache.ContainsKey(ID))
+            {
+                IO.Item dbitem = new IO.Item(Type.Name, "get");
+                dbitem.ID = ID;
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, dbitem);
+                IO.SOAPResponse response = request.Execute();
+
+                if (!response.IsError)
+                {
+                    this.ItemCache[ID] = new Item(ID, response.Items.First().ConfigID, Type);
+                }
+                else
+                {
+                    throw new Exceptions.ServerException(response.ErrorMessage);
+                }
             }
 
             return this.ItemCache[ID];
@@ -94,15 +167,14 @@ namespace Aras.Model
             return new Transaction(this);
         }
 
-        public Item Create(String Type, String Select, Transaction Transaction)
+        public Item Create(String Type, Transaction Transaction)
         {
-            return this.Create(this.ItemType(Type), Select, Transaction);
+            return this.Create(this.ItemType(Type), Transaction);
         }
 
-        public Item Create(ItemType Type, String Select, Transaction Transaction)
+        public Item Create(ItemType Type, Transaction Transaction)
         {
-            Item item = new Item(Type);
-            item.Select = Select;
+            Item item = new Item(null, null, Type);
             this.ItemCache[item.ID] = item;
             Transaction.Add("add", item);
             return item;
@@ -115,8 +187,10 @@ namespace Aras.Model
             this.UserID = UserID;
             this.Username = Username;
             this.Password = Password;
-            this.ItemTypeCache = new Dictionary<String, ItemType>();
+            this.ItemTypeNameCache = new Dictionary<String, ItemType>();
+            this.ItemTypeIDCache = new Dictionary<String, ItemType>();
             this.ItemCache = new Dictionary<String, Item>();
+            this.ListCache = new Dictionary<String, List>();
         }
     }
 }

@@ -36,7 +36,7 @@ namespace Aras.Model
 
         public Session Session { get; private set; }
 
-        public string ID { get; private set; }
+        public String ID { get; private set; }
 
         public String Name { get; private set; }
 
@@ -50,7 +50,7 @@ namespace Aras.Model
                     this._propertyTypeCache = new Dictionary<String, PropertyType>();
 
                     IO.Item props = new IO.Item("Property", "get");
-                    props.Select = "name,data_type,stored_length,readonly,default_value";
+                    props.Select = "name,data_type,stored_length,readonly,default_value,data_source";
                     props.SetProperty("source_id", this.ID);
                     IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, props);
                     IO.SOAPResponse response = request.Execute();
@@ -72,8 +72,14 @@ namespace Aras.Model
                                         Int32.TryParse(thisprop.GetProperty("stored_length"), out length);
                                         this._propertyTypeCache[name] = new PropertyTypes.String(this, name, ReadOnly, DefaultString, length);
                                         break;
+                                    case "text":
+                                        this._propertyTypeCache[name] = new PropertyTypes.Text(this, name, ReadOnly, DefaultString);
+                                        break;
+                                    case "image":
+                                        this._propertyTypeCache[name] = new PropertyTypes.Image(this, name, ReadOnly, DefaultString);
+                                        break;
                                     case "integer":
-                                        
+
                                         if (DefaultString != null)
                                         {
                                             Int32 DefaultInteger = 0;
@@ -86,8 +92,59 @@ namespace Aras.Model
                                         }
 
                                         break;
-                                    default:
+                                    case "item":
+                                        ItemType valueitemtype = this.Session.ItemTypeByID(thisprop.GetProperty("data_source"));
+                                        this._propertyTypeCache[name] = new PropertyTypes.Item(this, name, ReadOnly, valueitemtype);
+
                                         break;
+                                    case "date":
+
+                                        if (DefaultString != null)
+                                        {
+                                            DateTime DefaultDate;
+                                            DateTime.TryParse(DefaultString, out DefaultDate);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, ReadOnly, DefaultDate);
+                                        }
+                                        else
+                                        {
+                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, ReadOnly, null);
+                                        }
+
+                                        break;
+                                    case "list":
+                                        List valuelist = this.Session.ListByID(thisprop.GetProperty("data_source"));
+                                        this._propertyTypeCache[name] = new PropertyTypes.List(this, name, ReadOnly, valuelist);
+
+                                        break;
+                                    case "decimal":
+
+                                        if (DefaultString != null)
+                                        {
+                                            Decimal DefaultDecimal = 0;
+                                            Decimal.TryParse(DefaultString, out DefaultDecimal);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, ReadOnly, DefaultDecimal);
+                                        }
+                                        else
+                                        {
+                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, ReadOnly, null);
+                                        }
+
+                                        break;
+                                    case "boolean":
+
+                                        if (DefaultString != null)
+                                        {
+                                            Boolean DefaultBoolean = "1".Equals(DefaultString);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, ReadOnly, DefaultBoolean);
+                                        }
+                                        else
+                                        {
+                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, ReadOnly, null);
+                                        }
+
+                                        break;
+                                    default:
+                                        throw new NotImplementedException("Property Type not implmented: " + thisprop.GetProperty("data_type"));
                                 }
                             }
                         }

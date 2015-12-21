@@ -34,7 +34,7 @@ namespace Aras.Model.PropertyTypes
     {
         public System.Int32 Length { get; private set; }
 
-        internal String(ItemType Type, System.String Name, Boolean ReadOnly, System.String Default, System.Int32 Length)
+        internal String(ItemType Type, System.String Name, System.Boolean ReadOnly, System.String Default, System.Int32 Length)
             :base(Type, Name, ReadOnly, Default)
         {
             this.Length = Length;

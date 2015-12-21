@@ -77,28 +77,11 @@ namespace Aras.Model.IO
         {
             get
             {
-                XmlAttribute id = this.Node.Attributes["config_id"];
-
-                if (id != null)
-                {
-                    return id.Value;
-                }
-                else
-                {
-                    return null;
-                }
+                return this.GetProperty("config_id");
             }
             set
             {
-                XmlAttribute id = this.Node.Attributes["config_id"];
-
-                if (id == null)
-                {
-                    id = this.Doc.CreateAttribute("config_id");
-                    this.Node.Attributes.Append(id);
-                }
-
-                id.Value = value;
+                this.SetProperty("config_id", value);
             }
         }
 

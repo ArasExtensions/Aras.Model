@@ -40,43 +40,49 @@ namespace Aras.Model
 
         public ItemType Type { get; private set; }
 
-        private Dictionary<PropertyType, Property> _propertyCache;
-        private Dictionary<PropertyType, Property> PropertyCache
+        private Dictionary<PropertyType, Property> PropertyCache;
+
+        public Property Property(PropertyType PropertyType)
         {
-            get
+            if (!this.PropertyCache.ContainsKey(PropertyType))
             {
-                if (this._propertyCache == null)
+                switch (PropertyType.GetType().Name)
                 {
-                    this._propertyCache = new Dictionary<PropertyType, Property>();
-
-                    foreach(PropertyType proptype in this.Type.PropertyTypes)
-                    {
-                        switch(proptype.GetType().Name)
-                        {
-                            case "String":
-                                this._propertyCache[proptype] = new Properties.String(this, (PropertyTypes.String)proptype);
-                                break;
-                            case "Integer":
-                                this._propertyCache[proptype] = new Properties.Integer(this, (PropertyTypes.Integer)proptype);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
+                    case "String":
+                        this.PropertyCache[PropertyType] = new Properties.String(this, (PropertyTypes.String)PropertyType);
+                        break;
+                    case "Text":
+                        this.PropertyCache[PropertyType] = new Properties.Text(this, (PropertyTypes.Text)PropertyType);
+                        break;
+                    case "Integer":
+                        this.PropertyCache[PropertyType] = new Properties.Integer(this, (PropertyTypes.Integer)PropertyType);
+                        break;
+                    case "Item":
+                        this.PropertyCache[PropertyType] = new Properties.Item(this, (PropertyTypes.Item)PropertyType);
+                        break;
+                    case "Date":
+                        this.PropertyCache[PropertyType] = new Properties.Date(this, (PropertyTypes.Date)PropertyType);
+                        break;
+                    case "List":
+                        this.PropertyCache[PropertyType] = new Properties.List(this, (PropertyTypes.List)PropertyType);
+                        break;
+                    case "Decimal":
+                        this.PropertyCache[PropertyType] = new Properties.Decimal(this, (PropertyTypes.Decimal)PropertyType);
+                        break;
+                    case "Boolean":
+                        this.PropertyCache[PropertyType] = new Properties.Boolean(this, (PropertyTypes.Boolean)PropertyType);
+                        break;
+                    default:
+                        throw new NotImplementedException("Property Type not implmented: " + PropertyType.GetType().Name);
                 }
-
-                return this._propertyCache;
             }
-        }
 
-        public Property Property(PropertyType PropertType)
-        {
-            return this.PropertyCache[PropertType];
+            return this.PropertyCache[PropertyType];
         }
 
         public Property Property(String Name)
         {
-            return this.PropertyCache[this.Type.PropertyType(Name)];
+            return this.Property(this.Type.PropertyType(Name));
         }
 
         public IEnumerable<Property> Properties
@@ -87,48 +93,24 @@ namespace Aras.Model
             }
         }
 
-        internal String Select
-        {
-            get
-            {
-                List<String> names = new List<String>();
-
-                foreach(Property prop in this.PropertyCache.Values)
-                {
-                    if (prop.Select)
-                    {
-                        names.Add(prop.Type.Name);
-                    }
-                }
-
-                return String.Join(",", names);
-            }
-            set
-            {
-                if (value != null)
-                {
-                    foreach (String name in value.Split(','))
-                    {
-                        this.PropertyCache[this.Type.PropertyType(name)].Select = true;
-                    }
-                }
-            }
-        }
-
         public Item(String ID, String ConfigID, ItemType Type)
         {
-            this.ID = ID;
-            this.ConfigID = ConfigID;
+            this.PropertyCache = new Dictionary<PropertyType, Property>();
             this.Type = Type;
-            this.IsNew = false;
-        }
 
-        public Item(ItemType Type)
-        {
-            this.Type = Type;
-            this.ID = Server.NewID();
-            this.ConfigID = this.ID;
-            this.IsNew = true;
+            if (ID == null)
+            {
+                this.ID = Server.NewID();
+                this.ConfigID = this.ID;
+                this.IsNew = true;
+            }
+            else
+            {
+                this.ID = ID;
+                this.ConfigID = ConfigID;
+                this.IsNew = false;
+            }
+
         }
     }
 }
