@@ -27,14 +27,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace Aras.Model
 {
-    public class Item
+    public class Item : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(String Name)
+        {
+            if (this.PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(Name));
+            }
+        }
+
         public enum States { Create, Read, Update, Deleted };
 
-        public States State { get; private set; }
+        private States _state;
+        public States State 
+        { 
+            get
+            {
+                return this._state;
+            }
+            private set
+            {
+                if (this._state != value)
+                {
+                    this._state = value;
+                    this.OnPropertyChanged("State");
+                }
+            }
+        }
 
         public String ID { get; private set; }
 
@@ -203,13 +229,13 @@ namespace Aras.Model
             {
                 this.ID = Server.NewID();
                 this.ConfigID = this.ID;
-                this.State = States.Create;
+                this._state = States.Create;
             }
             else
             {
                 this.ID = ID;
                 this.ConfigID = ConfigID;
-                this.State = States.Read;
+                this._state = States.Read;
             }
 
         }

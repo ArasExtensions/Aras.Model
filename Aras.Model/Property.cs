@@ -43,7 +43,22 @@ namespace Aras.Model
             }
         }
 
-        public Boolean Modified { get; private set; }
+        private Boolean _modified;
+        public Boolean Modified 
+        { 
+            get
+            {
+                return this._modified;
+            }
+            private set
+            {
+                if (this._modified != value)
+                {
+                    this._modified = value;
+                    this.OnPropertyChanged("Modified");
+                }
+            }
+        }
 
         private Boolean Loaded { get; set; }
 
@@ -84,18 +99,41 @@ namespace Aras.Model
             this.Modified = false;
         }
 
+        private Boolean _readOnly;
         public Boolean ReadOnly
         {
             get
             {
-                if (this.Type.ReadOnly || this.Item.State == Model.Item.States.Read || this.Item.State == Model.Item.States.Deleted)
+                return this._readOnly;
+            }
+            private set
+            {
+                if (this._readOnly != value)
                 {
-                    return true;
+                    this._readOnly = value;
+                    this.OnPropertyChanged("ReadOnly");
                 }
-                else
-                {
-                    return false;
-                }
+            }
+        }
+
+        void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch(e.PropertyName)
+            {
+                case "State":
+
+                    if (this.Type.ReadOnly || this.Item.State == Model.Item.States.Read || this.Item.State == Model.Item.States.Deleted)
+                    {
+                        this.ReadOnly = true;
+                    }
+                    else
+                    {
+                        this.ReadOnly = false;
+                    }
+
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -174,6 +212,8 @@ namespace Aras.Model
 
             // Set Default Value
             this._value = this.Type.Default;
+
+            this.Item.PropertyChanged += Item_PropertyChanged;
         }
     }
 }
