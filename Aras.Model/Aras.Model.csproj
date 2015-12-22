@@ -60,6 +60,7 @@
     <Compile Include="PropertyTypes\List.cs" />
     <Compile Include="PropertyTypes\Item.cs" />
     <Compile Include="PropertyTypes\Image.cs" />
+    <Compile Include="PropertyTypes\MultilingualString.cs" />
     <Compile Include="PropertyTypes\Text.cs" />
     <Compile Include="PropertyTypes\String.cs" />
     <Compile Include="Props\Date.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="Props\List.cs" />
     <Compile Include="Props\Item.cs" />
     <Compile Include="Props\Image.cs" />
+    <Compile Include="Props\MultilingualString.cs" />
     <Compile Include="Props\Text.cs" />
     <Compile Include="Props\String.cs" />
     <Compile Include="RelationshipType.cs" />

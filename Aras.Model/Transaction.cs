@@ -57,7 +57,7 @@ namespace Aras.Model
                     }
                     else
                     {
-                        IO.Item dbitem = new IO.Item(action.Item.Type.Name, action.Name);
+                        IO.Item dbitem = new IO.Item(action.Item.ItemType.Name, action.Name);
                         dbitem.ID = action.Item.ID;
                         dbitem.ConfigID = action.Item.ConfigID;
 

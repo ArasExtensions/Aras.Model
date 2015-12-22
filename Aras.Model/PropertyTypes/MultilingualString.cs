@@ -28,30 +28,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model.Debug
+namespace Aras.Model.PropertyTypes
 {
-    class Program
+    public class MultilingualString : PropertyType
     {
-        static void Main(string[] args)
+        public System.Int32 Length { get; private set; }
+
+        internal MultilingualString(ItemType Type, System.String Name, System.Boolean ReadOnly, System.String Default, System.Int32 Length)
+            :base(Type, Name, ReadOnly, Default)
         {
-            Server server = new Server("http://localhost/11SP1");
-            Database database = server.Database("VariantsDemo11SP1");
-            Session session = database.Login("admin", Server.PasswordHash("innovator"));
-
-            ItemType parttype = session.ItemType("Part");
-            IEnumerable<RelationshipType> reltypes = parttype.RelationshipTypes;
-
-            Queries.Item partquery = session.Query("Part");
-            partquery.Select = "item_number,cmb_name";
-            IEnumerable<Item> parts = partquery.Execute();
-
-            Item part = parts.First();
-            ListValue test = (ListValue)part.Property("unit").Value;
-            String test3 = test.Label;
-
-
-
-
+            this.Length = Length;
         }
     }
 }

@@ -30,19 +30,36 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public class ListValue
+    public class ListValue : Relationship
     {
-        public List List { get; private set; }
-
-        public String Value { get; private set; }
-
-        public String Label { get; private set; }
-
-        internal ListValue(List List, String Value, String Label)
+        public List List
         {
-            this.List = List;
-            this.Value = Value;
-            this.Label = Label;
+            get
+            {
+                return (List)this.Source;
+            }
+        }
+
+        public String Value
+        {
+            get
+            {
+                return (String)this.Property("value").Value;
+            }
+        }
+
+        public String Label
+        {
+            get
+            {
+                return (String)this.Property("label").Value;
+            }
+        }
+
+        internal ListValue(String ID, String ConfigID, RelationshipType RelationshipType, List List)
+            :base(ID, ConfigID, RelationshipType, List)
+        {
+      
         }
     }
 }

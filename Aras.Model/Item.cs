@@ -40,7 +40,7 @@ namespace Aras.Model
 
         public String ConfigID { get; private set; }
 
-        public ItemType Type { get; private set; }
+        public ItemType ItemType { get; private set; }
 
         private Dictionary<PropertyType, Property> PropertyCache;
 
@@ -52,6 +52,9 @@ namespace Aras.Model
                 {
                     case "String":
                         this.PropertyCache[PropertyType] = new Properties.String(this, (PropertyTypes.String)PropertyType);
+                        break;
+                    case "MultilingualString":
+                        this.PropertyCache[PropertyType] = new Properties.MultilingualString(this, (PropertyTypes.MultilingualString)PropertyType);
                         break;
                     case "Text":
                         this.PropertyCache[PropertyType] = new Properties.Text(this, (PropertyTypes.Text)PropertyType);
@@ -87,7 +90,7 @@ namespace Aras.Model
 
         public Property Property(String Name)
         {
-            return this.Property(this.Type.PropertyType(Name));
+            return this.Property(this.ItemType.PropertyType(Name));
         }
 
         public IEnumerable<Property> Properties
@@ -118,10 +121,10 @@ namespace Aras.Model
 
             if (lockedby == null)
             {
-                IO.Item lockitem = new IO.Item(this.Type.Name, "lock");
+                IO.Item lockitem = new IO.Item(this.ItemType.Name, "lock");
                 lockitem.ID = this.ID;
                 lockitem.Select = "locked_by_id";
-                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, lockitem);
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, lockitem);
                 IO.SOAPResponse response = request.Execute();
 
                 if (!response.IsError)
@@ -134,7 +137,7 @@ namespace Aras.Model
                     throw new Exceptions.ServerException(response.ErrorMessage);
                 }
             }
-            else if (lockedby.ID.Equals(this.Type.Session.UserID))
+            else if (lockedby.ID.Equals(this.ItemType.Session.UserID))
             {
                 return true;
             }
@@ -148,11 +151,11 @@ namespace Aras.Model
         {
             Item lockedby = (Item)this.Property("locked_by_id").Value;
 
-            if (lockedby.ID.Equals(this.Type.Session.UserID))
+            if (lockedby.ID.Equals(this.ItemType.Session.UserID))
             {
-                IO.Item unlockitem = new IO.Item(this.Type.Name, "unlock");
+                IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
                 unlockitem.ID = this.ID;
-                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, unlockitem);
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, unlockitem);
                 IO.SOAPResponse response = request.Execute();
 
                 if (!response.IsError)
@@ -194,7 +197,7 @@ namespace Aras.Model
         public Item(String ID, String ConfigID, ItemType Type)
         {
             this.PropertyCache = new Dictionary<PropertyType, Property>();
-            this.Type = Type;
+            this.ItemType = Type;
 
             if (ID == null)
             {

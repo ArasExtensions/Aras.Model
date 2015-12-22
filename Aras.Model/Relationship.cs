@@ -32,11 +32,20 @@ namespace Aras.Model
 {
     public class Relationship : Item
     {
- 
-        public Relationship(String ID, String ConfigID, ItemType Type)
+        public RelationshipType RelationshipType
+        {
+            get
+            {
+                return (RelationshipType)this.ItemType;
+            }
+        }
+
+        public Item Source { get; private set; }
+
+        public Relationship(String ID, String ConfigID, RelationshipType Type, Item Source)
             :base(ID, ConfigID, Type)
         {
-
+            this.Source = Source;
         }
     }
 }

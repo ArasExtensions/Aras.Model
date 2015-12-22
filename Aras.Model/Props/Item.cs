@@ -72,7 +72,7 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    this.SetValue(this.Item.Type.Session.ItemFromCache(value, ((PropertyTypes.Item)this.Type).ValueType));
+                    this.SetValue(this.Item.ItemType.Session.ItemFromCache(value, ((PropertyTypes.Item)this.Type).ValueType));
                 }
             }
         }

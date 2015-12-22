@@ -58,11 +58,11 @@ namespace Aras.Model
                 case Model.Item.States.Read:
                 case Model.Item.States.Update:
                 case Model.Item.States.Deleted:
-                    IO.Item prop = new IO.Item(this.Item.Type.Name, "get");
+                    IO.Item prop = new IO.Item(this.Item.ItemType.Name, "get");
                     prop.Select = this.Type.Name;
                     prop.SetProperty("id", this.Item.ID);
 
-                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Item.Type.Session, prop);
+                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Item.ItemType.Session, prop);
                     IO.SOAPResponse response = request.Execute();
 
                     if (!response.IsError)

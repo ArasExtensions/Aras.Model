@@ -30,14 +30,8 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public class List
+    public class List : Item
     {
-        public Session Session { get; private set; }
-
-        public String ID { get; private set; }
-
-        public String Name { get; private set; }
-
         private List<ListValue> _values;
         public IEnumerable<ListValue> Values
         {
@@ -48,18 +42,18 @@ namespace Aras.Model
                     this._values = new List<ListValue>();
 
                     IO.Item dbitem = new IO.Item("Value", "get");
-                    dbitem.Select = "value,label";
+                    dbitem.Select = "id,config_id,value,label";
                     dbitem.OrderBy = "sort_order";
                     dbitem.SetProperty("source_id", this.ID);
 
-                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, dbitem);
+                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, dbitem);
                     IO.SOAPResponse response = request.Execute();
 
                     if (!response.IsError)
                     {
-                        foreach(IO.Item listvalueitem in response.Items)
+                        foreach(IO.Item valueitem in response.Items)
                         {
-                            ListValue listvalue = new ListValue(this, listvalueitem.GetProperty("value"), listvalueitem.GetProperty("value"));
+                            ListValue listvalue = new ListValue(valueitem.ID, valueitem.ConfigID, this.ItemType.RelationshipType("Value"), this);
                             this._values.Add(listvalue);
                         }
                     }
@@ -72,6 +66,7 @@ namespace Aras.Model
                 return this._values;
             }
         }
+      
 
         public ListValue Value(String Value)
         {
@@ -85,12 +80,12 @@ namespace Aras.Model
 
             throw new Exceptions.ArgumentException("Invalid List Value");
         }
+   
 
-        internal List(Session Session, String ID, String Name)
+        public List(String ID, String ConfigID, ItemType ItemType)
+            :base(ID, ConfigID, ItemType)
         {
-            this.Session = Session;
-            this.ID = ID;
-            this.Name = Name;
+           
         }
     }
 }

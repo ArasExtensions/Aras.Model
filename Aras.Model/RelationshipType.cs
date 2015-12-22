@@ -32,10 +32,16 @@ namespace Aras.Model
 {
     public class RelationshipType : ItemType
     {
-        internal RelationshipType(Session Session, String ID, String Name)
+        public ItemType SourceItemType { get; private set; }
+
+        public ItemType RelatedItemType { get; private set; }
+
+        internal RelationshipType(Session Session, String ID, String Name, ItemType SourceItemType, ItemType RelatedItemType)
             :base(Session, ID, Name)
         {
-     
+            this.SourceItemType = SourceItemType;
+            this.RelatedItemType = RelatedItemType;
+            this.SourceItemType.AddRelationshipType(this);
         }
     }
 }
