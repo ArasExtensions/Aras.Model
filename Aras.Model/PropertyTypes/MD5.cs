@@ -28,38 +28,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.PropertyTypes
 {
-    public class RelationshipType : ItemType
+    public class MD5 : PropertyType
     {
-        internal override Type Class
+        internal MD5(ItemType Type, System.String Name, System.Boolean ReadOnly, System.String Default)
+            :base(Type, Name, ReadOnly, Default)
         {
-            get
-            {
-                if (this._class == null)
-                {
-                    this._class = this.Session.Database.ItemType(this.Name);
-
-                    if (this._class == null)
-                    {
-                        this._class = typeof(Relationship);
-                    }
-                }
-
-                return this._class;
-            }
-        }
-
-        public ItemType Source { get; private set; }
-
-        public ItemType Related { get; private set; }
-
-        internal RelationshipType(Session Session, String ID, String Name, ItemType Source, ItemType Related)
-            :base(Session, ID, Name)
-        {
-            this.Source = Source;
-            this.Related = Related;
-            this.Source.AddRelationshipType(this);
+      
         }
     }
 }

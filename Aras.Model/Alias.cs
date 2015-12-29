@@ -30,36 +30,29 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public class RelationshipType : ItemType
+    [Attributes.ItemType("Alias")]
+    public class Alias : Relationship
     {
-        internal override Type Class
+        public User User
         {
             get
             {
-                if (this._class == null)
-                {
-                    this._class = this.Session.Database.ItemType(this.Name);
-
-                    if (this._class == null)
-                    {
-                        this._class = typeof(Relationship);
-                    }
-                }
-
-                return this._class;
+                return (User)this.Source;
             }
         }
 
-        public ItemType Source { get; private set; }
-
-        public ItemType Related { get; private set; }
-
-        internal RelationshipType(Session Session, String ID, String Name, ItemType Source, ItemType Related)
-            :base(Session, ID, Name)
+        public Identity Identity
         {
-            this.Source = Source;
-            this.Related = Related;
-            this.Source.AddRelationshipType(this);
+            get
+            {
+                return (Identity)this.Related;
+            }
+        }
+
+        public Alias(String ID, String ConfigID, RelationshipType RelationshipType, Item Source, Item Related)
+            :base(ID, ConfigID, RelationshipType, Source, Related)
+        {
+      
         }
     }
 }

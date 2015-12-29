@@ -45,19 +45,19 @@ namespace Aras.Model
 
         public enum States { Create, Read, Update, Deleted };
 
-        private States _state;
-        public States State 
+        private States _status;
+        public States Status 
         { 
             get
             {
-                return this._state;
+                return this._status;
             }
             private set
             {
-                if (this._state != value)
+                if (this._status != value)
                 {
-                    this._state = value;
-                    this.OnPropertyChanged("State");
+                    this._status = value;
+                    this.OnPropertyChanged("Status");
                 }
             }
         }
@@ -76,9 +76,137 @@ namespace Aras.Model
             }
         }
 
+        public User CreatedBy
+        {
+            get
+            {
+                return (User)this.Property("created_by_id").Value;
+            }
+        }
+
+        public DateTime CreatedOn
+        {
+            get
+            {
+                return (DateTime)this.Property("created_on").Value;
+            }
+        }
+
+        public LifeCycleState CurrentState
+        {
+            get
+            {
+                return (LifeCycleState)this.Property("current_state").Value;
+            }
+        }
+
+        public Int32 Generation
+        {
+            get
+            {
+                return (Int32)this.Property("generation").Value;
+            }
+        }
+
+        public Boolean IsCurrent
+        {
+            get
+            {
+                return (Boolean)this.Property("is_current").Value;
+            }
+        }
+
+        public Boolean IsReleased
+        {
+            get
+            {
+                return (Boolean)this.Property("is_released").Value;
+            }
+        }
+
+        public User LockedBy
+        {
+            get
+            {
+                return (User)this.Property("locked_by_id").Value;
+            }
+        }
+
+        public String MajorRev
+        {
+            get
+            {
+                return (String)this.Property("major_rev").Value;
+            }
+        }
+
+        public Identity ManagedBy
+        {
+            get
+            {
+                return (Identity)this.Property("managed_by_id").Value;
+            }
+        }
+
+        public String MinorRev
+        {
+            get
+            {
+                return (String)this.Property("minor_rev").Value;
+            }
+        }
+
+        public User ModifiedBy
+        {
+            get
+            {
+                return (User)this.Property("modified_by_id").Value;
+            }
+        }
+
+        public DateTime ModifiedOn
+        {
+            get
+            {
+                return (DateTime)this.Property("modified_on").Value;
+            }
+        }
+
+        public Identity OwnedBy
+        {
+            get
+            {
+                return (Identity)this.Property("owned_by_id").Value;
+            }
+        }
+
+        public Permission Permission
+        {
+            get
+            {
+                return (Permission)this.Property("permission_id").Value;
+            }
+        }
+
         public override string ToString()
         {
             return this.KeyedName;
+        }
+
+        public String State
+        {
+            get
+            {
+                return (String)this.Property("state").Value;
+            }
+        }
+
+        public Team Team
+        {
+            get
+            {
+                return (Team)this.Property("team_id").Value;
+            }
         }
 
         private Dictionary<PropertyType, Property> PropertyCache;
@@ -145,7 +273,7 @@ namespace Aras.Model
             if (this.Lock())
             {
                 Transaction.Add("update", this);
-                this.State = States.Update;
+                this.Status = States.Update;
             }
             else
             {
@@ -200,7 +328,7 @@ namespace Aras.Model
                 if (!response.IsError)
                 {
                     this.UpdateProperties(response.Items.First());
-                    this.State = States.Read;
+                    this.Status = States.Read;
                     return true;
                 }
                 else
@@ -242,13 +370,13 @@ namespace Aras.Model
             {
                 this.ID = Server.NewID();
                 this.ConfigID = this.ID;
-                this._state = States.Create;
+                this._status = States.Create;
             }
             else
             {
                 this.ID = ID;
                 this.ConfigID = ConfigID;
-                this._state = States.Read;
+                this._status = States.Read;
             }
 
         }

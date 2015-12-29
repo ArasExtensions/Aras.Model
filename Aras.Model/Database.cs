@@ -28,6 +28,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Xml;
+using System.Reflection;
+using System.IO;
 
 namespace Aras.Model
 {
@@ -54,6 +56,54 @@ namespace Aras.Model
             }
         }
 
+        private Dictionary<String, Type> ItemTypesCache;
+
+        internal Type ItemType(String Name)
+        {
+            if (this.ItemTypesCache.ContainsKey(Name))
+            {
+                return this.ItemTypesCache[Name];
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public void LoadAssembly(String AssemblyFile)
+        {
+            this.LoadAssembly(new FileInfo(AssemblyFile));
+        }
+
+        public void LoadAssembly(FileInfo AssemblyFile)
+        {
+            Assembly assembly = Assembly.LoadFrom(AssemblyFile.FullName);
+
+            foreach (Type type in assembly.GetTypes())
+            {
+                if (type.IsSubclassOf(typeof(Item)))
+                {
+                    // Get Atttribute
+                    Model.Attributes.ItemType itemtypeatt = (Model.Attributes.ItemType)type.GetCustomAttribute(typeof(Model.Attributes.ItemType));
+
+                    if (itemtypeatt != null)
+                    {
+                        if (!this.ItemTypesCache.ContainsKey(itemtypeatt.Name))
+                        {
+                            this.ItemTypesCache[itemtypeatt.Name] = type;
+                        }
+                        else
+                        {
+                            if (type.IsSubclassOf(this.ItemTypesCache[itemtypeatt.Name]))
+                            {
+                                this.ItemTypesCache[itemtypeatt.Name] = type;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         public override string ToString()
         {
             return this.Name;
@@ -62,8 +112,12 @@ namespace Aras.Model
         internal Database(Server Server, String Name)
             : base()
         {
+            this.ItemTypesCache = new Dictionary<String, Type>();
             this.Server = Server;
             this.Name = Name;
+
+            // Load this assembly
+            this.LoadAssembly(System.Reflection.Assembly.GetExecutingAssembly().Location);
         }
     }
 }

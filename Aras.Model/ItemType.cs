@@ -40,6 +40,25 @@ namespace Aras.Model
 
         public String Name { get; private set; }
 
+        protected Type _class;
+        internal virtual Type Class
+        {
+            get
+            {
+                if (this._class == null)
+                {
+                    this._class = this.Session.Database.ItemType(this.Name);
+
+                    if (this._class == null)
+                    {
+                        this._class = typeof(Item);
+                    }
+                }
+
+                return this._class;
+            }
+        }
+
         private Dictionary<String, PropertyType> _propertyTypeCache;
         private Dictionary<String, PropertyType> PropertyTypeCache
         {
@@ -79,6 +98,9 @@ namespace Aras.Model
                                         break;
                                     case "text":
                                         this._propertyTypeCache[name] = new PropertyTypes.Text(this, name, ReadOnly, DefaultString);
+                                        break;
+                                    case "md5":
+                                        this._propertyTypeCache[name] = new PropertyTypes.MD5(this, name, ReadOnly, DefaultString);
                                         break;
                                     case "image":
                                         this._propertyTypeCache[name] = new PropertyTypes.Image(this, name, ReadOnly, DefaultString);
@@ -144,7 +166,7 @@ namespace Aras.Model
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, ReadOnly, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, ReadOnly, null);
                                         }
 
                                         break;

@@ -30,36 +30,13 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public class RelationshipType : ItemType
+    [Attributes.ItemType("Life Cycle Map")]
+    public class LifeCycleMap : Item
     {
-        internal override Type Class
+        public LifeCycleMap(String ID, String ConfigID, ItemType Type)
+            :base(ID, ConfigID, Type)
         {
-            get
-            {
-                if (this._class == null)
-                {
-                    this._class = this.Session.Database.ItemType(this.Name);
 
-                    if (this._class == null)
-                    {
-                        this._class = typeof(Relationship);
-                    }
-                }
-
-                return this._class;
-            }
-        }
-
-        public ItemType Source { get; private set; }
-
-        public ItemType Related { get; private set; }
-
-        internal RelationshipType(Session Session, String ID, String Name, ItemType Source, ItemType Related)
-            :base(Session, ID, Name)
-        {
-            this.Source = Source;
-            this.Related = Related;
-            this.Source.AddRelationshipType(this);
         }
     }
 }

@@ -148,34 +148,51 @@ namespace Aras.Model
 
         internal List ListByID(String ID)
         {
-            if (!this.ItemCache.ContainsKey(ID))
-            {
-                IO.Item list = new IO.Item("List", "get");
-                list.Select = "id,config_id,name";
-                list.ID = ID;
-                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, list);
-                IO.SOAPResponse response = request.Execute();
-
-                if (!response.IsError)
-                {
-                    this.ItemCache[ID] = new List(response.Items.First().ID, response.Items.First().ConfigID, this.ItemType("List"));
-                }
-                else
-                {
-                    throw new Exceptions.ServerException(response);
-                }
-            }
-
-            return (List)this.ItemCache[ID];
+            return (List)this.ItemFromCache(ID, this.ItemType("List"));
         }
 
         private Dictionary<String, Item> ItemCache;
 
         internal Item ItemFromCache(String ID, String ConfigID, ItemType Type)
         {
+
             if (!this.ItemCache.ContainsKey(ID))
             {
-                this.ItemCache[ID] = new Item(ID, ConfigID, Type);
+                if (Type is RelationshipType)
+                {
+                    IO.Item dbitem = new IO.Item(Type.Name, "get");
+                    dbitem.ID = ID;
+                    dbitem.Select = "source_id(id,config_id),related_id(id,config_id)";
+                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, dbitem);
+                    IO.SOAPResponse response = request.Execute();
+
+                    if (!response.IsError)
+                    {
+                        IO.Item dbsource = response.Items.First().GetPropertyItem("source_id");
+                        Item source = this.ItemFromCache(dbsource.ID, dbsource.ConfigID, ((RelationshipType)Type).Source);
+                        Item related = null;
+
+                        if (((RelationshipType)Type).Related != null)
+                        {
+                            IO.Item dbrelated = response.Items.First().GetPropertyItem("related_id");
+                            
+                            if (dbrelated != null)
+                            {
+                                related = this.ItemFromCache(dbrelated.ID, dbrelated.ConfigID, ((RelationshipType)Type).Related);
+                            }
+                        }
+
+                        this.ItemCache[ID] = (Relationship)Type.Class.GetConstructor(new Type[] { typeof(String), typeof(String), typeof(RelationshipType), typeof(Item), typeof(Item) }).Invoke(new object[] { ID, ConfigID, Type, source, related });
+                    }
+                    else
+                    {
+                        throw new Exceptions.ServerException(response);
+                    }
+                }
+                else
+                {
+                    this.ItemCache[ID] = (Item)Type.Class.GetConstructor(new Type[] { typeof(String), typeof(String), typeof(ItemType) }).Invoke(new object[] { ID, ConfigID, Type });
+                }
             }
 
             return this.ItemCache[ID];
@@ -192,15 +209,27 @@ namespace Aras.Model
 
                 if (!response.IsError)
                 {
-                    this.ItemCache[ID] = new Item(ID, response.Items.First().ConfigID, Type);
+                    return this.ItemFromCache(ID, response.Items.First().ConfigID, Type);
                 }
                 else
                 {
                     throw new Exceptions.ServerException(response);
                 }
             }
+            else
+            {
+                return this.ItemCache[ID];
+            }
+        }
 
-            return this.ItemCache[ID];
+        internal Relationship RelationshipFromCache(String ID, String ConfigID, RelationshipType Type, Item Source, Item Related)
+        {
+            if (!this.ItemCache.ContainsKey(ID))
+            {
+                this.ItemCache[ID] = (Relationship)Type.Class.GetConstructor(new Type[] { typeof(String), typeof(String), typeof(RelationshipType), typeof(Item), typeof(Item)}).Invoke(new object[] { ID, ConfigID, Type, Source, Related });
+            }
+
+            return (Relationship)this.ItemCache[ID];
         }
 
         public Queries.Item Query(ItemType Type)

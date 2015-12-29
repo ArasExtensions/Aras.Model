@@ -33,10 +33,57 @@ namespace Aras.Model
     [Attributes.ItemType("User")]
     public class User : Item
     {
+        private Alias _alias;
+        private Alias Alias
+        {
+            get
+            {
+                this.LoadAlias();
+                return this._alias;
+            }
+        }
+
+        private Identity _identity;
+        private Identity Identity
+        {
+            get
+            {
+                this.LoadAlias();
+                return this._identity;
+            }
+        }
+
+        private Boolean AliasLoaded;
+        private void LoadAlias()
+        {
+            if (!AliasLoaded)
+            {
+                IO.Item dbalias = new IO.Item("Alias", "get");
+                dbalias.Select = "id,config_id,related_id(id,config_id)";
+                dbalias.SetProperty("source_id", this.ID);
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, dbalias);
+                IO.SOAPResponse response = request.Execute();
+
+                if (!response.IsError)
+                {
+                    dbalias = response.Items.First();
+                    IO.Item dbidenity = dbalias.GetPropertyItem("related_id");
+                    this._identity = (Identity)this.ItemType.Session.ItemFromCache(dbidenity.ID, dbidenity.ConfigID, this.ItemType.Session.ItemType("Identity"));
+                    this._alias = (Alias)this.ItemType.Session.RelationshipFromCache(dbalias.ID, dbalias.ConfigID, this.ItemType.RelationshipType("Alias"), this, this._identity);
+                }
+                else
+                {
+                    throw new Exceptions.ServerException(response);
+                }
+
+                this.AliasLoaded = true;
+            }
+        }
+
         public User(String ID, String ConfigID, ItemType Type)
             :base(ID, ConfigID, Type)
         {
-
+            this.AliasLoaded = false;
         }
     }
 }

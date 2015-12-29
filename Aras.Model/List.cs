@@ -54,7 +54,7 @@ namespace Aras.Model
                     {
                         foreach(IO.Item valueitem in response.Items)
                         {
-                            ListValue listvalue = new ListValue(valueitem.ID, valueitem.ConfigID, this.ItemType.RelationshipType("Value"), this);
+                            ListValue listvalue = (ListValue)this.ItemType.Session.RelationshipFromCache(valueitem.ID, valueitem.ConfigID, this.ItemType.RelationshipType("Value"), this, null);
                             this._values.Add(listvalue);
                         }
                     }

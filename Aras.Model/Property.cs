@@ -50,7 +50,7 @@ namespace Aras.Model
             {
                 return this._modified;
             }
-            private set
+            set
             {
                 if (this._modified != value)
                 {
@@ -68,7 +68,7 @@ namespace Aras.Model
 
         public void Refresh()
         {
-            switch (this.Item.State)
+            switch (this.Item.Status)
             {
                 case Model.Item.States.Read:
                 case Model.Item.States.Update:
@@ -120,9 +120,9 @@ namespace Aras.Model
         {
             switch(e.PropertyName)
             {
-                case "State":
+                case "Status":
 
-                    if (this.Type.ReadOnly || this.Item.State == Model.Item.States.Read || this.Item.State == Model.Item.States.Deleted)
+                    if (this.Type.ReadOnly || this.Item.Status == Model.Item.States.Read || this.Item.Status == Model.Item.States.Deleted)
                     {
                         this.ReadOnly = true;
                     }

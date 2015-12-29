@@ -48,10 +48,11 @@ namespace Aras.Model.Debug
             Item part = parts.First();
             ListValue test = (ListValue)part.Property("unit").Value;
             String test3 = test.Label;
-
-
-
-
+            User createdby = part.CreatedBy;
+            ItemType usertype = session.ItemType("User");
+            IEnumerable<PropertyType> proptypes = usertype.PropertyTypes;
+            Boolean test34 = part.IsCurrent;
+            LifeCycleState test56 = part.CurrentState;
         }
     }
 }

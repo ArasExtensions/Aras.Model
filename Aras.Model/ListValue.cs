@@ -57,8 +57,8 @@ namespace Aras.Model
             }
         }
 
-        internal ListValue(String ID, String ConfigID, RelationshipType RelationshipType, List List)
-            :base(ID, ConfigID, RelationshipType, List)
+        public ListValue(String ID, String ConfigID, RelationshipType RelationshipType, Item Source, Item Related)
+            :base(ID, ConfigID, RelationshipType, Source, Related)
         {
       
         }

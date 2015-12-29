@@ -42,10 +42,13 @@ namespace Aras.Model
 
         public Item Source { get; private set; }
 
-        public Relationship(String ID, String ConfigID, RelationshipType Type, Item Source)
+        public Item Related { get; private set; }
+
+        public Relationship(String ID, String ConfigID, RelationshipType Type, Item Source, Item Related)
             :base(ID, ConfigID, Type)
         {
             this.Source = Source;
+            this.Related = Related;
         }
     }
 }
