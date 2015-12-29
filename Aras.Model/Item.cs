@@ -68,6 +68,19 @@ namespace Aras.Model
 
         public ItemType ItemType { get; private set; }
 
+        public String KeyedName
+        {
+            get
+            {
+                return (String)this.Property("keyed_name").Value;
+            }
+        }
+
+        public override string ToString()
+        {
+            return this.KeyedName;
+        }
+
         private Dictionary<PropertyType, Property> PropertyCache;
 
         public Property Property(PropertyType PropertyType)

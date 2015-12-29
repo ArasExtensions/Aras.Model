@@ -30,6 +30,7 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
+    [Attributes.ItemType("Value")]
     public class ListValue : Relationship
     {
         public List List

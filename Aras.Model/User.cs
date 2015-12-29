@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-
+    [Attributes.ItemType("User")]
     public class User : Item
     {
         public User(String ID, String ConfigID, ItemType Type)

@@ -30,6 +30,7 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
+    [Attributes.ItemType("List")]
     public class List : Item
     {
         private List<ListValue> _values;
