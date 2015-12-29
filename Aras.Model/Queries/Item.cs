@@ -66,7 +66,7 @@ namespace Aras.Model.Queries
             }
             else
             {
-                throw new Exceptions.ServerException(response.ErrorMessage);
+                throw new Exceptions.ServerException(response);
             }
 
             return ret;

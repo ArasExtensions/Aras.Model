@@ -34,11 +34,25 @@ namespace Aras.Model.Exceptions
         internal ServerException(String Message, Exception e)
             : base(Message, e)
         { 
+
         }
 
         internal ServerException(String Message)
             : base(Message)
         {
+
+        }
+
+        internal ServerException(IO.SOAPResponse Response, Exception e)
+            : base(Response.ErrorMessage, e)
+        {
+
+        }
+
+        internal ServerException(IO.SOAPResponse Response)
+            : base(Response.ErrorMessage)
+        {
+
         }
     }
 }

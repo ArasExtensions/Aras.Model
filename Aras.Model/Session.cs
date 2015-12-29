@@ -88,7 +88,7 @@ namespace Aras.Model
                 }
                 else
                 {
-                    throw new Exceptions.ServerException(response.ErrorMessage);
+                    throw new Exceptions.ServerException(response);
                 }
 
             }
@@ -116,7 +116,7 @@ namespace Aras.Model
                 }
                 else
                 {
-                    throw new Exceptions.ServerException(response.ErrorMessage);
+                    throw new Exceptions.ServerException(response);
                 }
             }
 
@@ -139,7 +139,7 @@ namespace Aras.Model
                 }
                 else
                 {
-                    throw new Exceptions.ServerException(response.ErrorMessage);
+                    throw new Exceptions.ServerException(response);
                 }
             }
 
@@ -162,7 +162,7 @@ namespace Aras.Model
                 }
                 else
                 {
-                    throw new Exceptions.ServerException(response.ErrorMessage);
+                    throw new Exceptions.ServerException(response);
                 }
             }
 
@@ -196,7 +196,7 @@ namespace Aras.Model
                 }
                 else
                 {
-                    throw new Exceptions.ServerException(response.ErrorMessage);
+                    throw new Exceptions.ServerException(response);
                 }
             }
 

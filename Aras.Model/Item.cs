@@ -160,7 +160,7 @@ namespace Aras.Model
                 }
                 else
                 {
-                    throw new Exceptions.ServerException(response.ErrorMessage);
+                    throw new Exceptions.ServerException(response);
                 }
             }
             else if (lockedby.ID.Equals(this.ItemType.Session.UserID))
@@ -192,7 +192,7 @@ namespace Aras.Model
                 }
                 else
                 {
-                    throw new Exceptions.ServerException(response.ErrorMessage);
+                    throw new Exceptions.ServerException(response);
                 }
             }
             else if (lockedby == null)
