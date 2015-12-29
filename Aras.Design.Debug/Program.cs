@@ -40,16 +40,11 @@ namespace Aras.Design.Debug
             database.LoadAssembly(Environment.CurrentDirectory + "\\Aras.Design.dll");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-            ItemType parttype = session.ItemType("Part");
-            IEnumerable<RelationshipType> reltypes = parttype.RelationshipTypes;
-
-            Model.Queries.Item partquery = session.Query("Part", "item_number,cmb_name");
-
-            foreach(Part part in partquery)
+            foreach (Part part in session.Query("Part", "item_number,cmb_name"))
             {
                 foreach(PartBOM partbom in part.Relationships("Part BOM", "quantity"))
                 {
-                    int a = 1;
+                    Double quantity = partbom.Quantity;
                 }
             }
         }

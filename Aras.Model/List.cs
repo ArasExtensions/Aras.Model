@@ -42,25 +42,9 @@ namespace Aras.Model
                 {
                     this._values = new List<ListValue>();
 
-                    IO.Item dbitem = new IO.Item("Value", "get");
-                    dbitem.Select = "id,config_id,value,label";
-                    dbitem.OrderBy = "sort_order";
-                    dbitem.SetProperty("source_id", this.ID);
-
-                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, dbitem);
-                    IO.SOAPResponse response = request.Execute();
-
-                    if (!response.IsError)
+                    foreach(ListValue listvalue in this.Relationships("Value", "value,label"))
                     {
-                        foreach(IO.Item valueitem in response.Items)
-                        {
-                            ListValue listvalue = (ListValue)this.ItemType.Session.RelationshipFromCache(valueitem.ID, valueitem.ConfigID, this.ItemType.RelationshipType("Value"), this, null);
-                            this._values.Add(listvalue);
-                        }
-                    }
-                    else
-                    {
-                        throw new Exceptions.ServerException(response);
+                        this._values.Add(listvalue);
                     }
                 }
 

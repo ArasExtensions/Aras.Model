@@ -41,18 +41,13 @@ namespace Aras.Model.Debug
             ItemType parttype = session.ItemType("Part");
             IEnumerable<RelationshipType> reltypes = parttype.RelationshipTypes;
 
-            Queries.Item partquery = session.Query("Part");
-            partquery.Select = "item_number,cmb_name";
-            IEnumerable<Item> parts = partquery.Execute();
+            Queries.Item partquery = session.Query("Part", "item_number,cmb_name,unit");
 
-            Item part = parts.First();
-            ListValue test = (ListValue)part.Property("unit").Value;
-            String test3 = test.Label;
-            User createdby = part.CreatedBy;
-            ItemType usertype = session.ItemType("User");
-            IEnumerable<PropertyType> proptypes = usertype.PropertyTypes;
-            Boolean test34 = part.IsCurrent;
-            LifeCycleState test56 = part.CurrentState;
+            foreach (Item part in partquery)
+            {
+                ListValue test = (ListValue)part.Property("unit").Value;
+                String test3 = test.Label;
+            }
         }
     }
 }
