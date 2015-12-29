@@ -232,14 +232,14 @@ namespace Aras.Model
             return (Relationship)this.ItemCache[ID];
         }
 
-        public Queries.Item Query(ItemType Type)
+        public Queries.Item Query(ItemType Type, String Select)
         {
-            return new Queries.Item(Type);
+            return new Queries.Item(Type, Select);
         }
 
-        public Queries.Item Query(String ItemTypeName)
+        public Queries.Item Query(String ItemTypeName, String Select)
         {
-            return new Queries.Item(this.ItemType(ItemTypeName));
+            return new Queries.Item(this.ItemType(ItemTypeName), Select);
         }
 
         public Transaction BeginTransaction()

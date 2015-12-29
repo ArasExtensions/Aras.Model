@@ -20,8 +20,8 @@
   Address: The Winnowing House, Mill Lane, Askham Richard, York, YO23 3NW, United Kingdom
   Tel:     +44 113 815 3440
   Email:   support@processwall.com
- * 
 */
+
 using System;
 using System.Collections.Generic;
 using System.Linq;

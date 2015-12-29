@@ -157,6 +157,20 @@ namespace Aras.Model
                                         }
 
                                         break;
+                                    case "float":
+
+                                        if (DefaultString != null)
+                                        {
+                                            Double DefaultDouble = 0;
+                                            Double.TryParse(DefaultString, out DefaultDouble);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Float(this, name, ReadOnly, DefaultDouble);
+                                        }
+                                        else
+                                        {
+                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, ReadOnly, null);
+                                        }
+
+                                        break;
                                     case "boolean":
 
                                         if (DefaultString != null)

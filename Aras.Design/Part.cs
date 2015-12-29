@@ -28,48 +28,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Design
 {
-    public abstract class Query: System.Collections.IEnumerable
+    [Model.Attributes.ItemType("Part")]
+    public class Part : Model.Item
     {
-        public abstract System.Collections.IEnumerator GetEnumerator();
-
-        public ItemType Type { get; private set; }
-
-        private String _select;
-        public String Select
+        public Part(String ID, String ConfigID, Model.ItemType Type)
+            :base(ID, ConfigID, Type)
         {
-            get
-            {
-                return this._select;
-            }
-            set
-            {
-                if (this._select == null)
-                {
-                    if (value != null)
-                    {
-                        this._select = value;
-                        this.Refresh();
-                    }
-                }
-                else
-                {
-                    if (!this._select.Equals(value))
-                    {
-                        this._select = value;
-                        this.Refresh();
-                    }
-                }
-            }
-        }
 
-        public abstract void Refresh();
-
-        internal Query(ItemType Type, String Select)
-        {
-            this.Type = Type;
-            this._select = Select;
         }
     }
 }

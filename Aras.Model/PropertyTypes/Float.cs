@@ -28,48 +28,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.PropertyTypes
 {
-    public abstract class Query: System.Collections.IEnumerable
+    public class Float : PropertyType
     {
-        public abstract System.Collections.IEnumerator GetEnumerator();
-
-        public ItemType Type { get; private set; }
-
-        private String _select;
-        public String Select
+        internal Float(ItemType Type, System.String Name, System.Boolean ReadOnly, System.Double? Default)
+            :base(Type, Name, ReadOnly, Default)
         {
-            get
-            {
-                return this._select;
-            }
-            set
-            {
-                if (this._select == null)
-                {
-                    if (value != null)
-                    {
-                        this._select = value;
-                        this.Refresh();
-                    }
-                }
-                else
-                {
-                    if (!this._select.Equals(value))
-                    {
-                        this._select = value;
-                        this.Refresh();
-                    }
-                }
-            }
-        }
-
-        public abstract void Refresh();
-
-        internal Query(ItemType Type, String Select)
-        {
-            this.Type = Type;
-            this._select = Select;
+  
         }
     }
 }

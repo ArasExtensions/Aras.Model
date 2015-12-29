@@ -28,48 +28,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Design
 {
-    public abstract class Query: System.Collections.IEnumerable
+    [Model.Attributes.ItemType("Part BOM")]
+    public class PartBOM : Model.Relationship
     {
-        public abstract System.Collections.IEnumerator GetEnumerator();
 
-        public ItemType Type { get; private set; }
-
-        private String _select;
-        public String Select
+        public Double Quantity
         {
             get
             {
-                return this._select;
-            }
-            set
-            {
-                if (this._select == null)
+                Double? quanity = (Double?)this.Property("quantity").Value;
+
+                if (quanity == null)
                 {
-                    if (value != null)
-                    {
-                        this._select = value;
-                        this.Refresh();
-                    }
+                    return 0.0;
                 }
                 else
                 {
-                    if (!this._select.Equals(value))
-                    {
-                        this._select = value;
-                        this.Refresh();
-                    }
+                    return (Double)quanity;
                 }
             }
         }
 
-        public abstract void Refresh();
-
-        internal Query(ItemType Type, String Select)
+        public PartBOM(String ID, String ConfigID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
+            :base(ID, ConfigID, Type, Source, Related)
         {
-            this.Type = Type;
-            this._select = Select;
+
         }
     }
 }

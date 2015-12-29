@@ -27,49 +27,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Aras.Model;
 
-namespace Aras.Model
+namespace Aras.Design.Debug
 {
-    public abstract class Query: System.Collections.IEnumerable
+    class Program
     {
-        public abstract System.Collections.IEnumerator GetEnumerator();
-
-        public ItemType Type { get; private set; }
-
-        private String _select;
-        public String Select
+        static void Main(string[] args)
         {
-            get
+            Server server = new Server("http://localhost/11SP1");
+            Database database = server.Database("VariantsDemo11SP1");
+            database.LoadAssembly(Environment.CurrentDirectory + "\\Aras.Design.dll");
+            Session session = database.Login("admin", Server.PasswordHash("innovator"));
+
+            ItemType parttype = session.ItemType("Part");
+            IEnumerable<RelationshipType> reltypes = parttype.RelationshipTypes;
+
+            Model.Queries.Item partquery = session.Query("Part", "item_number,cmb_name");
+
+            foreach(Part part in partquery)
             {
-                return this._select;
-            }
-            set
-            {
-                if (this._select == null)
+                foreach(PartBOM partbom in part.Relationships("Part BOM", "quantity"))
                 {
-                    if (value != null)
-                    {
-                        this._select = value;
-                        this.Refresh();
-                    }
-                }
-                else
-                {
-                    if (!this._select.Equals(value))
-                    {
-                        this._select = value;
-                        this.Refresh();
-                    }
+                    int a = 1;
                 }
             }
-        }
-
-        public abstract void Refresh();
-
-        internal Query(ItemType Type, String Select)
-        {
-            this.Type = Type;
-            this._select = Select;
         }
     }
 }

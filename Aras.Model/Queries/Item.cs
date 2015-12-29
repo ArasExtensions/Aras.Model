@@ -20,8 +20,8 @@
   Address: The Winnowing House, Mill Lane, Askham Richard, York, YO23 3NW, United Kingdom
   Tel:     +44 113 815 3440
   Email:   support@processwall.com
- * 
 */
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,21 +32,19 @@ namespace Aras.Model.Queries
 {
     public class Item : Query
     {
-        public IEnumerable<Model.Item> Execute()
+        private List<Model.Item> Items;
+
+        public override System.Collections.IEnumerator GetEnumerator()
         {
-            List<Model.Item> ret = new List<Model.Item>();
+            return this.Items.GetEnumerator();
+        }
+
+        public override void Refresh()
+        {
+            this.Items.Clear();
 
             IO.Item item = new IO.Item(this.Type.Name, "get");
-
-            if (this.SelectPropertyTypes.Count() > 0)
-            {
-                item.Select = "id,config_id," + this.Select;
-            }
-            else
-            {
-                item.Select = "id,config_id";
-            }
-
+            item.Select = "id,config_id," + this.Select;
             IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, item);
             IO.SOAPResponse response = request.Execute();
 
@@ -55,27 +53,24 @@ namespace Aras.Model.Queries
                 foreach(IO.Item dbitem in response.Items)
                 {
                     Model.Item cacheitem = this.Type.Session.ItemFromCache(dbitem.ID, dbitem.ConfigID, this.Type);
-
-                    foreach(PropertyType proptype in this.SelectPropertyTypes)
-                    {
-                        cacheitem.Property(proptype).DBValue = dbitem.GetProperty(proptype.Name);
-                    }
-
-                    ret.Add(cacheitem);
+                    cacheitem.UpdateProperties(dbitem);
+                    this.Items.Add(cacheitem);
                 }
             }
             else
             {
-                throw new Exceptions.ServerException(response);
+                if (!response.ErrorMessage.Equals("No items of type " + this.Type.Name + " found."))
+                {
+                    throw new Exceptions.ServerException(response);
+                }
             }
-
-            return ret;
         }
 
-        internal Item(ItemType Type)
-            :base(Type)
+        internal Item(ItemType Type, String Select)
+            :base(Type, Select)
         {
-
+            this.Items = new List<Model.Item>();
+            this.Refresh();
         }
     }
 }

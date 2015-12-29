@@ -32,17 +32,61 @@ namespace Aras.Model.Queries
 {
     public class Relationship : Query
     {
-        public Model.Item Source { get; private set; }
+        private List<Model.Relationship> Relationships;
 
-        public IEnumerable<Relationship> Execute()
+        public override System.Collections.IEnumerator GetEnumerator()
         {
-            throw new NotImplementedException();
+            return this.Relationships.GetEnumerator();
         }
 
-        internal Relationship(RelationshipType Type, Model.Item Source)
-            :base(Type)
+        public Model.Item Source { get; private set; }
+
+        public override void Refresh()
         {
+            this.Relationships.Clear();
+
+            IO.Item item = new IO.Item(this.Type.Name, "get");
+            item.Select = "id,config_id,related_id(id,config_id)," + this.Select;
+            item.SetProperty("source_id", this.Source.ID);
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, item);
+            IO.SOAPResponse response = request.Execute();
+
+            if (!response.IsError)
+            {
+                foreach (IO.Item dbitem in response.Items)
+                {
+                    Model.Item related = null;
+                    
+                    if (((RelationshipType)this.Type).Related != null)
+                    {
+                        IO.Item dbrelated = dbitem.GetPropertyItem("related_id");
+
+                        if (dbrelated != null)
+                        {
+                            related = this.Type.Session.ItemFromCache(dbrelated.ID, dbrelated.ConfigID, ((RelationshipType)this.Type).Related);
+                        }
+                    }
+
+                    Model.Relationship relationship = this.Type.Session.RelationshipFromCache(dbitem.ID, dbitem.ConfigID, (RelationshipType)this.Type, this.Source, related);
+                    relationship.UpdateProperties(dbitem);
+                    this.Relationships.Add(relationship);
+                }
+            }
+            else
+            {
+                if (!response.ErrorMessage.Equals("No items of type " + this.Type.Name + " found."))
+                {
+                    throw new Exceptions.ServerException(response);
+                }
+            }
+        }
+
+        internal Relationship(RelationshipType Type, String Select, Model.Item Source)
+            :base(Type, Select)
+        {
+            this.Relationships = new List<Model.Relationship>();
             this.Source = Source;
+            this.Refresh();
         }
     }
 }

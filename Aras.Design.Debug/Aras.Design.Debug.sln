@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aras.Design.Debug", "Aras.Design.Debug.csproj", "{079686A3-2B02-4029-9471-367A3C2C4BBF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aras.Model", "..\Aras.Model\Aras.Model.csproj", "{20FEA736-01A1-49A3-A61F-43CAD00D9717}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aras.Design", "..\Aras.Design\Aras.Design.csproj", "{D99031A4-F91E-4D94-8080-BE0375D3E83B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{079686A3-2B02-4029-9471-367A3C2C4BBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{079686A3-2B02-4029-9471-367A3C2C4BBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{079686A3-2B02-4029-9471-367A3C2C4BBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{079686A3-2B02-4029-9471-367A3C2C4BBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20FEA736-01A1-49A3-A61F-43CAD00D9717}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20FEA736-01A1-49A3-A61F-43CAD00D9717}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20FEA736-01A1-49A3-A61F-43CAD00D9717}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20FEA736-01A1-49A3-A61F-43CAD00D9717}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D99031A4-F91E-4D94-8080-BE0375D3E83B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D99031A4-F91E-4D94-8080-BE0375D3E83B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D99031A4-F91E-4D94-8080-BE0375D3E83B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D99031A4-F91E-4D94-8080-BE0375D3E83B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

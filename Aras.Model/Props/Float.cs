@@ -28,48 +28,52 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Properties
 {
-    public abstract class Query: System.Collections.IEnumerable
+    public class Float : Property
     {
-        public abstract System.Collections.IEnumerator GetEnumerator();
-
-        public ItemType Type { get; private set; }
-
-        private String _select;
-        public String Select
+        public override Object Value
         {
             get
             {
-                return this._select;
+                return base.Value;
             }
             set
             {
-                if (this._select == null)
+                if ((value == null) || (value is System.Double))
                 {
-                    if (value != null)
-                    {
-                        this._select = value;
-                        this.Refresh();
-                    }
+                    base.Value = value;
                 }
                 else
                 {
-                    if (!this._select.Equals(value))
-                    {
-                        this._select = value;
-                        this.Refresh();
-                    }
+                    throw new Exceptions.ArgumentException("Value must be a System.Double");
                 }
             }
         }
 
-        public abstract void Refresh();
-
-        internal Query(ItemType Type, String Select)
+        internal override string DBValue
         {
-            this.Type = Type;
-            this._select = Select;
+            get
+            {
+                return this.Value.ToString();
+            }
+            set
+            {
+                if (value == null)
+                {
+                    this.SetValue(null);
+                }
+                else
+                {
+                    this.SetValue(System.Double.Parse(value));
+                }
+            }
+        }
+
+        internal Float(Model.Item Item, PropertyTypes.Float Type)
+            :base(Item, Type)
+        {
+
         }
     }
 }

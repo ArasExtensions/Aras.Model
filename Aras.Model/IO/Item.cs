@@ -131,6 +131,7 @@ namespace Aras.Model.IO
             }
             set
             {
+
                 XmlAttribute select = this.Node.Attributes["select"];
 
                 if (select == null)

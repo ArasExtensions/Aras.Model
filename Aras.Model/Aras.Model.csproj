@@ -47,6 +47,8 @@
     <Compile Include="Exceptions\ServerException.cs" />
     <Compile Include="LifeCycleMap.cs" />
     <Compile Include="LifeCycleState.cs" />
+    <Compile Include="PropertyTypes\Float.cs" />
+    <Compile Include="Props\Float.cs" />
     <Compile Include="Team.cs" />
     <Compile Include="Permission.cs" />
     <Compile Include="IO\Item.cs" />

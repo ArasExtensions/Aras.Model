@@ -241,6 +241,9 @@ namespace Aras.Model
                     case "Decimal":
                         this.PropertyCache[PropertyType] = new Properties.Decimal(this, (PropertyTypes.Decimal)PropertyType);
                         break;
+                    case "Float":
+                        this.PropertyCache[PropertyType] = new Properties.Float(this, (PropertyTypes.Float)PropertyType);
+                        break;
                     case "Boolean":
                         this.PropertyCache[PropertyType] = new Properties.Boolean(this, (PropertyTypes.Boolean)PropertyType);
                         break;
@@ -361,9 +364,27 @@ namespace Aras.Model
             }
         }
 
+        private Dictionary<RelationshipType, Queries.Relationship> RelationshipsCache;
+
+        public Queries.Relationship Relationships(RelationshipType RelationshipType, String Select)
+        {
+            if (!this.RelationshipsCache.ContainsKey(RelationshipType))
+            {
+                this.RelationshipsCache[RelationshipType] = new Queries.Relationship(RelationshipType, Select, this);
+            }
+
+            return this.RelationshipsCache[RelationshipType];
+        }
+
+        public Queries.Relationship Relationships(String RelationshipType, String Select)
+        {
+            return this.Relationships(this.ItemType.RelationshipType(RelationshipType), Select);
+        }
+
         public Item(String ID, String ConfigID, ItemType Type)
         {
             this.PropertyCache = new Dictionary<PropertyType, Property>();
+            this.RelationshipsCache = new Dictionary<RelationshipType, Queries.Relationship>();
             this.ItemType = Type;
 
             if (ID == null)
