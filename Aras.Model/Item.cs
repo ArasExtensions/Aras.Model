@@ -285,6 +285,9 @@ namespace Aras.Model
                     default:
                         throw new NotImplementedException("Property Type not implmented: " + PropertyType.GetType().Name);
                 }
+
+                // Ensure selected in future
+                this.ItemType.AddToSelect(PropertyType.Name);
             }
 
             return this.PropertyCache[PropertyType];
@@ -437,19 +440,19 @@ namespace Aras.Model
 
         private Dictionary<RelationshipType, Queries.Relationship> RelationshipsCache;
 
-        public Queries.Relationship Relationships(RelationshipType RelationshipType, String Select)
+        public Queries.Relationship Relationships(RelationshipType RelationshipType)
         {
             if (!this.RelationshipsCache.ContainsKey(RelationshipType))
             {
-                this.RelationshipsCache[RelationshipType] = new Queries.Relationship(RelationshipType, Select, this);
+                this.RelationshipsCache[RelationshipType] = new Queries.Relationship(RelationshipType, this);
             }
 
             return this.RelationshipsCache[RelationshipType];
         }
 
-        public Queries.Relationship Relationships(String RelationshipType, String Select)
+        public Queries.Relationship Relationships(String RelationshipType)
         {
-            return this.Relationships(this.ItemType.RelationshipType(RelationshipType), Select);
+            return this.Relationships(this.ItemType.RelationshipType(RelationshipType));
         }
 
         public Item(String ID, ItemType Type)

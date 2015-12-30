@@ -268,7 +268,14 @@ namespace Aras.Model
 
         public PropertyType PropertyType(String Name)
         {
-            return this.PropertyTypeCache[Name];
+            if (this.PropertyTypeCache.ContainsKey(Name))
+            {
+                return this.PropertyTypeCache[Name];
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid property name: " + Name);
+            }
         }
 
         public IEnumerable<PropertyType> PropertyTypes
@@ -330,6 +337,43 @@ namespace Aras.Model
             return this.RelationshipTypeCache[Name];
         }
 
+        private List<PropertyType> SelectCache;
+
+        public String _select;
+        public String Select
+        {
+            get
+            {
+                if (this._select == null)
+                {
+                    List<String> names = new List<String>();
+
+                    foreach(PropertyType proptype in this.SelectCache)
+                    {
+                        names.Add(proptype.Name);
+                    }
+
+                    this._select = String.Join(",", names);
+                }
+
+                return this._select;
+            }
+        }
+
+        public void AddToSelect(String Names)
+        {
+            foreach(String name in Names.Split(','))
+            {
+                PropertyType proptype = this.PropertyType(name);
+
+                if (!this.SelectCache.Contains(proptype))
+                {
+                    this.SelectCache.Add(proptype);
+                    this._select = null;
+                }
+            }
+        }
+
         public override string ToString()
         {
             return this.Name;
@@ -338,6 +382,7 @@ namespace Aras.Model
         internal ItemType(Session Session, String ID, String Name, String ClassStructure)
         {
             this.RelationshipTypeCache = new Dictionary<String, RelationshipType>();
+            this.SelectCache = new List<PropertyType>();
             this.RelationshipTypesLoaded = false;
             this.Session = Session;
             this.ID = ID;

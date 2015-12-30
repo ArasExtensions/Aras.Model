@@ -44,7 +44,7 @@ namespace Aras.Model.Queries
             this.Items.Clear();
 
             IO.Item item = new IO.Item(this.Type.Name, "get");
-            item.Select = "id," + this.Select;
+            item.Select = "id," + this.Type.Select;
             IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, item);
             IO.SOAPResponse response = request.Execute();
 
@@ -66,8 +66,8 @@ namespace Aras.Model.Queries
             }
         }
 
-        internal Item(ItemType Type, String Select)
-            :base(Type, Select)
+        internal Item(ItemType Type)
+            :base(Type)
         {
             this.Items = new List<Model.Item>();
             this.Refresh();

@@ -78,7 +78,7 @@ namespace Aras.Design
                 {
                     this._orderContext = new List<OrderContext>();
 
-                    foreach(OrderContext ordercontext in this.Relationships("v_Order Context", "value,quantity"))
+                    foreach(OrderContext ordercontext in this.Relationships("v_Order Context"))
                     {
                         this._orderContext.Add(ordercontext);
                     }

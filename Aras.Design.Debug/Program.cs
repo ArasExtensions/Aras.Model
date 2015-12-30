@@ -40,7 +40,10 @@ namespace Aras.Design.Debug
             database.LoadAssembly(Environment.CurrentDirectory + "\\Aras.Design.dll");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-            foreach (Order order in session.Query("v_Order", "keyed_name,item_number,name,part,locked_by_id,configured_part"))
+            session.ItemType("v_Order").AddToSelect("keyed_name,item_number,name,part,locked_by_id,configured_part");
+            session.ItemType("v_Order Context").AddToSelect("quantity");
+
+            foreach (Order order in session.Query("v_Order"))
             {
                 if (order.ItemNumber == "0002")
                 {
@@ -48,6 +51,9 @@ namespace Aras.Design.Debug
                    {
                        order.Update(transaction);
                        order.Property("name").Value = "Test Company 0002";
+                       OrderContext ordercontext = order.OrderContext.First();
+                       VariantContext variantcontext = ordercontext.VariantContext;
+                       
 
                        transaction.Commit();
                    }

@@ -46,7 +46,7 @@ namespace Aras.Model.Queries
             this.Relationships.Clear();
 
             IO.Item item = new IO.Item(this.Type.Name, "get");
-            item.Select = "id,related_id," + this.Select;
+            item.Select = "id,related_id," + this.Type.Select;
             item.SetProperty("source_id", this.Source.ID);
             IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, item);
             IO.SOAPResponse response = request.Execute();
@@ -81,8 +81,8 @@ namespace Aras.Model.Queries
             }
         }
 
-        internal Relationship(RelationshipType Type, String Select, Model.Item Source)
-            :base(Type, Select)
+        internal Relationship(RelationshipType Type, Model.Item Source)
+            :base(Type)
         {
             this.Relationships = new List<Model.Relationship>();
             this.Source = Source;

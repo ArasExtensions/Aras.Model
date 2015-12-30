@@ -65,7 +65,7 @@ namespace Aras.Model
             {
                 IO.Item dbrelationshiptype = new IO.Item("RelationshipType", "get");
                 dbrelationshiptype.SetProperty("relationship_id", DBItem.ID);
-                dbrelationshiptype.Select = "source_id(id),related_id(id)";
+                dbrelationshiptype.Select = "source_id,related_id";
                 IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, dbrelationshiptype);
                 IO.SOAPResponse response = request.Execute();
 
@@ -209,14 +209,14 @@ namespace Aras.Model
             return (Relationship)this.ItemCache[ID];
         }
 
-        public Queries.Item Query(ItemType Type, String Select)
+        public Queries.Item Query(ItemType Type)
         {
-            return new Queries.Item(Type, Select);
+            return new Queries.Item(Type);
         }
 
-        public Queries.Item Query(String ItemTypeName, String Select)
+        public Queries.Item Query(String ItemTypeName)
         {
-            return new Queries.Item(this.ItemType(ItemTypeName), Select);
+            return new Queries.Item(this.ItemType(ItemTypeName));
         }
 
         public Transaction BeginTransaction()
@@ -254,6 +254,9 @@ namespace Aras.Model
             this.ItemTypeNameCache = new Dictionary<String, ItemType>();
             this.ItemTypeIDCache = new Dictionary<String, ItemType>();
             this.ItemCache = new Dictionary<String, Item>();
+
+            // Default Selections
+            this.ItemType("Value").AddToSelect("value,label");
         }
     }
 }

@@ -55,6 +55,14 @@ namespace Aras.Design
             }
         }
 
+        public VariantContext VariantContext
+        {
+            get
+            {
+                return (VariantContext)this.Related;
+            }
+        }
+
         public OrderContext(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
             :base(ID, Type, Source, Related)
         {

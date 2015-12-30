@@ -57,7 +57,7 @@ namespace Aras.Design
                 {
                     this._partBOM = new List<PartBOM>();
    
-                    foreach(PartBOM partbom in this.Relationships("Part BOM", "quantity"))
+                    foreach(PartBOM partbom in this.Relationships("Part BOM"))
                     {
                         this._partBOM.Add(partbom);
                     }
@@ -76,7 +76,7 @@ namespace Aras.Design
                 {
                     this._partVariant = new List<PartVariant>();
 
-                    foreach (PartVariant partvariant in this.Relationships("Part Variants", "quantity"))
+                    foreach (PartVariant partvariant in this.Relationships("Part Variants"))
                     {
                         this._partVariant.Add(partvariant);
                     }

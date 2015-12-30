@@ -42,7 +42,7 @@ namespace Aras.Model
                 {
                     this._values = new List<ListValue>();
 
-                    foreach(ListValue listvalue in this.Relationships("Value", "value,label"))
+                    foreach(ListValue listvalue in this.Relationships("Value"))
                     {
                         this._values.Add(listvalue);
                     }
