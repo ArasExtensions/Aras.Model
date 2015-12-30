@@ -34,8 +34,29 @@ namespace Aras.Design
     public class PartVariant : Model.Relationship
     {
 
-        public PartVariant(String ID, String ConfigID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
-            :base(ID, ConfigID, Type, Source, Related)
+        public Double Quantity
+        {
+            get
+            {
+                Double? quanity = (Double?)this.Property("quantity").Value;
+
+                if (quanity == null)
+                {
+                    return 0.0;
+                }
+                else
+                {
+                    return (Double)quanity;
+                }
+            }
+            set
+            {
+                this.Property("quantity").Value = value;
+            }
+        }
+
+        public PartVariant(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
+            :base(ID, Type, Source, Related)
         {
 
         }

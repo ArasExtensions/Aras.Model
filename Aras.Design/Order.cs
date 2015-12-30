@@ -45,8 +45,70 @@ namespace Aras.Design
             }
         }
 
-        public Order(String ID, String ConfigID, Model.ItemType Type)
-            :base(ID, ConfigID, Type)
+        public Part Part
+        {
+            get
+            {
+                return (Part)this.Property("part").Value;
+            }
+            set
+            {
+                this.Property("part").Value = value;
+            }
+        }
+
+        public Part ConfiguredPart
+        {
+            get
+            {
+                return (Part)this.Property("configured_part").Value;
+            }
+            set
+            {
+                this.Property("configured_part").Value = value;
+            }
+        }
+
+        private List<OrderContext> _orderContext;
+        public IEnumerable<OrderContext> OrderContext
+        {
+            get
+            {
+                if (this._orderContext == null)
+                {
+                    this._orderContext = new List<OrderContext>();
+
+                    foreach(OrderContext ordercontext in this.Relationships("v_Order Context", "value,quantity"))
+                    {
+                        this._orderContext.Add(ordercontext);
+                    }
+                }
+
+                return this._orderContext;
+            }
+        }
+        
+        private void Process()
+        {
+            if (this.Status == States.Create || this.Status == States.Update)
+            {
+
+            }
+        }
+
+        protected override void OnUpdate()
+        {
+            base.OnUpdate();
+            this.Process();
+        }
+
+        protected override void OnRefresh()
+        {
+            base.OnRefresh();
+        }
+
+        public Order(String ID, Model.ItemType Type)
+            :base(ID, Type)
         {
 
         }

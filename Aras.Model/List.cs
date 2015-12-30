@@ -67,8 +67,8 @@ namespace Aras.Model
         }
    
 
-        public List(String ID, String ConfigID, ItemType ItemType)
-            :base(ID, ConfigID, ItemType)
+        public List(String ID, ItemType ItemType)
+            :base(ID, ItemType)
         {
            
         }

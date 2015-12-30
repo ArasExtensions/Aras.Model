@@ -64,7 +64,13 @@ namespace Aras.Model
 
         public String ID { get; private set; }
 
-        public String ConfigID { get; private set; }
+        public String ConfigID
+        {
+            get
+            {
+                return (String)this.Property("config_id").Value;
+            }
+        }
 
         public ItemType ItemType { get; private set; }
 
@@ -297,17 +303,54 @@ namespace Aras.Model
             }
         }
 
+        public virtual void Refresh()
+        {
+            List<String> propertynames = new List<String>();
+            propertynames.Add("id");
+
+            foreach(Property property in this.Properties)
+            {
+                propertynames.Add(property.Type.Name);
+            }
+
+            IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
+            dbitem.Select = String.Join(",", propertynames);
+            dbitem.ID = this.ID;
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, dbitem);
+            IO.SOAPResponse response = request.Execute();
+
+            if (!response.IsError)
+            {
+                this.UpdateProperties(response.Items.First());
+                this.OnRefresh();
+            }
+            else
+            {
+                throw new Exceptions.ServerException(response);
+            }
+        }
+
+        protected virtual void OnRefresh()
+        {
+
+        }
+
         public void Update(Transaction Transaction)
         {
             if (this.Lock())
             {
                 Transaction.Add("update", this);
-                this.Status = States.Update;
+                this.OnUpdate();
             }
             else
             {
                 throw new Exceptions.ServerException("Failed to lock Item");
             }
+        }
+
+        protected virtual void OnUpdate()
+        {
+            this.Status = States.Update;
         }
 
         public Transaction Transaction { get; internal set; }
@@ -409,7 +452,7 @@ namespace Aras.Model
             return this.Relationships(this.ItemType.RelationshipType(RelationshipType), Select);
         }
 
-        public Item(String ID, String ConfigID, ItemType Type)
+        public Item(String ID, ItemType Type)
         {
             this.PropertyCache = new Dictionary<PropertyType, Property>();
             this.RelationshipsCache = new Dictionary<RelationshipType, Queries.Relationship>();
@@ -418,13 +461,11 @@ namespace Aras.Model
             if (ID == null)
             {
                 this.ID = Server.NewID();
-                this.ConfigID = this.ID;
                 this._status = States.Create;
             }
             else
             {
                 this.ID = ID;
-                this.ConfigID = ConfigID;
                 this._status = States.Read;
             }
 

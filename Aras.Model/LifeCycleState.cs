@@ -41,8 +41,8 @@ namespace Aras.Model
             }
         }
 
-        public LifeCycleState(String ID, String ConfigID, RelationshipType RelationshipType, Item Source, Item Related)
-            :base(ID, ConfigID, RelationshipType, Source, Related)
+        public LifeCycleState(String ID, RelationshipType RelationshipType, Item Source, Item Related)
+            :base(ID, RelationshipType, Source, Related)
         {
       
         }

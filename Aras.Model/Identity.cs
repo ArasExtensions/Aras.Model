@@ -33,8 +33,8 @@ namespace Aras.Model
     [Attributes.ItemType("Identity")]
     public class Identity : Item
     {
-        public Identity(String ID, String ConfigID, ItemType Type)
-            :base(ID, ConfigID, Type)
+        public Identity(String ID, ItemType Type)
+            :base(ID, Type)
         {
 
         }

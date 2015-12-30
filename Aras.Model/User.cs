@@ -59,7 +59,7 @@ namespace Aras.Model
             if (!AliasLoaded)
             {
                 IO.Item dbalias = new IO.Item("Alias", "get");
-                dbalias.Select = "id,config_id,related_id(id,config_id)";
+                dbalias.Select = "id,related_id";
                 dbalias.SetProperty("source_id", this.ID);
                 IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, dbalias);
                 IO.SOAPResponse response = request.Execute();
@@ -68,8 +68,8 @@ namespace Aras.Model
                 {
                     dbalias = response.Items.First();
                     IO.Item dbidenity = dbalias.GetPropertyItem("related_id");
-                    this._identity = (Identity)this.ItemType.Session.ItemFromCache(dbidenity.ID, dbidenity.ConfigID, this.ItemType.Session.ItemType("Identity"));
-                    this._alias = (Alias)this.ItemType.Session.RelationshipFromCache(dbalias.ID, dbalias.ConfigID, this.ItemType.RelationshipType("Alias"), this, this._identity);
+                    this._identity = (Identity)this.ItemType.Session.ItemFromCache(dbidenity.ID, this.ItemType.Session.ItemType("Identity"));
+                    this._alias = (Alias)this.ItemType.Session.RelationshipFromCache(dbalias.ID, this.ItemType.RelationshipType("Alias"), this, this._identity);
                 }
                 else
                 {
@@ -80,8 +80,8 @@ namespace Aras.Model
             }
         }
 
-        public User(String ID, String ConfigID, ItemType Type)
-            :base(ID, ConfigID, Type)
+        public User(String ID, ItemType Type)
+            :base(ID, Type)
         {
             this.AliasLoaded = false;
         }

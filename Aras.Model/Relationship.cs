@@ -40,12 +40,47 @@ namespace Aras.Model
             }
         }
 
+        public override void Refresh()
+        {
+            List<String> propertynames = new List<String>();
+            propertynames.Add("id");
+            propertynames.Add("related_id");
+
+            foreach (Property property in this.Properties)
+            {
+                propertynames.Add(property.Type.Name);
+            }
+
+            IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
+            dbitem.Select = String.Join(",", propertynames);
+            dbitem.ID = this.ID;
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, dbitem);
+            IO.SOAPResponse response = request.Execute();
+
+            if (!response.IsError)
+            {
+                this.UpdateProperties(response.Items.First());
+                IO.Item dbrelated = response.Items.First().GetPropertyItem("related_id");
+
+                if (dbrelated != null)
+                {
+                    this.Related = this.ItemType.Session.ItemFromCache(dbrelated.ID, this.RelationshipType.Related);
+                }
+
+                this.OnRefresh();
+            }
+            else
+            {
+                throw new Exceptions.ServerException(response);
+            }
+        }
+
         public Item Source { get; private set; }
 
         public Item Related { get; private set; }
 
-        public Relationship(String ID, String ConfigID, RelationshipType Type, Item Source, Item Related)
-            :base(ID, ConfigID, Type)
+        public Relationship(String ID, RelationshipType Type, Item Source, Item Related)
+            :base(ID, Type)
         {
             this.Source = Source;
             this.Related = Related;

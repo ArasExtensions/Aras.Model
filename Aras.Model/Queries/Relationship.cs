@@ -46,7 +46,7 @@ namespace Aras.Model.Queries
             this.Relationships.Clear();
 
             IO.Item item = new IO.Item(this.Type.Name, "get");
-            item.Select = "id,config_id,related_id(id,config_id)," + this.Select;
+            item.Select = "id,related_id," + this.Select;
             item.SetProperty("source_id", this.Source.ID);
             IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, item);
             IO.SOAPResponse response = request.Execute();
@@ -63,11 +63,11 @@ namespace Aras.Model.Queries
 
                         if (dbrelated != null)
                         {
-                            related = this.Type.Session.ItemFromCache(dbrelated.ID, dbrelated.ConfigID, ((RelationshipType)this.Type).Related);
+                            related = this.Type.Session.ItemFromCache(dbrelated.ID, ((RelationshipType)this.Type).Related);
                         }
                     }
 
-                    Model.Relationship relationship = this.Type.Session.RelationshipFromCache(dbitem.ID, dbitem.ConfigID, (RelationshipType)this.Type, this.Source, related);
+                    Model.Relationship relationship = this.Type.Session.RelationshipFromCache(dbitem.ID, (RelationshipType)this.Type, this.Source, related);
                     relationship.UpdateProperties(dbitem);
                     this.Relationships.Add(relationship);
                 }

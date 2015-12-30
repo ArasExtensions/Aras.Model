@@ -33,8 +33,73 @@ namespace Aras.Design
     [Model.Attributes.ItemType("Part")]
     public class Part : Model.Item
     {
-        public Part(String ID, String ConfigID, Model.ItemType Type)
-            :base(ID, ConfigID, Type)
+        public Boolean Variant
+        {
+            get
+            {
+                if ((this.Class != null) && (this.Class.Name == "Variant"))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        private List<PartBOM> _partBOM;
+        public IEnumerable<PartBOM> PartBOM
+        {
+            get
+            {
+                if (this._partBOM == null)
+                {
+                    this._partBOM = new List<PartBOM>();
+   
+                    foreach(PartBOM partbom in this.Relationships("Part BOM", "quantity"))
+                    {
+                        this._partBOM.Add(partbom);
+                    }
+                }
+
+                return this._partBOM;
+            }
+        }
+
+        private List<PartVariant> _partVariant;
+        public IEnumerable<PartVariant> PartVariant
+        {
+            get
+            {
+                if (this._partVariant == null)
+                {
+                    this._partVariant = new List<PartVariant>();
+
+                    foreach (PartVariant partvariant in this.Relationships("Part Variants", "quantity"))
+                    {
+                        this._partVariant.Add(partvariant);
+                    }
+                }
+
+                return this._partVariant;
+            }
+        }
+
+        public IEnumerable<PartBOM> ConfiguredPartBOM(Order Order)
+        {
+            return null;
+        }
+
+        protected override void OnRefresh()
+        {
+            base.OnRefresh();
+            this._partBOM = null;
+            this._partVariant = null;
+        }
+
+        public Part(String ID, Model.ItemType Type)
+            :base(ID, Type)
         {
 
         }

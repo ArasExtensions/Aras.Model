@@ -33,8 +33,8 @@ namespace Aras.Model
     [Attributes.ItemType("Life Cycle Map")]
     public class LifeCycleMap : Item
     {
-        public LifeCycleMap(String ID, String ConfigID, ItemType Type)
-            :base(ID, ConfigID, Type)
+        public LifeCycleMap(String ID, ItemType Type)
+            :base(ID, Type)
         {
 
         }

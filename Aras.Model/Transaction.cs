@@ -95,7 +95,7 @@ namespace Aras.Model
                         foreach (IO.Item dbitem in response.Items)
                         {
                             ItemType itemtype = Session.ItemType(dbitem.ItemType);
-                            Item item = this.Session.ItemFromCache(dbitem.ID, dbitem.ConfigID, itemtype);
+                            Item item = this.Session.ItemFromCache(dbitem.ID, itemtype);
                             item.UpdateProperties(dbitem);
                             item.UnLock();
                             item.Transaction = null;

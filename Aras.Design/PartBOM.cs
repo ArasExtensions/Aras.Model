@@ -49,10 +49,14 @@ namespace Aras.Design
                     return (Double)quanity;
                 }
             }
+            set
+            {
+                this.Property("quantity").Value = value;
+            }
         }
 
-        public PartBOM(String ID, String ConfigID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
-            :base(ID, ConfigID, Type, Source, Related)
+        public PartBOM(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
+            :base(ID, Type, Source, Related)
         {
 
         }

@@ -33,8 +33,8 @@ namespace Aras.Model
     [Attributes.ItemType("Permission")]
     public class Permission : Item
     {
-        public Permission(String ID, String ConfigID, ItemType Type)
-            :base(ID, ConfigID, Type)
+        public Permission(String ID, ItemType Type)
+            :base(ID, Type)
         {
 
         }

@@ -33,7 +33,7 @@ namespace Aras.Model
 {
     public class ItemType
     {
-        private readonly String[] SystemProperties = new String[] { "id", "config_id", "source_id", "related_id" };
+        private readonly String[] SystemProperties = new String[] { "id", "source_id", "related_id" };
 
         public Session Session { get; private set; }
 
@@ -143,108 +143,115 @@ namespace Aras.Model
 
                             if (!SystemProperties.Contains(name))
                             {
-                                switch (thisprop.GetProperty("data_type"))
+                                if (name.Equals("config_id"))
                                 {
-                                    case "string":
-                                        Int32 length = 32;
-                                        Int32.TryParse(thisprop.GetProperty("stored_length"), out length);
-                                        this._propertyTypeCache[name] = new PropertyTypes.String(this, name, ReadOnly, DefaultString, length);
-                                        break;
-                                    case "ml_string":
-                                        Int32 ml_length = 32;
-                                        Int32.TryParse(thisprop.GetProperty("stored_length"), out ml_length);
-                                        this._propertyTypeCache[name] = new PropertyTypes.MultilingualString(this, name, ReadOnly, DefaultString, ml_length);
-                                        break;
-                                    case "text":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Text(this, name, ReadOnly, DefaultString);
-                                        break;
-                                    case "md5":
-                                        this._propertyTypeCache[name] = new PropertyTypes.MD5(this, name, ReadOnly, DefaultString);
-                                        break;
-                                    case "image":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Image(this, name, ReadOnly, DefaultString);
-                                        break;
-                                    case "integer":
+                                    this._propertyTypeCache[name] = new PropertyTypes.String(this, name, true, null, 32);
+                                }
+                                else
+                                {
+                                    switch (thisprop.GetProperty("data_type"))
+                                    {
+                                        case "string":
+                                            Int32 length = 32;
+                                            Int32.TryParse(thisprop.GetProperty("stored_length"), out length);
+                                            this._propertyTypeCache[name] = new PropertyTypes.String(this, name, ReadOnly, DefaultString, length);
+                                            break;
+                                        case "ml_string":
+                                            Int32 ml_length = 32;
+                                            Int32.TryParse(thisprop.GetProperty("stored_length"), out ml_length);
+                                            this._propertyTypeCache[name] = new PropertyTypes.MultilingualString(this, name, ReadOnly, DefaultString, ml_length);
+                                            break;
+                                        case "text":
+                                            this._propertyTypeCache[name] = new PropertyTypes.Text(this, name, ReadOnly, DefaultString);
+                                            break;
+                                        case "md5":
+                                            this._propertyTypeCache[name] = new PropertyTypes.MD5(this, name, ReadOnly, DefaultString);
+                                            break;
+                                        case "image":
+                                            this._propertyTypeCache[name] = new PropertyTypes.Image(this, name, ReadOnly, DefaultString);
+                                            break;
+                                        case "integer":
 
-                                        if (DefaultString != null)
-                                        {
-                                            Int32 DefaultInteger = 0;
-                                            Int32.TryParse(DefaultString, out DefaultInteger);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, ReadOnly, DefaultInteger);
-                                        }
-                                        else
-                                        {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, ReadOnly, null);
-                                        }
+                                            if (DefaultString != null)
+                                            {
+                                                Int32 DefaultInteger = 0;
+                                                Int32.TryParse(DefaultString, out DefaultInteger);
+                                                this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, ReadOnly, DefaultInteger);
+                                            }
+                                            else
+                                            {
+                                                this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, ReadOnly, null);
+                                            }
 
-                                        break;
-                                    case "item":
-                                        ItemType valueitemtype = this.Session.ItemTypeByID(thisprop.GetProperty("data_source"));
-                                        this._propertyTypeCache[name] = new PropertyTypes.Item(this, name, ReadOnly, valueitemtype);
+                                            break;
+                                        case "item":
+                                            ItemType valueitemtype = this.Session.ItemTypeByID(thisprop.GetProperty("data_source"));
+                                            this._propertyTypeCache[name] = new PropertyTypes.Item(this, name, ReadOnly, valueitemtype);
 
-                                        break;
-                                    case "date":
+                                            break;
+                                        case "date":
 
-                                        if (DefaultString != null)
-                                        {
-                                            DateTime DefaultDate;
-                                            DateTime.TryParse(DefaultString, out DefaultDate);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, ReadOnly, DefaultDate);
-                                        }
-                                        else
-                                        {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, ReadOnly, null);
-                                        }
+                                            if (DefaultString != null)
+                                            {
+                                                DateTime DefaultDate;
+                                                DateTime.TryParse(DefaultString, out DefaultDate);
+                                                this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, ReadOnly, DefaultDate);
+                                            }
+                                            else
+                                            {
+                                                this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, ReadOnly, null);
+                                            }
 
-                                        break;
-                                    case "list":
-                                        List valuelist = this.Session.ListByID(thisprop.GetProperty("data_source"));
-                                        this._propertyTypeCache[name] = new PropertyTypes.List(this, name, ReadOnly, valuelist);
+                                            break;
+                                        case "list":
+                                            List valuelist = this.Session.ListByID(thisprop.GetProperty("data_source"));
+                                            this._propertyTypeCache[name] = new PropertyTypes.List(this, name, ReadOnly, valuelist);
 
-                                        break;
-                                    case "decimal":
+                                            break;
+                                        case "decimal":
 
-                                        if (DefaultString != null)
-                                        {
-                                            Decimal DefaultDecimal = 0;
-                                            Decimal.TryParse(DefaultString, out DefaultDecimal);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, ReadOnly, DefaultDecimal);
-                                        }
-                                        else
-                                        {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, ReadOnly, null);
-                                        }
+                                            if (DefaultString != null)
+                                            {
+                                                Decimal DefaultDecimal = 0;
+                                                Decimal.TryParse(DefaultString, out DefaultDecimal);
+                                                this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, ReadOnly, DefaultDecimal);
+                                            }
+                                            else
+                                            {
+                                                this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, ReadOnly, null);
+                                            }
 
-                                        break;
-                                    case "float":
+                                            break;
+                                        case "float":
 
-                                        if (DefaultString != null)
-                                        {
-                                            Double DefaultDouble = 0;
-                                            Double.TryParse(DefaultString, out DefaultDouble);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Float(this, name, ReadOnly, DefaultDouble);
-                                        }
-                                        else
-                                        {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, ReadOnly, null);
-                                        }
+                                            if (DefaultString != null)
+                                            {
+                                                Double DefaultDouble = 0;
+                                                Double.TryParse(DefaultString, out DefaultDouble);
+                                                this._propertyTypeCache[name] = new PropertyTypes.Float(this, name, ReadOnly, DefaultDouble);
+                                            }
+                                            else
+                                            {
+                                                this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, ReadOnly, null);
+                                            }
 
-                                        break;
-                                    case "boolean":
+                                            break;
+                                        case "boolean":
 
-                                        if (DefaultString != null)
-                                        {
-                                            Boolean DefaultBoolean = "1".Equals(DefaultString);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, ReadOnly, DefaultBoolean);
-                                        }
-                                        else
-                                        {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, ReadOnly, null);
-                                        }
+                                            if (DefaultString != null)
+                                            {
+                                                Boolean DefaultBoolean = "1".Equals(DefaultString);
+                                                this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, ReadOnly, DefaultBoolean);
+                                            }
+                                            else
+                                            {
+                                                this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, ReadOnly, null);
+                                            }
 
-                                        break;
-                                    default:
-                                        throw new NotImplementedException("Property Type not implmented: " + thisprop.GetProperty("data_type"));
+                                            break;
+                                        default:
+                                            throw new NotImplementedException("Property Type not implmented: " + thisprop.GetProperty("data_type"));
+                                    }
                                 }
                             }
                         }

@@ -49,8 +49,8 @@ namespace Aras.Model
             }
         }
 
-        public Alias(String ID, String ConfigID, RelationshipType RelationshipType, Item Source, Item Related)
-            :base(ID, ConfigID, RelationshipType, Source, Related)
+        public Alias(String ID, RelationshipType RelationshipType, Item Source, Item Related)
+            :base(ID, RelationshipType, Source, Related)
         {
       
         }

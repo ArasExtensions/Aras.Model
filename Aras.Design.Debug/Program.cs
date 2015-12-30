@@ -40,14 +40,15 @@ namespace Aras.Design.Debug
             database.LoadAssembly(Environment.CurrentDirectory + "\\Aras.Design.dll");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-            foreach (Order order in session.Query("v_Order", "item_number"))
+            foreach (Order order in session.Query("v_Order", "keyed_name,item_number,name,part,locked_by_id,configured_part"))
             {
                 if (order.ItemNumber == "0002")
                 {
                    using(Transaction transaction = session.BeginTransaction())
                    {
                        order.Update(transaction);
-                       order.Property("name").Value = "RJM Company 0002";
+                       order.Property("name").Value = "Test Company 0002";
+
                        transaction.Commit();
                    }
                 }

@@ -34,8 +34,8 @@ namespace Aras.Design
     public class VariantContext : Model.Item
     {
 
-        public VariantContext(String ID, String ConfigID, Model.ItemType Type)
-            :base(ID, ConfigID, Type)
+        public VariantContext(String ID, Model.ItemType Type)
+            :base(ID, Type)
         {
 
         }

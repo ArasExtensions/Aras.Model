@@ -33,8 +33,8 @@ namespace Aras.Design
     [Model.Attributes.ItemType("Part Variant Rule")]
     public class PartVariantRule : Model.Relationship
     {
-        public PartVariantRule(String ID, String ConfigID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
-            :base(ID, ConfigID, Type, Source, Related)
+        public PartVariantRule(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
+            :base(ID, Type, Source, Related)
         {
 
         }

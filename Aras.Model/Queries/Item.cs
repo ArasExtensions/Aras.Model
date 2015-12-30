@@ -44,7 +44,7 @@ namespace Aras.Model.Queries
             this.Items.Clear();
 
             IO.Item item = new IO.Item(this.Type.Name, "get");
-            item.Select = "id,config_id," + this.Select;
+            item.Select = "id," + this.Select;
             IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, item);
             IO.SOAPResponse response = request.Execute();
 
@@ -52,7 +52,7 @@ namespace Aras.Model.Queries
             {
                 foreach(IO.Item dbitem in response.Items)
                 {
-                    Model.Item cacheitem = this.Type.Session.ItemFromCache(dbitem.ID, dbitem.ConfigID, this.Type);
+                    Model.Item cacheitem = this.Type.Session.ItemFromCache(dbitem.ID, this.Type);
                     cacheitem.UpdateProperties(dbitem);
                     this.Items.Add(cacheitem);
                 }
