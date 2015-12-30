@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Aras.Model
 {
@@ -39,6 +40,64 @@ namespace Aras.Model
         public String ID { get; private set; }
 
         public String Name { get; private set; }
+
+        public Class ClassStructure { get; private set; }
+
+        public Class GetClassFullname(String Fullname)
+        {
+            if (Fullname == null)
+            {
+                return this.ClassStructure;
+            }
+            else
+            {
+                String[] parts = Fullname.Split('/');
+                Class currentclass = this.ClassStructure;
+
+                foreach (String part in parts)
+                {
+                    Boolean found = false;
+
+                    foreach (Class subclass in currentclass.Children)
+                    {
+                        if (subclass.Name.Equals(part))
+                        {
+                            currentclass = subclass;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        return this.ClassStructure;
+                    }
+                }
+
+                return currentclass;
+            }
+        }
+
+        public Class GetClassName(String Name)
+        {
+            if (Name == null)
+            {
+                return this.ClassStructure;
+            }
+            else
+            {
+                Class ret = this.ClassStructure.Search(Name);
+
+                if (ret != null)
+                {
+                    return ret;
+                }
+                else
+                {
+                    return this.ClassStructure;
+                }
+            }
+        }
 
         protected Type _class;
         internal virtual Type Class
@@ -269,13 +328,25 @@ namespace Aras.Model
             return this.Name;
         }
 
-        internal ItemType(Session Session, String ID, String Name)
+        internal ItemType(Session Session, String ID, String Name, String ClassStructure)
         {
             this.RelationshipTypeCache = new Dictionary<String, RelationshipType>();
             this.RelationshipTypesLoaded = false;
             this.Session = Session;
             this.ID = ID;
             this.Name = Name;
+
+            if (ClassStructure != null)
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(ClassStructure);
+                XmlNode root = doc.SelectSingleNode("class");
+                this.ClassStructure = new Class(this, null, root);
+            }
+            else
+            {
+                this.ClassStructure = new Class(this, null, null);
+            }
         }
     }
 }

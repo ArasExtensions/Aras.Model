@@ -54,8 +54,8 @@ namespace Aras.Model
 
         public ItemType Related { get; private set; }
 
-        internal RelationshipType(Session Session, String ID, String Name, ItemType Source, ItemType Related)
-            :base(Session, ID, Name)
+        internal RelationshipType(Session Session, String ID, String Name, String ClassStructure, ItemType Source, ItemType Related)
+            : base(Session, ID, Name, ClassStructure)
         {
             this.Source = Source;
             this.Related = Related;

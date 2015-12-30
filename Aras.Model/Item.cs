@@ -68,6 +68,32 @@ namespace Aras.Model
 
         public ItemType ItemType { get; private set; }
 
+        public Class Class
+        {
+            get
+            {
+                return this.ItemType.ClassStructure.Search((String)this.Property("classification").Value);
+            }
+            set
+            {
+                if (value != null)
+                {
+                    if (value.ItemType.Equals(this.ItemType))
+                    {
+                        this.Property("classification").Value = value.Fullname;
+                    }
+                    else
+                    {
+                        throw new Exceptions.ArgumentException("Class is from another ItemType");
+                    }
+                }
+                else
+                {
+                    this.Property("classification").Value = null;
+                }
+            }
+        }
+
         public String KeyedName
         {
             get

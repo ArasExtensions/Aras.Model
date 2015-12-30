@@ -82,7 +82,7 @@ namespace Aras.Model
                         relateditemtype = this.ItemTypeByID(dbrelateditemtype.ID);
                     }
 
-                    RelationshipType relationshiptype = new RelationshipType(this, DBItem.ID, DBItem.GetProperty("name"), sourceitemtype, relateditemtype);
+                    RelationshipType relationshiptype = new RelationshipType(this, DBItem.ID, DBItem.GetProperty("name"), DBItem.GetProperty("class_structure"), sourceitemtype, relateditemtype);
                     this.ItemTypeNameCache[relationshiptype.Name] = relationshiptype;
                     this.ItemTypeIDCache[relationshiptype.ID] = relationshiptype;
                 }
@@ -94,7 +94,7 @@ namespace Aras.Model
             }
             else
             {
-                ItemType itemtype = new ItemType(this, DBItem.ID, DBItem.GetProperty("name"));
+                ItemType itemtype = new ItemType(this, DBItem.ID, DBItem.GetProperty("name"), DBItem.GetProperty("class_structure"));
                 this.ItemTypeNameCache[itemtype.Name] = itemtype;
                 this.ItemTypeIDCache[itemtype.ID] = itemtype;
             }
@@ -105,7 +105,7 @@ namespace Aras.Model
             if (!this.ItemTypeNameCache.ContainsKey(Name))
             {
                 IO.Item itemtype = new IO.Item("ItemType", "get");
-                itemtype.Select = "id,name,is_relationship";
+                itemtype.Select = "id,name,is_relationship,class_structure";
                 itemtype.SetProperty("name", Name);
                 IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, itemtype);
                 IO.SOAPResponse response = request.Execute();
@@ -128,7 +128,7 @@ namespace Aras.Model
             if (!this.ItemTypeIDCache.ContainsKey(ID))
             {
                 IO.Item itemtype = new IO.Item("ItemType", "get");
-                itemtype.Select = "id,name,is_relationship";
+                itemtype.Select = "id,name,is_relationship,class_structure";
                 itemtype.ID = ID;
                 IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, itemtype);
                 IO.SOAPResponse response = request.Execute();

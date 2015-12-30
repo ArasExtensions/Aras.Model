@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="Action.cs" />
     <Compile Include="Attributes\ItemType.cs" />
+    <Compile Include="Class.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="Exceptions\ReadOnlyException.cs" />
     <Compile Include="Exceptions\ArgumentException.cs" />
