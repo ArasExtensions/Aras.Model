@@ -39,6 +39,7 @@ namespace Aras.Model
         internal void Add(String Name, Item Item)
         {
             this._actions.Add(new Action(Name, Item));
+            Item.Transaction = this;
         }
 
         public Boolean Committed { get; private set; }
@@ -79,6 +80,7 @@ namespace Aras.Model
                         else
                         {
                             action.Item.UnLock();
+                            action.Item.Transaction = null;
                         }
                     }
                 }
@@ -96,6 +98,7 @@ namespace Aras.Model
                             Item item = this.Session.ItemFromCache(dbitem.ID, dbitem.ConfigID, itemtype);
                             item.UpdateProperties(dbitem);
                             item.UnLock();
+                            item.Transaction = null;
                         }
                     }
                     else

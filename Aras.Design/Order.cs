@@ -27,31 +27,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Aras.Model;
 
-namespace Aras.Design.Debug
+namespace Aras.Design
 {
-    class Program
+    [Model.Attributes.ItemType("v_Order")]
+    public class Order : Model.Item
     {
-        static void Main(string[] args)
+        public String ItemNumber
         {
-            Server server = new Server("http://localhost/11SP1");
-            Database database = server.Database("VariantsDemo11SP1");
-            database.LoadAssembly(Environment.CurrentDirectory + "\\Aras.Design.dll");
-            Session session = database.Login("admin", Server.PasswordHash("innovator"));
-
-            foreach (Order order in session.Query("v_Order", "item_number"))
+            get
             {
-                if (order.ItemNumber == "0002")
-                {
-                   using(Transaction transaction = session.BeginTransaction())
-                   {
-                       order.Update(transaction);
-                       order.Property("name").Value = "RJM Company 0002";
-                       transaction.Commit();
-                   }
-                }
+                return (String)this.Property("item_number").Value;
             }
+            set
+            {
+                this.Property("item_number").Value = value;
+            }
+        }
+
+        public Order(String ID, String ConfigID, Model.ItemType Type)
+            :base(ID, ConfigID, Type)
+        {
+
         }
     }
 }

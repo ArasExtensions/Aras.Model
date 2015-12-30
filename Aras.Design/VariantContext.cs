@@ -27,31 +27,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Aras.Model;
 
-namespace Aras.Design.Debug
+namespace Aras.Design
 {
-    class Program
+    [Model.Attributes.ItemType("Variant Context")]
+    public class VariantContext : Model.Item
     {
-        static void Main(string[] args)
-        {
-            Server server = new Server("http://localhost/11SP1");
-            Database database = server.Database("VariantsDemo11SP1");
-            database.LoadAssembly(Environment.CurrentDirectory + "\\Aras.Design.dll");
-            Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-            foreach (Order order in session.Query("v_Order", "item_number"))
-            {
-                if (order.ItemNumber == "0002")
-                {
-                   using(Transaction transaction = session.BeginTransaction())
-                   {
-                       order.Update(transaction);
-                       order.Property("name").Value = "RJM Company 0002";
-                       transaction.Commit();
-                   }
-                }
-            }
+        public VariantContext(String ID, String ConfigID, Model.ItemType Type)
+            :base(ID, ConfigID, Type)
+        {
+
         }
     }
 }

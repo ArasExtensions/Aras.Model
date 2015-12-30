@@ -159,6 +159,7 @@ namespace Aras.Model
                         {
                             this._value = value;
                             this.Modified = true;
+                            this.Loaded = true;
                             this.OnPropertyChanged("Value");
                         }
                     }
@@ -168,6 +169,7 @@ namespace Aras.Model
                         {
                             this._value = value;
                             this.Modified = true;
+                            this.Loaded = true;
                             this.OnPropertyChanged("Value");
                         }
                     }

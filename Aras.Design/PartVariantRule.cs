@@ -27,31 +27,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Aras.Model;
 
-namespace Aras.Design.Debug
+namespace Aras.Design
 {
-    class Program
+    [Model.Attributes.ItemType("Part Variant Rule")]
+    public class PartVariantRule : Model.Relationship
     {
-        static void Main(string[] args)
+        public PartVariantRule(String ID, String ConfigID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
+            :base(ID, ConfigID, Type, Source, Related)
         {
-            Server server = new Server("http://localhost/11SP1");
-            Database database = server.Database("VariantsDemo11SP1");
-            database.LoadAssembly(Environment.CurrentDirectory + "\\Aras.Design.dll");
-            Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-            foreach (Order order in session.Query("v_Order", "item_number"))
-            {
-                if (order.ItemNumber == "0002")
-                {
-                   using(Transaction transaction = session.BeginTransaction())
-                   {
-                       order.Update(transaction);
-                       order.Property("name").Value = "RJM Company 0002";
-                       transaction.Commit();
-                   }
-                }
-            }
         }
     }
 }

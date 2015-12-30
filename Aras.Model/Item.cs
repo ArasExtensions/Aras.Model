@@ -310,6 +310,8 @@ namespace Aras.Model
             }
         }
 
+        public Transaction Transaction { get; internal set; }
+
         private Boolean Lock()
         {
             this.Property("locked_by_id").Refresh();

@@ -39,6 +39,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PartVariantRule.cs" />
+    <Compile Include="PartVariant.cs" />
+    <Compile Include="VariantContext.cs" />
+    <Compile Include="Order.cs" />
+    <Compile Include="OrderContext.cs" />
     <Compile Include="PartBOM.cs" />
     <Compile Include="Part.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
