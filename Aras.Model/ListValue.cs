@@ -47,6 +47,10 @@ namespace Aras.Model
             {
                 return (String)this.Property("value").Value;
             }
+            set
+            {
+                this.Property("value").Value = value;
+            }
         }
 
         public String Label
@@ -54,6 +58,10 @@ namespace Aras.Model
             get
             {
                 return (String)this.Property("label").Value;
+            }
+            set
+            {
+                this.Property("label").Value = value;
             }
         }
 

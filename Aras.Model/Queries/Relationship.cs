@@ -32,6 +32,7 @@ namespace Aras.Model.Queries
 {
     public class Relationship : Query
     {
+        private List<Model.Relationship> CreatedRelationships;
         private List<Model.Relationship> Relationships;
 
         public override System.Collections.IEnumerator GetEnumerator()
@@ -40,6 +41,29 @@ namespace Aras.Model.Queries
         }
 
         public Model.Item Source { get; private set; }
+
+        public Model.Item Create(Model.Item Related, Transaction Transaction)
+        {
+            Model.Relationship relationship = this.Type.Session.Create((RelationshipType)this.Type, this.Source, Related, Transaction);
+            this.CreatedRelationships.Add(relationship);
+            this.Relationships.Add(relationship);
+            return relationship;
+        }
+
+        public Model.Item Create(Transaction Transaction)
+        {
+            return this.Create(null, Transaction);
+        }
+
+        public Model.Item Create(Model.Item Related)
+        {
+            return this.Create(Related, null);
+        }
+
+        public Model.Item Create()
+        {
+            return this.Create(null, null);
+        }
 
         public override void Refresh()
         {
@@ -71,6 +95,11 @@ namespace Aras.Model.Queries
                     relationship.UpdateProperties(dbitem);
                     this.Relationships.Add(relationship);
                 }
+
+                foreach(Model.Relationship relationship in this.CreatedRelationships)
+                {
+                    this.Relationships.Add(relationship);
+                }
             }
             else
             {
@@ -85,6 +114,7 @@ namespace Aras.Model.Queries
             :base(Type)
         {
             this.Relationships = new List<Model.Relationship>();
+            this.CreatedRelationships = new List<Model.Relationship>();
             this.Source = Source;
             this.Refresh();
         }

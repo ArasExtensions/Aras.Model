@@ -235,13 +235,41 @@ namespace Aras.Model
             {
                 Item item = (Item)Type.Class.GetConstructor(new Type[] { typeof(String), typeof(ItemType) }).Invoke(new object[] { null, Type });                
                 this.ItemCache[item.ID] = item;
-                Transaction.Add("add", item);
+
+                if (Transaction != null)
+                {
+                    Transaction.Add("add", item);
+                }
+
                 return item;
             }
             else
             {
                 throw new Exceptions.ArgumentException("Not possible to create a Relation");
             }
+        }
+
+        public Item Create(ItemType Type)
+        {
+            return this.Create(Type, null);
+        }
+
+        public Item Create(String Type)
+        {
+            return this.Create(Type, null);
+        }
+
+        internal Relationship Create(RelationshipType RelationshipType, Item Source, Item Related, Transaction Transaction)
+        {
+            Relationship relationship = (Relationship)RelationshipType.Class.GetConstructor(new Type[] { typeof(String), typeof(RelationshipType), typeof(Item), typeof(Item) }).Invoke(new object[] { null, RelationshipType, Source, Related });
+            this.ItemCache[relationship.ID] = relationship;
+
+            if (Transaction != null)
+            {
+                Transaction.Add("add", relationship);
+            }
+
+            return relationship;
         }
 
         internal Session(Database Database, String UserID, String Username, String Password)

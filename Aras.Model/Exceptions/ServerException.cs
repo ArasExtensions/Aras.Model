@@ -31,13 +31,13 @@ namespace Aras.Model.Exceptions
 {
     public class ServerException : Exception
     {
-        internal ServerException(String Message, Exception e)
+        public ServerException(String Message, Exception e)
             : base(Message, e)
         { 
 
         }
 
-        internal ServerException(String Message)
+        public ServerException(String Message)
             : base(Message)
         {
 

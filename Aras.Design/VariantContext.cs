@@ -33,6 +33,45 @@ namespace Aras.Design
     [Model.Attributes.ItemType("Variant Context")]
     public class VariantContext : Model.Item
     {
+        public Model.ListValue ContextType
+        {
+            get
+            {
+                return (Model.ListValue)this.Property("context_type").Value;
+            }
+        }
+
+        private Model.List _values;
+        public Model.List Values
+        {
+            get
+            {
+                if (this._values == null)
+                {
+                    switch(this.ContextType.Value)
+                    {
+                        case "List":
+                            this._values = (Model.List)this.Property("list").Value;
+                            break;
+                        case "Boolean":
+                        case "Method":
+                            this._values = (Model.List)this.ItemType.Session.Create("List");
+                            Model.ListValue falseval = (Model.ListValue)this._values.Relationships("Value").Create();
+                            falseval.Value = "0";
+                            falseval.Label = "No";
+                            Model.ListValue trueval = (Model.ListValue)this._values.Relationships("Value").Create();
+                            trueval.Value = "1";
+                            trueval.Label = "Yes";
+
+                            break;
+                        default:
+                            throw new Model.Exceptions.ArgumentException("Invalid Variant Context Type");
+                    }
+                }
+
+                return this._values;
+            }
+        }
 
         public VariantContext(String ID, Model.ItemType Type)
             :base(ID, Type)

@@ -31,7 +31,7 @@ namespace Aras.Model.Exceptions
 {
     public class ArgumentException : Exception
     {
-        internal ArgumentException(String Message)
+        public ArgumentException(String Message)
             : base(Message)
         {
         }

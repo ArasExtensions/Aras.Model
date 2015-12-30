@@ -31,7 +31,7 @@ namespace Aras.Model.Exceptions
 {
     public class ReadOnlyException : Exception
     {
-        internal ReadOnlyException()
+        public ReadOnlyException()
             : base()
         {
         }
