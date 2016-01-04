@@ -55,6 +55,20 @@ namespace Aras.Design
             }
         }
 
+        public String Value
+        {
+            get
+            {
+                return (String)this.Property("value").Value;
+            }
+            set
+            {
+                this.Property("value").Value = value;
+            }
+        }
+
+        public Model.Properties.VariableList ValueList { get; private set; }
+
         public VariantContext VariantContext
         {
             get
@@ -63,10 +77,26 @@ namespace Aras.Design
             }
         }
 
+        private void ValueList_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Value")
+            {
+                if (((Model.Properties.VariableList)sender).Value == null)
+                {
+                    this.Value = null;
+                }
+                else
+                {
+                    this.Value = ((Model.ListValue)((Model.Properties.VariableList)sender).Value).Value;
+                }
+            }
+        }
+
         public OrderContext(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
             :base(ID, Type, Source, Related)
         {
-
+            this.ValueList = this.AddVariableListRuntime("value_list", false, this.VariantContext.Values);
+            this.ValueList.PropertyChanged += ValueList_PropertyChanged;
         }
     }
 }

@@ -410,6 +410,23 @@ namespace Aras.Model
             }
         }
 
+        internal PropertyTypes.VariableList AddVariableListRuntime(String Name, System.Boolean ReadOnly)
+        {
+            if (!this.PropertyTypeCache.ContainsKey(Name))
+            {
+                this.PropertyTypeCache[Name] = new PropertyTypes.VariableList(this, Name, ReadOnly);
+            }
+            else
+            {
+                if (!(this.PropertyTypeCache[Name] is PropertyTypes.VariableList))
+                {
+                    throw new Exceptions.ArgumentException("Duplicate Property Name");
+                }
+            }
+
+            return (PropertyTypes.VariableList)this.PropertyTypeCache[Name];
+        }
+
         public PropertyType PropertyType(String Name)
         {
             if (this.PropertyTypeCache.ContainsKey(Name))

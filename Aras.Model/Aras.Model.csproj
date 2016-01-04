@@ -49,7 +49,9 @@
     <Compile Include="LifeCycleMap.cs" />
     <Compile Include="LifeCycleState.cs" />
     <Compile Include="PropertyTypes\Float.cs" />
+    <Compile Include="PropertyTypes\VariableList.cs" />
     <Compile Include="Props\Float.cs" />
+    <Compile Include="Props\VariableList.cs" />
     <Compile Include="Team.cs" />
     <Compile Include="Permission.cs" />
     <Compile Include="IO\Item.cs" />
