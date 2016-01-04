@@ -36,6 +36,20 @@ namespace Aras.Model
 
         public System.String Name { get; private set; }
 
+        private String _columnName;
+        internal String ColumnName
+        {
+            get
+            {
+                if (this._columnName == null)
+                {
+                    this._columnName = this.Type.TableName + "." + this.Name;
+                }
+
+                return this._columnName;
+            }
+        }
+
         public System.Boolean ReadOnly { get; private set; }
 
         public System.Boolean Runtime { get; private set; }

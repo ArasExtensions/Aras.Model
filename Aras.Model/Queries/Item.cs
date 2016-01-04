@@ -45,6 +45,7 @@ namespace Aras.Model.Queries
 
             IO.Item item = new IO.Item(this.Type.Name, "get");
             item.Select = "id," + this.Type.Select;
+            item.Where = this.Where;
             IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, item);
             IO.SOAPResponse response = request.Execute();
 
@@ -66,11 +67,17 @@ namespace Aras.Model.Queries
             }
         }
 
-        internal Item(ItemType Type)
-            :base(Type)
+        internal Item(ItemType Type, Condition Condition)
+            :base(Type, Condition)
         {
             this.Items = new List<Model.Item>();
             this.Refresh();
+        }
+
+        internal Item(ItemType Type)
+            :this(Type, null)
+        {
+
         }
     }
 }

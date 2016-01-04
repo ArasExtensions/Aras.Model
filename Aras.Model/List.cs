@@ -55,15 +55,22 @@ namespace Aras.Model
 
         public ListValue Value(String Value)
         {
-            foreach(ListValue listvalue in this.Values)
+            if (Value == null)
             {
-                if (listvalue.Value == Value)
-                {
-                    return listvalue;
-                }
+                return null;
             }
+            else
+            {
+                foreach (ListValue listvalue in this.Values)
+                {
+                    if (listvalue.Value == Value)
+                    {
+                        return listvalue;
+                    }
+                }
 
-            throw new Exceptions.ArgumentException("Invalid List Value");
+                throw new Exceptions.ArgumentException("Invalid List Value");
+            }
         }
    
 

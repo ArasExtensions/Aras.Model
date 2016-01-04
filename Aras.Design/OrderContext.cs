@@ -83,11 +83,25 @@ namespace Aras.Design
             {
                 if (((Model.Properties.VariableList)sender).Value == null)
                 {
-                    this.Value = null;
+                    if (this.Value != null)
+                    {
+                        this.Value = null;
+                    }
+
                 }
                 else
                 {
-                    this.Value = ((Model.ListValue)((Model.Properties.VariableList)sender).Value).Value;
+                    if (this.Value == null)
+                    {
+                        this.Value = ((Model.ListValue)((Model.Properties.VariableList)sender).Value).Value;
+                    }
+                    else
+                    {
+                        if(!this.Value.Equals(((Model.ListValue)((Model.Properties.VariableList)sender).Value).Value))
+                        {
+                            this.Value = ((Model.ListValue)((Model.Properties.VariableList)sender).Value).Value;
+                        }
+                    }
                 }
             }
         }
@@ -97,6 +111,7 @@ namespace Aras.Design
         {
             this.ValueList = this.AddVariableListRuntime("value_list", false, this.VariantContext.Values);
             this.ValueList.PropertyChanged += ValueList_PropertyChanged;
+            this.ValueList.Value = this.VariantContext.Values.Value(this.Value);
         }
     }
 }

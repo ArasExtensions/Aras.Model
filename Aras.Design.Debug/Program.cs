@@ -43,23 +43,18 @@ namespace Aras.Design.Debug
             session.ItemType("v_Order").AddToSelect("keyed_name,item_number,name,part,locked_by_id,configured_part");
             session.ItemType("v_Order Context").AddToSelect("quantity");
             session.ItemType("Variant Context").AddToSelect("name,keyed_name,context_type,list,method,question");
-            
 
-            foreach (Order order in session.Query("v_Order"))
+            Order order = (Order)session.Query("v_Order", Conditions.Eq("item_number", "0002")).First();
+
+            using (Transaction transaction = session.BeginTransaction())
             {
-                if (order.ItemNumber == "0002")
-                {
-                   using(Transaction transaction = session.BeginTransaction())
-                   {
-                       order.Update(transaction);
-                       order.Property("name").Value = "Test Company 0002";
-                       OrderContext ordercontext = (OrderContext)order.Relationships("v_Order Context").First();
-                       VariantContext variantcontext = ordercontext.VariantContext;
-                       
+                order.Update(transaction);
+                order.Property("name").Value = "Test Company 0002";
+                OrderContext ordercontext = (OrderContext)order.Relationships("v_Order Context").First();
+                VariantContext variantcontext = ordercontext.VariantContext;
 
-                       transaction.Commit();
-                   }
-                }
+
+                transaction.Commit();
             }
         }
     }

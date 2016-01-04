@@ -110,13 +110,19 @@ namespace Aras.Model.Queries
             }
         }
 
-        internal Relationship(RelationshipType Type, Model.Item Source)
-            :base(Type)
+        internal Relationship(RelationshipType Type, Condition Condition, Model.Item Source)
+            : base(Type, Condition)
         {
             this.Relationships = new List<Model.Relationship>();
             this.CreatedRelationships = new List<Model.Relationship>();
             this.Source = Source;
             this.Refresh();
+        }
+
+        internal Relationship(RelationshipType Type, Model.Item Source)
+            :this(Type, null, Source)
+        {
+
         }
     }
 }

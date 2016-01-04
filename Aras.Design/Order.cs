@@ -88,6 +88,28 @@ namespace Aras.Design
             }
         }
 
+        private void AddVariantContext(VariantContext VariantContext)
+        {
+
+        }
+
+        private Part GetConfiguredPart()
+        {
+            Model.Queries.Item query = this.ItemType.Session.Query("Part", Conditions.Eq("item_number", this.ItemNumber));
+    
+            if (query.Count() == 0)
+            {
+                // Create Part
+                Part ret = (Part)this.ItemType.Session.Create("Part", this.Transaction);
+                ret.ItemNumber = this.ItemNumber;
+                return ret;
+            }
+            else
+            {
+                return (Part)query.First();
+            }
+        }
+
         private Boolean Processing;
         private void Process()
         {
@@ -97,15 +119,25 @@ namespace Aras.Design
 
                 if (this.Status == States.Create || this.Status == States.Update)
                 {
-                    // Load Order Context Already in Database
-                    this.Relationships("v_Order Context").Refresh();
-
-                    foreach (OrderContext ordercontext in this.Relationships("v_Order Context"))
+                    // Check Configured Part - same Item Number as Order
+                    if (this.ConfiguredPart == null)
                     {
-                        this.AddOrderContext(ordercontext);
+                        this.ConfiguredPart = this.GetConfiguredPart();
                     }
-
-
+                    else
+                    {
+                        if (this.ItemNumber != null)
+                        {
+                            if (!this.ItemNumber.Equals(this.ConfiguredPart.ItemNumber))
+                            {
+                                this.ConfiguredPart = this.GetConfiguredPart();
+                            }
+                        }
+                        else
+                        {
+                            this.ConfiguredPart = null;
+                        }
+                    }
                 }
 
                 this.Processing = false;
@@ -128,6 +160,12 @@ namespace Aras.Design
         {
             this.OrderContextCache = new Dictionary<String, OrderContext>();
             this.Processing = false;
+
+            // Load Order Contect already in database
+            foreach (OrderContext ordercontext in this.Relationships("v_Order Context"))
+            {
+                this.AddOrderContext(ordercontext);
+            }
         }
     }
 }

@@ -41,6 +41,20 @@ namespace Aras.Model
 
         public String Name { get; private set; }
 
+        private String _tableName;
+        internal String TableName
+        {
+            get
+            {
+                if (this._tableName == null)
+                {
+                    this._tableName = "[" + this.Name.ToLower().Replace(' ', '_') + "]";
+                }
+
+                return this._tableName;
+            }
+        }
+
         public Class ClassStructure { get; private set; }
 
         public Class GetClassFullname(String Fullname)

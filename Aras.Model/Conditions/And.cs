@@ -28,56 +28,42 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Conditions
 {
-    public abstract class Query<T> : System.Collections.Generic.IEnumerable<T>
+    public class And : Condition
     {
-        public abstract System.Collections.Generic.IEnumerator<T> GetEnumerator();
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        public void Add(Condition Condition)
         {
-            return this.GetEnumerator();
+            this.AddChild(Condition);
         }
 
-        public ItemType Type { get; private set; }
-
-        private Condition _condition;
-        public Condition Condition 
-        { 
-            get
-            {
-                return this._condition;
-            }
-            set
-            {
-                this._condition = value;
-            }
-        }
-
-        public abstract void Refresh();
-
-
-
-
-        protected System.String Where
+        internal override String Where(ItemType ItemType)
         {
-            get
+            switch (this.Children.Count())
             {
-                if (this.Condition == null)
-                {
+                case 0:
                     return null;
-                }
-                else
-                {
-                    return this.Condition.Where(this.Type);
-                }
+                case 1:
+                    return this.Children.First().Where(ItemType);
+                default:
+                    String ret = "(" + this.Children.First().Where(ItemType);
+
+                    for (int i = 1; i < this.Children.Count(); i++)
+                    {
+                        ret += " and " + this.Children.ElementAt(i).Where(ItemType);
+                    }
+
+                    ret += ")";
+
+                    return ret;
             }
         }
 
-        internal Query(ItemType Type, Condition Condition)
+        internal And(Condition Left, Condition Right)
+            : base()
         {
-            this.Type = Type;
-            this._condition = Condition;
+            this.AddChild(Left);
+            this.AddChild(Right);
         }
     }
 }

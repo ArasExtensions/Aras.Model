@@ -42,6 +42,10 @@
     <Compile Include="Action.cs" />
     <Compile Include="Attributes\ItemType.cs" />
     <Compile Include="Class.cs" />
+    <Compile Include="Condition.cs" />
+    <Compile Include="Conditions\Or.cs" />
+    <Compile Include="Conditions\And.cs" />
+    <Compile Include="Conditions\Property.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="Exceptions\ReadOnlyException.cs" />
     <Compile Include="Exceptions\ArgumentException.cs" />
@@ -52,6 +56,7 @@
     <Compile Include="PropertyTypes\VariableList.cs" />
     <Compile Include="Props\Float.cs" />
     <Compile Include="Props\VariableList.cs" />
+    <Compile Include="ConditionCreation.cs" />
     <Compile Include="Team.cs" />
     <Compile Include="Permission.cs" />
     <Compile Include="IO\Item.cs" />

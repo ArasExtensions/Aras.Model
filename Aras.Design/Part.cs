@@ -33,6 +33,18 @@ namespace Aras.Design
     [Model.Attributes.ItemType("Part")]
     public class Part : Model.Item
     {
+        public String ItemNumber
+        {
+            get
+            {
+                return (String)this.Property("item_number").Value;
+            }
+            set
+            {
+                this.Property("item_number").Value = value;
+            }
+        }
+
         public Boolean Variant
         {
             get

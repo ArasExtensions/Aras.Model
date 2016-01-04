@@ -167,17 +167,17 @@ namespace Aras.Model
 
                     if (!response.IsError)
                     {
-                        IO.Item dbsource = response.Items.First().GetPropertyItem("source_id");
-                        Item source = this.ItemFromCache(dbsource.ID, ((RelationshipType)Type).Source);
+                        String sourceid = response.Items.First().GetProperty("source_id");
+                        Item source = this.ItemFromCache(sourceid, ((RelationshipType)Type).Source);
                         Item related = null;
 
                         if (((RelationshipType)Type).Related != null)
                         {
-                            IO.Item dbrelated = response.Items.First().GetPropertyItem("related_id");
-                            
-                            if (dbrelated != null)
+                            String relatedid = response.Items.First().GetProperty("related_id");
+
+                            if (relatedid != null)
                             {
-                                related = this.ItemFromCache(dbrelated.ID, ((RelationshipType)Type).Related);
+                                related = this.ItemFromCache(relatedid, ((RelationshipType)Type).Related);
                             }
                         }
 
@@ -217,6 +217,16 @@ namespace Aras.Model
         public Queries.Item Query(String ItemTypeName)
         {
             return new Queries.Item(this.ItemType(ItemTypeName));
+        }
+
+        public Queries.Item Query(ItemType Type, Condition Condition)
+        {
+            return new Queries.Item(Type, Condition);
+        }
+
+        public Queries.Item Query(String ItemTypeName, Condition Condition)
+        {
+            return new Queries.Item(this.ItemType(ItemTypeName), Condition);
         }
 
         public Transaction BeginTransaction()

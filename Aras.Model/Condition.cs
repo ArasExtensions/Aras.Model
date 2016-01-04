@@ -30,54 +30,28 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public abstract class Query<T> : System.Collections.Generic.IEnumerable<T>
+    public abstract class Condition
     {
-        public abstract System.Collections.Generic.IEnumerator<T> GetEnumerator();
+        private List<Condition> _children;
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
-
-        public ItemType Type { get; private set; }
-
-        private Condition _condition;
-        public Condition Condition 
-        { 
-            get
-            {
-                return this._condition;
-            }
-            set
-            {
-                this._condition = value;
-            }
-        }
-
-        public abstract void Refresh();
-
-
-
-
-        protected System.String Where
+        public IEnumerable<Condition> Children
         {
             get
             {
-                if (this.Condition == null)
-                {
-                    return null;
-                }
-                else
-                {
-                    return this.Condition.Where(this.Type);
-                }
+                return this._children;
             }
         }
 
-        internal Query(ItemType Type, Condition Condition)
+        protected void AddChild(Condition Child)
         {
-            this.Type = Type;
-            this._condition = Condition;
+            this._children.Add(Child);
+        }
+
+        internal abstract String Where(ItemType ItemType);
+
+        internal Condition()
+        {
+            this._children = new List<Condition>();
         }
     }
 }
