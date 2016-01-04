@@ -30,11 +30,11 @@ using System.Threading.Tasks;
 
 namespace Aras.Model.Queries
 {
-    public class Item : Query
+    public class Item : Query<Model.Item>
     {
         private List<Model.Item> Items;
 
-        public override System.Collections.IEnumerator GetEnumerator()
+        public override System.Collections.Generic.IEnumerator<Model.Item> GetEnumerator()
         {
             return this.Items.GetEnumerator();
         }

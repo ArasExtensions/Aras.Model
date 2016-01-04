@@ -69,30 +69,46 @@ namespace Aras.Design
             }
         }
 
-        private List<OrderContext> _orderContext;
-        public IEnumerable<OrderContext> OrderContext
+        private Dictionary<String, OrderContext> OrderContextCache;
+
+        private void AddOrderContext(OrderContext OrderContext)
         {
-            get
+            if (!this.OrderContextCache.ContainsKey(OrderContext.ID))
             {
-                if (this._orderContext == null)
-                {
-                    this._orderContext = new List<OrderContext>();
-
-                    foreach(OrderContext ordercontext in this.Relationships("v_Order Context"))
-                    {
-                        this._orderContext.Add(ordercontext);
-                    }
-                }
-
-                return this._orderContext;
+                this.OrderContextCache[OrderContext.ID] = OrderContext;
+                OrderContext.ValueList.PropertyChanged += ValueList_PropertyChanged;
             }
         }
-        
+
+        void ValueList_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Value")
+            {
+                this.Process();
+            }
+        }
+
+        private Boolean Processing;
         private void Process()
         {
-            if (this.Status == States.Create || this.Status == States.Update)
+            if (!this.Processing)
             {
+                this.Processing = true;
 
+                if (this.Status == States.Create || this.Status == States.Update)
+                {
+                    // Load Order Context Already in Database
+                    this.Relationships("v_Order Context").Refresh();
+
+                    foreach (OrderContext ordercontext in this.Relationships("v_Order Context"))
+                    {
+                        this.AddOrderContext(ordercontext);
+                    }
+
+
+                }
+
+                this.Processing = false;
             }
         }
 
@@ -110,7 +126,8 @@ namespace Aras.Design
         public Order(String ID, Model.ItemType Type)
             :base(ID, Type)
         {
-
+            this.OrderContextCache = new Dictionary<String, OrderContext>();
+            this.Processing = false;
         }
     }
 }

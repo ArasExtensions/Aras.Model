@@ -30,9 +30,14 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public abstract class Query: System.Collections.IEnumerable
+    public abstract class Query<T> : System.Collections.Generic.IEnumerable<T>
     {
-        public abstract System.Collections.IEnumerator GetEnumerator();
+        public abstract System.Collections.Generic.IEnumerator<T> GetEnumerator();
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
 
         public ItemType Type { get; private set; }
 

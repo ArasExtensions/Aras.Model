@@ -30,12 +30,12 @@ using System.Threading.Tasks;
 
 namespace Aras.Model.Queries
 {
-    public class Relationship : Query
+    public class Relationship : Query<Model.Relationship>
     {
         private List<Model.Relationship> CreatedRelationships;
         private List<Model.Relationship> Relationships;
 
-        public override System.Collections.IEnumerator GetEnumerator()
+        public override System.Collections.Generic.IEnumerator<Model.Relationship> GetEnumerator()
         {
             return this.Relationships.GetEnumerator();
         }
