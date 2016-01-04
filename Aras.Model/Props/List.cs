@@ -77,6 +77,18 @@ namespace Aras.Model.Properties
             }
         }
 
+        public override string ToString()
+        {
+            if (this.Value == null)
+            {
+                return "null";
+            }
+            else
+            {
+                return this.Value.ToString();
+            }
+        }
+
         internal List(Model.Item Item, PropertyTypes.List Type)
             :base(Item, Type)
         {

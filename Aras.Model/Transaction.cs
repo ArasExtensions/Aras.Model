@@ -66,7 +66,7 @@ namespace Aras.Model
 
                         foreach (Property prop in action.Item.Properties)
                         {
-                            if (!prop.Type.ReadOnly && (prop.Modified))
+                            if (!prop.Type.Runtime && !prop.Type.ReadOnly && (prop.Modified))
                             {
                                 dbitem.SetProperty(prop.Type.Name, prop.DBValue);
                                 modified = true;

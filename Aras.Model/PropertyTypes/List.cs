@@ -34,8 +34,8 @@ namespace Aras.Model.PropertyTypes
     {
         public Model.List ValueList { get; private set; }
 
-        internal List(ItemType Type, System.String Name, System.Boolean ReadOnly, Model.List ValueList)
-            :base(Type, Name, ReadOnly, null)
+        internal List(ItemType Type, System.String Name, System.Boolean ReadOnly, System.Boolean Runtime, Model.List ValueList)
+            :base(Type, Name, ReadOnly, Runtime, null)
         {
             this.ValueList = ValueList;
         }

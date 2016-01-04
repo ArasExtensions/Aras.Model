@@ -32,8 +32,8 @@ namespace Aras.Model.PropertyTypes
 {
     public class MD5 : PropertyType
     {
-        internal MD5(ItemType Type, System.String Name, System.Boolean ReadOnly, System.String Default)
-            :base(Type, Name, ReadOnly, Default)
+        internal MD5(ItemType Type, System.String Name, System.Boolean ReadOnly, System.Boolean Runtime, System.String Default)
+            :base(Type, Name, ReadOnly, Runtime, Default)
         {
       
         }

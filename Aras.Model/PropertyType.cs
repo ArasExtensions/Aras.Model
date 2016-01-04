@@ -34,22 +34,25 @@ namespace Aras.Model
     {
         public ItemType Type { get; private set; }
 
-        public String Name { get; private set; }
+        public System.String Name { get; private set; }
 
-        public Boolean ReadOnly { get; private set; }
+        public System.Boolean ReadOnly { get; private set; }
+
+        public System.Boolean Runtime { get; private set; }
 
         public Object Default { get; private set; }
 
-        public override string ToString()
+        public override System.String ToString()
         {
             return this.Name;
         }
 
-        internal PropertyType(ItemType Type, String Name, System.Boolean ReadOnly, Object Default)
+        internal PropertyType(ItemType Type, System.String Name, System.Boolean ReadOnly, System.Boolean Runtime, Object Default)
         {
             this.Type = Type;
             this.Name = Name;
             this.ReadOnly = ReadOnly;
+            this.Runtime = Runtime;
             this.Default = Default;
         }
     }

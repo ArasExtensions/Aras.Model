@@ -65,6 +65,11 @@ namespace Aras.Model
             }
         }
 
+        public override string ToString()
+        {
+            return Label;
+        }
+
         public ListValue(String ID, RelationshipType RelationshipType, Item Source, Item Related)
             :base(ID, RelationshipType, Source, Related)
         {

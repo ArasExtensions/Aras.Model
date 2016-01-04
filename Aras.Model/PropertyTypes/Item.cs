@@ -34,8 +34,8 @@ namespace Aras.Model.PropertyTypes
     {
         public ItemType ValueType { get; private set; }
 
-        internal Item(ItemType Type, System.String Name, System.Boolean ReadOnly, ItemType ValueType)
-            :base(Type, Name, ReadOnly, null)
+        internal Item(ItemType Type, System.String Name, System.Boolean ReadOnly, System.Boolean Runtime, ItemType ValueType)
+            :base(Type, Name, ReadOnly, Runtime, null)
         {
             this.ValueType = ValueType;
         }

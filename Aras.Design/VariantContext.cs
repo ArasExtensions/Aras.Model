@@ -62,7 +62,6 @@ namespace Aras.Design
                             Model.ListValue trueval = (Model.ListValue)this._values.Relationships("Value").Create();
                             trueval.Value = "1";
                             trueval.Label = "Yes";
-
                             break;
                         default:
                             throw new Model.Exceptions.ArgumentException("Invalid Variant Context Type");
