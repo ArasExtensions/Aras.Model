@@ -250,6 +250,10 @@ namespace Aras.Model
                 {
                     Transaction.Add("add", item);
                 }
+                else
+                {
+                    item.Transaction = null;
+                }
 
                 return item;
             }

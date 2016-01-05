@@ -26,33 +26,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Aras.Model.Exceptions
+namespace Aras.Model.PropertyTypes
 {
-    public class ServerException : Exception
+    public class Foreign : PropertyType
     {
-        public ServerException(String Message, Exception e)
-            : base(Message, e)
-        { 
 
-        }
-
-        public ServerException(String Message)
-            : base(Message)
+        internal Foreign(ItemType Type, System.String Name, System.Boolean ReadOnly, System.Boolean Runtime, System.String Default)
+            :base(Type, Name, ReadOnly, Runtime, Default)
         {
-
-        }
-
-        public ServerException(IO.SOAPResponse Response, Exception e)
-            : base(Response.ErrorMessage, e)
-        {
-
-        }
-
-        public ServerException(IO.SOAPResponse Response)
-            : base(Response.ErrorMessage)
-        {
-
+           
         }
     }
 }

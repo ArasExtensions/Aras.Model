@@ -33,6 +33,29 @@ namespace Aras.Design
     [Model.Attributes.ItemType("Variant Context")]
     public class VariantContext : Model.Item
     {
+        public Boolean IsMethod
+        {
+            get
+            {
+                return this.ContextType.Value.Equals("Method");
+            }
+        }
+
+        public String Method
+        {
+            get
+            {
+                if (this.Property("method").Value == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return (String)((Model.Item)this.Property("method").Value).Property("name").Value;
+                }
+            }
+        }
+
         public Model.ListValue ContextType
         {
             get

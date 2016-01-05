@@ -31,7 +31,7 @@ using System.ComponentModel;
 
 namespace Aras.Model
 {
-    public class Item : INotifyPropertyChanged
+    public class Item : INotifyPropertyChanged, IEquatable<Item>
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -58,6 +58,21 @@ namespace Aras.Model
                 {
                     this._status = value;
                     this.OnPropertyChanged("Status");
+                }
+            }
+        }
+
+        public Boolean Runtime
+        {
+            get
+            {
+                if ((this.Status == States.Create) && (this.Transaction == null))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
         }
@@ -359,6 +374,13 @@ namespace Aras.Model
             }
         }
 
+        public void Delete(Transaction Transaction)
+        {
+            Transaction.Add("delete", this);
+            this.Transaction = Transaction;
+            this.Status = States.Deleted;
+        }
+
         protected virtual void OnUpdate()
         {
             this.Status = States.Update;
@@ -463,11 +485,48 @@ namespace Aras.Model
             return this.Relationships(this.ItemType.RelationshipType(RelationshipType));
         }
 
+        public Boolean Equals(Item other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+            else
+            {
+                return this.ID.Equals(other.ID);
+            }
+        }
+
+        public override Boolean Equals(object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+            else
+            {
+                if (obj is Item)
+                {
+                    return this.ID.Equals(((Item)obj).ID);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ID.GetHashCode();
+        }
+
         public Item(String ID, ItemType Type)
         {
             this.PropertyCache = new Dictionary<PropertyType, Property>();
             this.RelationshipsCache = new Dictionary<RelationshipType, Queries.Relationship>();
             this.ItemType = Type;
+            this.Transaction = null;
 
             if (ID == null)
             {

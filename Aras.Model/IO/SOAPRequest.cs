@@ -33,19 +33,19 @@ using System.IO;
 
 namespace Aras.Model.IO
 {
-    internal enum SOAPOperation { ValidateUser, ApplyItem, ApplyAML };
+    public enum SOAPOperation { ValidateUser, ApplyItem, ApplyAML };
 
-    internal class SOAPRequest
+    public class SOAPRequest
     {
-        internal SOAPOperation Operation { get; private set; }
+        public SOAPOperation Operation { get; private set; }
 
-        internal Database Database { get; private set; }
+        public Database Database { get; private set; }
 
-        internal String Username { get; private set; }
+        public String Username { get; private set; }
 
-        internal String Password { get; private set; }
+        public String Password { get; private set; }
 
-        internal IEnumerable<Item> Items { get; private set; }
+        public IEnumerable<Item> Items { get; private set; }
 
         private HttpWebRequest _request;
         private HttpWebRequest Request
@@ -121,7 +121,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal SOAPResponse Execute()
+        public SOAPResponse Execute()
         {
             try
             {
@@ -141,7 +141,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal async Task<SOAPResponse> ExecuteAsync()
+        public async Task<SOAPResponse> ExecuteAsync()
         {
             try
             {
@@ -163,7 +163,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal SOAPRequest(SOAPOperation Operation, Session Session, Item Item)
+        public SOAPRequest(SOAPOperation Operation, Session Session, Item Item)
         {
             this.Operation = Operation;
             this.Database = Session.Database;
@@ -172,7 +172,7 @@ namespace Aras.Model.IO
             this.Items  = new List<Item>() { Item };
         }
 
-        internal SOAPRequest(SOAPOperation Operation, Session Session, IEnumerable<Item> Items)
+        public SOAPRequest(SOAPOperation Operation, Session Session, IEnumerable<Item> Items)
         {
             this.Operation = Operation;
             this.Database = Session.Database;
@@ -181,7 +181,7 @@ namespace Aras.Model.IO
             this.Items = Items;
         }
 
-        internal SOAPRequest(SOAPOperation Operation, Database Database, String Username, String Password)
+        public SOAPRequest(SOAPOperation Operation, Database Database, String Username, String Password)
         {
             this.Operation = Operation;
             this.Database = Database;

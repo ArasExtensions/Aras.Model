@@ -53,6 +53,7 @@
     <Compile Include="LifeCycleMap.cs" />
     <Compile Include="LifeCycleState.cs" />
     <Compile Include="PropertyTypes\Float.cs" />
+    <Compile Include="PropertyTypes\Foreign.cs" />
     <Compile Include="PropertyTypes\VariableList.cs" />
     <Compile Include="Props\Float.cs" />
     <Compile Include="Props\VariableList.cs" />

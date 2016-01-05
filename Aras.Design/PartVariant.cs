@@ -33,7 +33,6 @@ namespace Aras.Design
     [Model.Attributes.ItemType("Part Variants")]
     public class PartVariant : Model.Relationship
     {
-
         public Double Quantity
         {
             get
@@ -53,6 +52,40 @@ namespace Aras.Design
             {
                 this.Property("quantity").Value = value;
             }
+        }
+
+        private PartBOM _configuredPartBOM;
+        public PartBOM ConfiguredPartBOM(Order Order)
+        {
+            OrderContext ordercontext = null;
+
+            foreach(PartVariantRule partvariantrule in this.Relationships("Part Variant Rule"))
+            {
+                ordercontext = partvariantrule.Selected(Order);
+
+                if (ordercontext == null)
+                {
+                    break;
+                }
+            }
+
+            if (ordercontext != null)
+            {
+                if (this._configuredPartBOM == null)
+                {
+                    this._configuredPartBOM = (PartBOM)this.Source.Relationships("Part BOM").Create(this.Related);
+                }
+
+                // Update Properties
+                this._configuredPartBOM.Quantity = this.Quantity * ordercontext.Quantity;
+
+                return this._configuredPartBOM;
+            }
+            else
+            {
+                return null;
+            }
+          
         }
 
         public PartVariant(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)

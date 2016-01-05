@@ -31,7 +31,7 @@ using System.Xml;
 
 namespace Aras.Model.IO
 {
-    internal class Item
+    public class Item
     {
         private static String[] SystemChildNodeNames = new String[6] { "id", "config_id", "itemtype", "source_id", "related_id", "Relationships" };
 
@@ -44,7 +44,7 @@ namespace Aras.Model.IO
             return System.Text.Encoding.ASCII.GetBytes(this.Doc.OuterXml);
         }
 
-        internal String ID
+        public String ID
         {
             get
             {
@@ -73,7 +73,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal String ConfigID
+        public String ConfigID
         {
             get
             {
@@ -85,7 +85,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal String ItemType
+        public String ItemType
         {
             get
             {
@@ -114,7 +114,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal String Select
+        public String Select
         {
             get
             {
@@ -144,7 +144,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal String OrderBy
+        public String OrderBy
         {
             get
             {
@@ -173,7 +173,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal String Where
+        public String Where
         {
             get
             {
@@ -202,7 +202,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal int Page
+        public int Page
         {
             get
             {
@@ -231,7 +231,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal int PageSize
+        public int PageSize
         {
             get
             {
@@ -260,7 +260,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal int ItemMax
+        public int ItemMax
         {
             get
             {
@@ -277,7 +277,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal int PageMax
+        public int PageMax
         {
             get
             {
@@ -294,13 +294,13 @@ namespace Aras.Model.IO
             }
         }
         
-        internal Item(XmlDocument Doc, XmlNode Node)
+        public Item(XmlDocument Doc, XmlNode Node)
         {
             this.Doc = Doc;
             this.Node = Node;
         }
 
-        internal IEnumerable<String> PropertyNames
+        public IEnumerable<String> PropertyNames
         {
             get
             {
@@ -320,13 +320,13 @@ namespace Aras.Model.IO
             }
         }
 
-        internal Boolean IsPropertyItem(String Name)
+        public Boolean IsPropertyItem(String Name)
         {
             XmlNode propnode = this.Node.SelectSingleNode(Name);
             return (propnode.FirstChild != null);
         }
 
-        internal String GetProperty(String Name, String Default)
+        public String GetProperty(String Name, String Default)
         {
             XmlNode propnode = this.Node.SelectSingleNode(Name);
 
@@ -349,12 +349,12 @@ namespace Aras.Model.IO
             }
         }
 
-        internal String GetProperty(String Name)
+        public String GetProperty(String Name)
         {
             return this.GetProperty(Name, null);
         }
 
-        internal Item GetPropertyItem(String Name)
+        public Item GetPropertyItem(String Name)
         {
             XmlNode propnode = this.Node.SelectSingleNode(Name);
 
@@ -368,7 +368,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal void SetProperty(String Name, String Value)
+        public void SetProperty(String Name, String Value)
         {
             XmlNode propnode = this.Node.SelectSingleNode(Name);
 
@@ -397,13 +397,13 @@ namespace Aras.Model.IO
             }
         }
 
-        internal void AddRelationship(Item Relationship)
+        public void AddRelationship(Item Relationship)
         {
             XmlNode rel = this.Doc.ImportNode(Relationship.Node, true);
             this.RelationshipsNode.AppendChild(rel);
         }
 
-        internal IEnumerable<Item> Relationships
+        public IEnumerable<Item> Relationships
         {
             get
             {
@@ -426,7 +426,7 @@ namespace Aras.Model.IO
             return this.Node.OuterXml;
         }
 
-        internal Item(String ItemType, String Action)
+        public Item(String ItemType, String Action)
         {
             this.Doc = new XmlDocument();
             this.Node = this.Doc.CreateNode(XmlNodeType.Element, "Item", null);

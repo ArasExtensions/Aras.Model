@@ -60,60 +60,115 @@ namespace Aras.Design
             }
         }
 
-        private List<PartBOM> _partBOM;
-        public IEnumerable<PartBOM> PartBOM
+        private static void AddPartBOM(List<PartBOM> List, PartBOM PartBOM)
         {
-            get
-            {
-                if (this._partBOM == null)
-                {
-                    this._partBOM = new List<PartBOM>();
-   
-                    foreach(PartBOM partbom in this.Relationships("Part BOM"))
-                    {
-                        this._partBOM.Add(partbom);
-                    }
-                }
+            Boolean found = false;
 
-                return this._partBOM;
+            foreach(PartBOM partbom in List)
+            {
+                if (partbom.Related != null && PartBOM.Related != null && partbom.Related.Equals(PartBOM.Related))
+                {
+                    found = true;
+                    partbom.Quantity = partbom.Quantity + PartBOM.Quantity;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                List.Add(PartBOM);
             }
         }
 
-        private List<PartVariant> _partVariant;
-        public IEnumerable<PartVariant> PartVariant
+        public IEnumerable<PartBOM> FlatConfiguredPartBOM(Order Order)
         {
-            get
+            List<PartBOM> ret = new List<PartBOM>();
+
+            foreach(PartBOM partbom in this.ConfiguredPartBOM(Order))
             {
-                if (this._partVariant == null)
+                AddPartBOM(ret, partbom);
+
+                foreach(PartBOM childpartbom in ((Part)partbom.Related).FlatConfiguredPartBOM(Order))
                 {
-                    this._partVariant = new List<PartVariant>();
-
-                    foreach (PartVariant partvariant in this.Relationships("Part Variants"))
-                    {
-                        this._partVariant.Add(partvariant);
-                    }
+                    AddPartBOM(ret, childpartbom);
                 }
-
-                return this._partVariant;
             }
+
+            return ret;
         }
 
         public IEnumerable<PartBOM> ConfiguredPartBOM(Order Order)
         {
-            return null;
+            List<PartBOM> ret = new List<PartBOM>();
+
+            // Add PartBOM
+            foreach(PartBOM partbom in this.Relationships("Part BOM"))
+            {
+                if (!partbom.Runtime)
+                {
+                    ret.Add(partbom);
+                }
+            }
+
+            // Add Configured Variants
+            foreach (PartVariant partvariant in this.Relationships("Part Variants"))
+            {
+                PartBOM configurepartbom = partvariant.ConfiguredPartBOM(Order);
+
+                if (configurepartbom != null)
+                {
+                    ret.Add(configurepartbom);
+                }
+            }
+
+            return ret;
+        }
+
+        public IEnumerable<VariantContext> VariantContext(Order Order)
+        {
+            List<VariantContext> ret = new List<VariantContext>();
+
+            // Check Variants on this Part
+            foreach (PartVariant partvariant in this.Relationships("Part Variants"))
+            {
+                foreach (PartVariantRule partvariantrule in partvariant.Relationships("Part Variant Rule"))
+                {
+                    VariantContext variantcontext = (VariantContext)partvariantrule.Related;
+
+                    if (!ret.Contains(variantcontext))
+                    {
+                        ret.Add(variantcontext);
+                    }
+                }
+            }
+
+            // Check Configured Part BOM
+            foreach(PartBOM partbom in this.ConfiguredPartBOM(Order))
+            {
+                if (partbom.Related != null)
+                {
+                    foreach (VariantContext variantcontext in ((Part)partbom.Related).VariantContext(Order))
+                    {
+                        if (!ret.Contains(variantcontext))
+                        {
+                            ret.Add(variantcontext);
+                        }
+                    }
+                }
+            }
+
+            return ret;
         }
 
         protected override void OnRefresh()
         {
             base.OnRefresh();
-            this._partBOM = null;
-            this._partVariant = null;
         }
 
         public Part(String ID, Model.ItemType Type)
             :base(ID, Type)
         {
-
+ 
         }
     }
 }

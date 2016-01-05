@@ -106,6 +106,16 @@ namespace Aras.Design
             }
         }
 
+        internal Model.IO.Item GetIOItem()
+        {
+            Model.IO.Item dbitem = new Model.IO.Item(this.ItemType.Name, "get");
+            dbitem.ID = this.ID;
+            dbitem.SetProperty("value", this.Value);
+            dbitem.SetProperty("quantity", this.Quantity.ToString());
+            dbitem.SetProperty("related_id", this.Related.ID);
+            return dbitem;
+        }
+
         public OrderContext(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
             :base(ID, Type, Source, Related)
         {

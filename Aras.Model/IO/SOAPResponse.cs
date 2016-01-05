@@ -31,13 +31,13 @@ using System.Xml;
 
 namespace Aras.Model.IO
 {
-    internal class SOAPResponse
+    public class SOAPResponse
     {
-        internal XmlDocument Doc { get; private set; }
+        public XmlDocument Doc { get; private set; }
 
-        internal XmlNamespaceManager Namespaces {get; private set; } 
+        public XmlNamespaceManager Namespaces {get; private set; } 
             
-        internal XmlNode Result
+        public XmlNode Result
         {
             get
             {
@@ -45,7 +45,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal IEnumerable<Item> Items
+        public IEnumerable<Item> Items
         {
             get
             {
@@ -73,7 +73,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal Boolean IsError
+        public Boolean IsError
         {
             get
             {
@@ -88,7 +88,7 @@ namespace Aras.Model.IO
             }
         }
 
-        internal String ErrorMessage
+        public String ErrorMessage
         {
             get
             {

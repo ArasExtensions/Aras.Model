@@ -263,6 +263,9 @@ namespace Aras.Model
                                             }
 
                                             break;
+                                        case "foreign":
+                                            this._propertyTypeCache[name] = new PropertyTypes.Foreign(this, name, ReadOnly, false, DefaultString);
+                                            break;
                                         default:
                                             throw new NotImplementedException("Property Type not implmented: " + thisprop.GetProperty("data_type"));
                                     }

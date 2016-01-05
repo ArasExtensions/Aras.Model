@@ -117,7 +117,7 @@ namespace Aras.Design
             {
                 this.Processing = true;
 
-                if (this.Status == States.Create || this.Status == States.Update)
+                if (((this.Status == States.Create) || (this.Status == States.Update)) && (this.Part != null))
                 {
                     // Check Configured Part - same Item Number as Order
                     if (this.ConfiguredPart == null)
@@ -136,6 +136,129 @@ namespace Aras.Design
                         else
                         {
                             this.ConfiguredPart = null;
+                        }
+                    }
+
+                    // Update Properties of Configured Part
+                    this.ConfiguredPart.Update(this.Transaction);
+                    this.ConfiguredPart.Class = this.ConfiguredPart.ItemType.GetClassName("Assembly");
+                    this.ConfiguredPart.Property("name").Value = this.Property("name").Value;
+                    this.ConfiguredPart.Property("description").Value = this.Property("description").Value;
+
+                    // Add any missing Order Context
+                    foreach(VariantContext variantcontext in this.Part.VariantContext(this))
+                    {
+                        Boolean exists = false;
+
+                        foreach (OrderContext ordercontext in this.Relationships("v_Order Context"))
+                        {
+                            if (ordercontext.Related.Equals(variantcontext))
+                            {
+                                exists = true;
+                                break;
+                            }
+                        }
+
+                        if (!exists)
+                        {
+                            this.Relationships("v_Order Context").Create(variantcontext, this.Transaction);
+                        }
+                    }
+
+                    // Evaluate any Method Variant Contexts
+                    foreach (OrderContext ordercontext in this.Relationships("v_Order Context"))
+                    {
+                        if (ordercontext.VariantContext.IsMethod && ordercontext.VariantContext.Method != null)
+                        {
+                            Model.IO.Item dborder = new Model.IO.Item(this.ItemType.Name, ordercontext.VariantContext.Method);
+                            dborder.ID = this.ID;
+
+                            // Add this Order Context
+                            Model.IO.Item dbordercontext = ordercontext.GetIOItem();
+                            dborder.AddRelationship(dbordercontext);
+
+                            // Add all other order Context
+                            foreach (OrderContext otherordercontext in this.Relationships("v_Order Context"))
+                            {
+                                if (!otherordercontext.Equals(ordercontext))
+                                {
+                                    Model.IO.Item dbotherordercontext = otherordercontext.GetIOItem();
+                                    dborder.AddRelationship(dbotherordercontext);
+                                }
+                            }
+
+                            Model.IO.SOAPRequest request = new Model.IO.SOAPRequest(Model.IO.SOAPOperation.ApplyItem, this.ItemType.Session, dborder);
+                            Model.IO.SOAPResponse response = request.Execute();
+
+                            if (!response.IsError)
+                            {
+                                if (response.Items.Count() == 1)
+                                {
+                                    ordercontext.Value = response.Items.First().GetProperty("value");
+                                    ordercontext.Quantity = Double.Parse(response.Items.First().GetProperty("quantity"));
+                                }
+                                else
+                                {
+                                    ordercontext.Value = "0";
+                                    ordercontext.Quantity = 0.0;
+                                }
+                            }
+                            else
+                            {
+                                throw new Model.Exceptions.ServerException(response);
+                            }
+                        }
+                    }
+
+                    // Get Flat Congigured Part BOM
+                    IEnumerable<PartBOM> flatpartboms = this.Part.FlatConfiguredPartBOM(this);
+
+                    // Remove any Part BOM no longer required in Configured Part
+                    foreach (PartBOM partbom in this.ConfiguredPart.Relationships("Part BOM"))
+                    {
+                        Boolean found = false;
+
+                        foreach (PartBOM flatpartbom in flatpartboms)
+                        {
+                            if (partbom.Related.Equals(flatpartbom.Related))
+                            {
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (!found)
+                        {
+                            partbom.Delete(this.Transaction);
+                        }
+                    }
+
+                    // Add any Part BOM that no current in Configured Part
+
+                    foreach(PartBOM flatpartbom in flatpartboms)
+                    {
+                        Boolean found = false;
+
+                        foreach (PartBOM partbom in this.ConfiguredPart.Relationships("Part BOM"))
+                        {
+                            if (partbom.Related.Equals(flatpartbom.Related))
+                            {
+                                found = true;
+
+                                if (partbom.Status == States.Deleted)
+                                {
+                                    partbom.Update(this.Transaction);
+                                    partbom.Quantity = flatpartbom.Quantity;
+                                }
+
+                                break;
+                            }
+                        }
+
+                        if (!found)
+                        {
+                            PartBOM newpartbom = (PartBOM)this.ConfiguredPart.Relationships("Part BOM").Create(flatpartbom.Related, this.Transaction);
+                            newpartbom.Quantity = flatpartbom.Quantity;
                         }
                     }
                 }

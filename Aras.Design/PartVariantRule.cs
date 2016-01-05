@@ -33,6 +33,41 @@ namespace Aras.Design
     [Model.Attributes.ItemType("Part Variant Rule")]
     public class PartVariantRule : Model.Relationship
     {
+        public String Value
+        {
+            get
+            {
+                return (String)this.Property("value").Value;
+            }
+        }
+
+        public VariantContext VariantContext
+        {
+            get
+            {
+                return (VariantContext)this.Related;
+            }
+        }
+
+        public OrderContext Selected(Order Order)
+        {
+            OrderContext ret = null;
+
+            foreach (OrderContext ordercontext in Order.Relationships("v_Order Context"))
+            {
+                if (ordercontext.VariantContext.Equals(this.VariantContext))
+                {
+                    if (String.Compare(ordercontext.Value, this.Value) == 0)
+                    {
+                        ret = ordercontext;
+                        break;
+                    }
+                }
+            }
+
+            return ret;
+        }
+
         public PartVariantRule(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
             :base(ID, Type, Source, Related)
         {
