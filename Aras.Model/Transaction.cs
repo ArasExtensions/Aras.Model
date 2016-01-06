@@ -34,12 +34,16 @@ namespace Aras.Model
     {
         public Session Session { get; private set; }
 
-        private List<Action> _actions;
+        private Dictionary<String, Action> _actions;
+
 
         internal void Add(String Name, Item Item)
         {
-            this._actions.Add(new Action(Name, Item));
-            Item.Transaction = this;
+            if (!this._actions.ContainsKey(Item.ID))
+            {
+                this._actions[Item.ID] = new Action(Name, Item);
+                Item.Transaction = this;
+            }
         }
 
         public Boolean Committed { get; private set; }
@@ -48,44 +52,57 @@ namespace Aras.Model
         {
             if (!this.Committed && this._actions.Count() > 0)
             {
-                List<IO.Item> dbitems = new List<IO.Item>();
+                Dictionary<String, IO.Item> dbitems = new Dictionary<string, IO.Item>();
 
-                foreach (Action action in this._actions)
+                foreach (Action action in this._actions.Values)
                 {
                     if (action.Item is Relationship)
                     {
-                        throw new NotImplementedException();
+                        Relationship relationship = (Relationship)action.Item;
+
+                        if (dbitems.ContainsKey(relationship.Source.ID))
+                        {
+                            IO.Item dbrelation = new IO.Item(action.Item.ItemType.Name, action.Name);
+                            dbrelation.ID = action.Item.ID;
+
+                            if (relationship.Related != null)
+                            {
+                                dbrelation.SetProperty("related_id", relationship.Related.ID);
+                            }
+
+                            foreach (Property prop in relationship.Properties)
+                            {
+                                if (!prop.Type.Runtime && !prop.Type.ReadOnly && (prop.Modified))
+                                {
+                                    dbrelation.SetProperty(prop.Type.Name, prop.DBValue);
+                                }
+                            }
+
+                            dbitems[relationship.Source.ID].AddRelationship(dbrelation);
+                        }
+                        else
+                        {
+                            throw new Exceptions.ArgumentException("Source Item is not part of Transaction: " + relationship.Source.ID);
+                        }
                     }
                     else
                     {
                         IO.Item dbitem = new IO.Item(action.Item.ItemType.Name, action.Name);
                         dbitem.ID = action.Item.ID;
-                        dbitem.ConfigID = action.Item.ConfigID;
-
-                        Boolean modified = false;
 
                         foreach (Property prop in action.Item.Properties)
                         {
                             if (!prop.Type.Runtime && !prop.Type.ReadOnly && (prop.Modified))
                             {
                                 dbitem.SetProperty(prop.Type.Name, prop.DBValue);
-                                modified = true;
                             }
                         }
 
-                        if (modified)
-                        {
-                            dbitems.Add(dbitem);
-                        }
-                        else
-                        {
-                            action.Item.UnLock();
-                            action.Item.Transaction = null;
-                        }
+                        dbitems[dbitem.ID] = dbitem;
                     }
                 }
 
-                foreach(IO.Item dbrequestitem in dbitems)
+                foreach(IO.Item dbrequestitem in dbitems.Values)
                 {
                     IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, dbrequestitem);
                     IO.SOAPResponse response = request.Execute();
@@ -128,7 +145,7 @@ namespace Aras.Model
         internal Transaction(Session Session)
         {
             this.Session = Session;
-            this._actions = new List<Action>();
+            this._actions = new Dictionary<String, Action>();
             this.Committed = false;
         }
     }

@@ -425,31 +425,37 @@ namespace Aras.Model
         {
             Item lockedby = (Item)this.Property("locked_by_id").Value;
 
-            if (lockedby.ID.Equals(this.ItemType.Session.UserID))
+            if (lockedby == null)
             {
-                IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
-                unlockitem.ID = this.ID;
-                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, unlockitem);
-                IO.SOAPResponse response = request.Execute();
-
-                if (!response.IsError)
-                {
-                    this.UpdateProperties(response.Items.First());
-                    this.Status = States.Read;
-                    return true;
-                }
-                else
-                {
-                    throw new Exceptions.ServerException(response);
-                }
-            }
-            else if (lockedby == null)
-            {
+                this.Transaction = null;
+                this.Status = States.Read;
                 return true;
             }
             else
             {
-                return false;
+                if (lockedby.ID.Equals(this.ItemType.Session.UserID))
+                {
+                    IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
+                    unlockitem.ID = this.ID;
+                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, unlockitem);
+                    IO.SOAPResponse response = request.Execute();
+
+                    if (!response.IsError)
+                    {
+                        this.UpdateProperties(response.Items.First());
+                        this.Status = States.Read;
+                        this.Transaction = null;
+                        return true;
+                    }
+                    else
+                    {
+                        throw new Exceptions.ServerException(response);
+                    }
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 
