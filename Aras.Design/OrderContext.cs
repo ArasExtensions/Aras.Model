@@ -81,19 +81,20 @@ namespace Aras.Design
         {
             if (e.PropertyName == "Value")
             {
-                if (((Model.Properties.VariableList)sender).Value == null)
+                Model.Properties.VariableList valuelist = (Model.Properties.VariableList)sender;
+
+                if (valuelist.Value == null)
                 {
                     if (this.Value != null)
                     {
                         this.Value = null;
                     }
-
                 }
                 else
                 {
                     if (this.Value == null)
                     {
-                        this.Value = ((Model.ListValue)((Model.Properties.VariableList)sender).Value).Value;
+                        this.Value = ((Model.ListValue)valuelist.Value).Value;
                     }
                     else
                     {

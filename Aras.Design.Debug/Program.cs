@@ -53,7 +53,8 @@ namespace Aras.Design.Debug
                 order.Update(transaction);
                 order.Property("name").Value = "Test Company 0002";
                 OrderContext ordercontext = (OrderContext)order.Relationships("v_Order Context").First();
-                VariantContext variantcontext = ordercontext.VariantContext;
+                ordercontext.ValueList.Value = ordercontext.ValueList.ValueList.Values.ToList()[0];
+            
 
 
                 transaction.Commit();
