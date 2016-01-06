@@ -110,6 +110,26 @@ namespace Aras.Design
             }
         }
 
+        private IEnumerable<PartBOM> AllConfiguredPartBOM(Order Order, Part Part)
+        {
+            List<PartBOM> ret = new List<PartBOM>();
+
+            foreach (PartBOM partbom in Part.ConfiguredPartBOM(Order, false))
+            {
+                ret.Add(partbom);
+
+                if (partbom.Related != null)
+                {
+                    foreach (PartBOM childpartbom in this.AllConfiguredPartBOM(Order, (Part)partbom.Related))
+                    {
+                        ret.Add(childpartbom);
+                    }
+                }
+            }
+
+            return ret;
+        }
+
         private Boolean Processing;
         private void Process()
         {
@@ -210,24 +230,30 @@ namespace Aras.Design
                         }
                     }
 
-                    // Get Flat Congigured Part BOM
-                    IEnumerable<PartBOM> flatpartboms = this.Part.FlatConfiguredPartBOM(this);
+                    // Build Flat BOM
+                    Dictionary<Part, Double> flatbom = new Dictionary<Part, Double>();
+                    flatbom[this.Part] = 1.0;
+
+                    foreach(PartBOM partbom in this.AllConfiguredPartBOM(this, this.Part))
+                    {
+
+                        if (partbom.Related != null)
+                        {
+                            if (flatbom.ContainsKey((Part)partbom.Related))
+                            {
+                                flatbom[(Part)partbom.Related] = flatbom[(Part)partbom.Related] + partbom.Quantity;
+                            }
+                            else
+                            {
+                                flatbom[(Part)partbom.Related] = partbom.Quantity;
+                            }
+                        }
+                    }
 
                     // Remove any Part BOM no longer required in Configured Part
                     foreach (PartBOM partbom in this.ConfiguredPart.Relationships("Part BOM"))
                     {
-                        Boolean found = false;
-
-                        foreach (PartBOM flatpartbom in flatpartboms)
-                        {
-                            if (partbom.Related.Equals(flatpartbom.Related))
-                            {
-                                found = true;
-                                break;
-                            }
-                        }
-
-                        if (!found)
+                        if ((partbom.Related != null) && !flatbom.ContainsKey((Part)partbom.Related))
                         {
                             partbom.Delete(this.Transaction);
                         }
@@ -235,20 +261,20 @@ namespace Aras.Design
 
                     // Add any Part BOM that no current in Configured Part
 
-                    foreach(PartBOM flatpartbom in flatpartboms)
+                    foreach(Part flatpart in flatbom.Keys)
                     {
                         Boolean found = false;
 
                         foreach (PartBOM partbom in this.ConfiguredPart.Relationships("Part BOM"))
                         {
-                            if (partbom.Related.Equals(flatpartbom.Related))
+                            if ((partbom.Related != null) && partbom.Related.Equals(flatpart))
                             {
                                 found = true;
 
                                 if (partbom.Status == States.Deleted)
                                 {
                                     partbom.Update(this.Transaction);
-                                    partbom.Quantity = flatpartbom.Quantity;
+                                    partbom.Quantity = flatbom[flatpart];
                                 }
 
                                 break;
@@ -257,8 +283,8 @@ namespace Aras.Design
 
                         if (!found)
                         {
-                            PartBOM newpartbom = (PartBOM)this.ConfiguredPart.Relationships("Part BOM").Create(flatpartbom.Related, this.Transaction);
-                            newpartbom.Quantity = flatpartbom.Quantity;
+                            PartBOM newpartbom = (PartBOM)this.ConfiguredPart.Relationships("Part BOM").Create(flatpart, this.Transaction);
+                            newpartbom.Quantity = flatbom[flatpart];
                         }
                     }
                 }

@@ -32,6 +32,18 @@ namespace Aras.Model
 {
     public abstract class Query<T> : System.Collections.Generic.IEnumerable<T>
     {
+        public List<T> Copy()
+        {
+            List<T> ret = new List<T>();
+
+            foreach(T item in this)
+            {
+                ret.Add(item);
+            }
+
+            return ret;
+        }
+
         public abstract System.Collections.Generic.IEnumerator<T> GetEnumerator();
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()

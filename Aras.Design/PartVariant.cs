@@ -54,8 +54,8 @@ namespace Aras.Design
             }
         }
 
-        private PartBOM _configuredPartBOM;
-        public PartBOM ConfiguredPartBOM(Order Order)
+        private Dictionary<Part, PartBOM> _configuredPartBOM;
+        public PartBOM ConfiguredPartBOM(Order Order, Part Source)
         {
             OrderContext ordercontext = null;
 
@@ -71,15 +71,15 @@ namespace Aras.Design
 
             if (ordercontext != null)
             {
-                if (this._configuredPartBOM == null)
+                if (!this._configuredPartBOM.ContainsKey(Source))
                 {
-                    this._configuredPartBOM = (PartBOM)this.Source.Relationships("Part BOM").Create(this.Related);
+                    this._configuredPartBOM[Source] = (PartBOM)Source.Relationships("Part BOM").Create(this.Related);
                 }
 
                 // Update Properties
-                this._configuredPartBOM.Quantity = this.Quantity * ordercontext.Quantity;
+                this._configuredPartBOM[Source].Quantity = this.Quantity * ordercontext.Quantity;
 
-                return this._configuredPartBOM;
+                return this._configuredPartBOM[Source];
             }
             else
             {
@@ -91,7 +91,7 @@ namespace Aras.Design
         public PartVariant(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
             :base(ID, Type, Source, Related)
         {
-
+            this._configuredPartBOM = new Dictionary<Part, PartBOM>();
         }
     }
 }

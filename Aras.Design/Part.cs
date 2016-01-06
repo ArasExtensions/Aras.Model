@@ -60,64 +60,68 @@ namespace Aras.Design
             }
         }
 
-        private static void AddPartBOM(List<PartBOM> List, PartBOM PartBOM)
-        {
-            Boolean found = false;
-
-            foreach(PartBOM partbom in List)
-            {
-                if (partbom.Related != null && PartBOM.Related != null && partbom.Related.Equals(PartBOM.Related))
-                {
-                    found = true;
-                    partbom.Quantity = partbom.Quantity + PartBOM.Quantity;
-                    break;
-                }
-            }
-
-            if (!found)
-            {
-                List.Add(PartBOM);
-            }
-        }
-
-        public IEnumerable<PartBOM> FlatConfiguredPartBOM(Order Order)
+        private IEnumerable<PartBOM> ConfiguredPartVariant(Order Order, Part Variant)
         {
             List<PartBOM> ret = new List<PartBOM>();
 
-            foreach(PartBOM partbom in this.ConfiguredPartBOM(Order))
+            // Add Configured Variants
+            foreach (PartVariant partvariant in Variant.Relationships("Part Variants"))
             {
-                AddPartBOM(ret, partbom);
+                PartBOM configurepartbom = partvariant.ConfiguredPartBOM(Order, this);
 
-                foreach(PartBOM childpartbom in ((Part)partbom.Related).FlatConfiguredPartBOM(Order))
+                if (configurepartbom != null)
                 {
-                    AddPartBOM(ret, childpartbom);
+                    if (configurepartbom.Related != null)
+                    {
+                        if (configurepartbom.Related.Class == configurepartbom.Related.ItemType.ClassStructure.Search("Variant"))
+                        {
+                            foreach(PartBOM childpartbom in this.ConfiguredPartVariant(Order, (Part)configurepartbom.Related))
+                            {
+                                ret.Add(childpartbom);
+                            }
+                        }
+                        else
+                        {
+                            ret.Add(configurepartbom);
+                        }
+                    }
                 }
             }
 
             return ret;
         }
 
-        public IEnumerable<PartBOM> ConfiguredPartBOM(Order Order)
+        public IEnumerable<PartBOM> ConfiguredPartBOM(Order Order, Boolean IncludeVariants)
         {
             List<PartBOM> ret = new List<PartBOM>();
 
             // Add PartBOM
-            foreach(PartBOM partbom in this.Relationships("Part BOM"))
+            foreach (PartBOM partbom in this.Relationships("Part BOM").Copy())
             {
                 if (!partbom.Runtime)
                 {
-                    ret.Add(partbom);
-                }
-            }
+                    Part related = (Part)partbom.Related;
 
-            // Add Configured Variants
-            foreach (PartVariant partvariant in this.Relationships("Part Variants"))
-            {
-                PartBOM configurepartbom = partvariant.ConfiguredPartBOM(Order);
+                    if (related != null)
+                    {
+                        if (related.Class == related.ItemType.ClassStructure.Search("Variant"))
+                        {
+                            // Add Configured Variants
+                            foreach (PartBOM configurepartbom in this.ConfiguredPartVariant(Order, related))
+                            {
+                                ret.Add(configurepartbom);
+                            }
 
-                if (configurepartbom != null)
-                {
-                    ret.Add(configurepartbom);
+                            if (IncludeVariants)
+                            {
+                                ret.Add(partbom);
+                            }
+                        }
+                        else
+                        {
+                            ret.Add(partbom);
+                        }
+                    }
                 }
             }
 
@@ -129,21 +133,25 @@ namespace Aras.Design
             List<VariantContext> ret = new List<VariantContext>();
 
             // Check Variants on this Part
-            foreach (PartVariant partvariant in this.Relationships("Part Variants"))
-            {
-                foreach (PartVariantRule partvariantrule in partvariant.Relationships("Part Variant Rule"))
-                {
-                    VariantContext variantcontext = (VariantContext)partvariantrule.Related;
 
-                    if (!ret.Contains(variantcontext))
+            if (this.Class == this.ItemType.ClassStructure.Search("Variant"))
+            {    
+                foreach (PartVariant partvariant in this.Relationships("Part Variants"))
+                {
+                    foreach (PartVariantRule partvariantrule in partvariant.Relationships("Part Variant Rule"))
                     {
-                        ret.Add(variantcontext);
+                        VariantContext variantcontext = (VariantContext)partvariantrule.Related;
+
+                        if (!ret.Contains(variantcontext))
+                        {
+                            ret.Add(variantcontext);
+                        }
                     }
                 }
             }
 
             // Check Configured Part BOM
-            foreach(PartBOM partbom in this.ConfiguredPartBOM(Order))
+            foreach(PartBOM partbom in this.ConfiguredPartBOM(Order, true))
             {
                 if (partbom.Related != null)
                 {
