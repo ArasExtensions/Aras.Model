@@ -48,7 +48,7 @@ namespace Aras.Model
 
         public Boolean Committed { get; private set; }
 
-        public void Commit()
+        public void Commit(Boolean SaveOnly)
         {
             if (!this.Committed && this._actions.Count() > 0)
             {
@@ -114,8 +114,12 @@ namespace Aras.Model
                             ItemType itemtype = Session.ItemType(dbitem.ItemType);
                             Item item = this.Session.ItemFromCache(dbitem.ID, itemtype);
                             item.UpdateProperties(dbitem);
-                            item.UnLock();
-                            item.Transaction = null;
+
+                            if (!SaveOnly)
+                            {
+                                item.UnLock();
+                                item.Transaction = null;
+                            }
                         }
                     }
                     else
@@ -126,7 +130,10 @@ namespace Aras.Model
 
             }
 
-            this.Committed = true;
+            if (!SaveOnly)
+            {
+                this.Committed = true;
+            }
         }
 
         public void RollBack()

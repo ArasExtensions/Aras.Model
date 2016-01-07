@@ -32,6 +32,18 @@ namespace Aras.Model
 {
     public abstract class Query<T> : System.Collections.Generic.IEnumerable<T>
     {
+        public delegate void QueryChangedEventHandler(object sender, EventArgs e);
+
+        public event QueryChangedEventHandler QueryChanged;
+
+        protected void OnQueryChanged()
+        {
+            if (this.QueryChanged != null)
+            {
+                QueryChanged(this, new EventArgs());
+            }
+        }
+
         public List<T> Copy()
         {
             List<T> ret = new List<T>();
@@ -67,9 +79,6 @@ namespace Aras.Model
         }
 
         public abstract void Refresh();
-
-
-
 
         protected System.String Where
         {

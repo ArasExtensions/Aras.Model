@@ -33,27 +33,7 @@ namespace Aras.Model
     [Attributes.ItemType("List")]
     public class List : Item
     {
-        private List<ListValue> _values;
-        public IEnumerable<ListValue> Values
-        {
-            get
-            {
-                if (this._values == null)
-                {
-                    this._values = new List<ListValue>();
-
-                    foreach(ListValue listvalue in this.Relationships("Value"))
-                    {
-                        this._values.Add(listvalue);
-                    }
-                }
-
-                return this._values;
-            }
-        }
-      
-
-        public ListValue Value(String Value)
+        public ListValue ListValue(String Value)
         {
             if (Value == null)
             {
@@ -61,9 +41,9 @@ namespace Aras.Model
             }
             else
             {
-                foreach (ListValue listvalue in this.Values)
+                foreach (ListValue listvalue in this.Relationships("Value"))
                 {
-                    if (listvalue.Value == Value)
+                    if (String.Compare(listvalue.Value, Value) == 0)
                     {
                         return listvalue;
                     }
@@ -73,7 +53,6 @@ namespace Aras.Model
             }
         }
    
-
         public List(String ID, ItemType ItemType)
             :base(ID, ItemType)
         {

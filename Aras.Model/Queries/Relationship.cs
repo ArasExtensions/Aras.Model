@@ -110,10 +110,16 @@ namespace Aras.Model.Queries
             }
         }
 
+        void Relationships_ListChanged(object sender, EventArgs e)
+        {
+            this.OnQueryChanged();
+        }
+
         internal Relationship(RelationshipType Type, Condition Condition, Model.Item Source)
             : base(Type, Condition)
         {
             this.Relationships = new ObservableList<Model.Relationship>();
+            this.Relationships.ListChanged += Relationships_ListChanged;
             this.CreatedRelationships = new ObservableList<Model.Relationship>();
             this.Source = Source;
             this.Refresh();

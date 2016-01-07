@@ -32,7 +32,7 @@ namespace Aras.Model.Properties
 {
     public class VariableList : Property
     {
-        public Model.List ValueList { get; private set; }
+        public Model.List Values { get; private set; }
 
         public override Object Value
         {
@@ -49,6 +49,39 @@ namespace Aras.Model.Properties
                 else
                 {
                     throw new Exceptions.ArgumentException("Value must be a Aras.Model.ListValue");
+                }
+            }
+        }
+
+        public System.Int32 Selected
+        {
+            get
+            {
+                if (this.Value == null)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return this.Values.Relationships("Value").ToList().IndexOf((ListValue)this.Value);
+                }
+            }
+            set
+            {
+                if (value == -1)
+                {
+                    this.Value = null;
+                }
+                else
+                {
+                    if (value >= 0 && value < this.Values.Relationships("Value").Count())
+                    {
+                        this.Value = this.Values.Relationships("Value").ToList()[value];
+                    }
+                    else
+                    {
+                        throw new Exceptions.ArgumentException("Index out of range");
+                    }
                 }
             }
         }
@@ -74,7 +107,7 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    this.SetValue(((PropertyTypes.List)this.Type).ValueList.Value(value));
+                    this.SetValue(((PropertyTypes.List)this.Type).Values.ListValue(value));
                 }
             }
         }
@@ -91,10 +124,21 @@ namespace Aras.Model.Properties
             }
         }
 
-        internal VariableList(Model.Item Item, PropertyTypes.VariableList Type, Model.List ValueList)
+        void VariableList_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Value")
+            {
+                this.OnPropertyChanged("Selected");
+            }
+        }
+
+        internal VariableList(Model.Item Item, PropertyTypes.VariableList Type, Model.List Values)
             :base(Item, Type)
         {
-            this.ValueList = ValueList;
+            this.Values = Values;
+            this.PropertyChanged += VariableList_PropertyChanged;
         }
+
+
     }
 }

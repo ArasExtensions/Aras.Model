@@ -122,7 +122,7 @@ namespace Aras.Model.Design
         {
             this.ValueList = this.AddVariableListRuntime("value_list", false, this.VariantContext.Values);
             this.ValueList.PropertyChanged += ValueList_PropertyChanged;
-            this.ValueList.Value = this.VariantContext.Values.Value(this.Value);
+            this.ValueList.Value = this.VariantContext.Values.ListValue(this.Value);
         }
     }
 }

@@ -85,6 +85,21 @@ namespace Aras.Model
             }
         }
 
+        public Boolean Locked
+        {
+            get
+            {
+                if (this.Runtime || this.Status == States.Create || (this.LockedBy != null && this.LockedBy.Equals(this.Session.User)))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
         public String ID { get; private set; }
 
         public String ConfigID

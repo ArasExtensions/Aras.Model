@@ -32,12 +32,12 @@ namespace Aras.Model.PropertyTypes
 {
     public class List : PropertyType
     {
-        public Model.List ValueList { get; private set; }
+        public Model.List Values { get; private set; }
 
-        internal List(ItemType Type, System.String Name, System.Boolean ReadOnly, System.Boolean Runtime, Model.List ValueList)
+        internal List(ItemType Type, System.String Name, System.Boolean ReadOnly, System.Boolean Runtime, Model.List Values)
             :base(Type, Name, ReadOnly, Runtime, null)
         {
-            this.ValueList = ValueList;
+            this.Values = Values;
         }
     }
 }

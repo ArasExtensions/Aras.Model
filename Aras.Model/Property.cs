@@ -35,7 +35,7 @@ namespace Aras.Model
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void OnPropertyChanged(String Name)
+        protected void OnPropertyChanged(String Name)
         {
             if (this.PropertyChanged != null)
             {
