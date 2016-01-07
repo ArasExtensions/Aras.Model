@@ -32,6 +32,14 @@ namespace Aras.Model.Properties
 {
     public class String : Property
     {
+        public System.Int32 Length
+        {
+            get
+            {
+                return ((PropertyTypes.String)this.Type).Length;
+            }
+        }
+
         public override Object Value
         {
             get
