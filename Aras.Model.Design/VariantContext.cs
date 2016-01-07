@@ -64,6 +64,14 @@ namespace Aras.Model.Design
             }
         }
 
+        public System.String Question
+        {
+            get
+            {
+                return (System.String)this.Property("question").Value;
+            }
+        }
+
         private Model.List _values;
         public Model.List Values
         {

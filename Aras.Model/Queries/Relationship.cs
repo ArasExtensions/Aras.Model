@@ -32,8 +32,8 @@ namespace Aras.Model.Queries
 {
     public class Relationship : Query<Model.Relationship>
     {
-        private List<Model.Relationship> CreatedRelationships;
-        private List<Model.Relationship> Relationships;
+        private ObservableList<Model.Relationship> CreatedRelationships;
+        private ObservableList<Model.Relationship> Relationships;
 
         public override System.Collections.Generic.IEnumerator<Model.Relationship> GetEnumerator()
         {
@@ -113,8 +113,8 @@ namespace Aras.Model.Queries
         internal Relationship(RelationshipType Type, Condition Condition, Model.Item Source)
             : base(Type, Condition)
         {
-            this.Relationships = new List<Model.Relationship>();
-            this.CreatedRelationships = new List<Model.Relationship>();
+            this.Relationships = new ObservableList<Model.Relationship>();
+            this.CreatedRelationships = new ObservableList<Model.Relationship>();
             this.Source = Source;
             this.Refresh();
         }

@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{20FEA736-01A1-49A3-A61F-43CAD00D9717}</ProjectGuid>
+    <ProjectGuid>{E5B4196A-00D0-4DE7-8104-487A7BC60784}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Aras.Model</RootNamespace>
@@ -52,6 +52,7 @@
     <Compile Include="Exceptions\ServerException.cs" />
     <Compile Include="LifeCycleMap.cs" />
     <Compile Include="LifeCycleState.cs" />
+    <Compile Include="ObservableList.cs" />
     <Compile Include="PropertyTypes\Float.cs" />
     <Compile Include="PropertyTypes\Foreign.cs" />
     <Compile Include="PropertyTypes\VariableList.cs" />

@@ -43,6 +43,14 @@ namespace Aras.Model
             }
         }
 
+        public Session Session
+        {
+            get
+            {
+                return this.ItemType.Session;
+            }
+        }
+
         public enum States { Create, Read, Update, Deleted };
 
         private States _status;

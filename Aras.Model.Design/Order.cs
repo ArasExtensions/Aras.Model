@@ -88,11 +88,6 @@ namespace Aras.Model.Design
             }
         }
 
-        private void AddVariantContext(VariantContext VariantContext)
-        {
-
-        }
-
         private Part GetConfiguredPart()
         {
             Model.Queries.Item query = this.ItemType.Session.Query("Part", Aras.Conditions.Eq("item_number", this.ItemNumber));

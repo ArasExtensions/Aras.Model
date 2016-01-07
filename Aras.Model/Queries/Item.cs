@@ -32,7 +32,7 @@ namespace Aras.Model.Queries
 {
     public class Item : Query<Model.Item>
     {
-        private List<Model.Item> Items;
+        private ObservableList<Model.Item> Items;
 
         public override System.Collections.Generic.IEnumerator<Model.Item> GetEnumerator()
         {
@@ -70,7 +70,7 @@ namespace Aras.Model.Queries
         internal Item(ItemType Type, Condition Condition)
             :base(Type, Condition)
         {
-            this.Items = new List<Model.Item>();
+            this.Items = new ObservableList<Model.Item>();
             this.Refresh();
         }
 
