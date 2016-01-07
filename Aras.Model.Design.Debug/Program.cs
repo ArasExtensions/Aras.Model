@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Aras.Model;
 
 namespace Aras.Model.Design.Debug
 {
@@ -36,11 +37,28 @@ namespace Aras.Model.Design.Debug
         {
             Server server = new Server("http://localhost/11SP1");
             Database database = server.Database("VariantsDemo11SP1");
-            Session session = database.Login("admin", "innovator");
+            database.LoadAssembly(Environment.CurrentDirectory + "\\Aras.Model.Design.dll");
+            Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-            Queries.Item<Part> parts = new Queries.Item<Part>(session);
-            parts.Execute();
+            session.ItemType("v_Order").AddToSelect("keyed_name,item_number,name,part,locked_by_id,configured_part");
+            session.ItemType("v_Order Context").AddToSelect("quantity");
+            session.ItemType("Variant Context").AddToSelect("name,keyed_name,context_type,list,method,question");
+            session.ItemType("Part Variants").AddToSelect("quantity");
+            session.ItemType("Part Variant Rule").AddToSelect("value");
 
+            Order order = (Order)session.Query("v_Order", Aras.Conditions.Eq("item_number", "0002")).First();
+
+            using (Transaction transaction = session.BeginTransaction())
+            {
+                order.Update(transaction);
+                order.Property("name").Value = "Test Company 0002";
+                OrderContext ordercontext = (OrderContext)order.Relationships("v_Order Context").First();
+                ordercontext.ValueList.Value = ordercontext.ValueList.ValueList.Values.ToList()[0];
+            
+
+
+                transaction.Commit();
+            }
         }
     }
 }

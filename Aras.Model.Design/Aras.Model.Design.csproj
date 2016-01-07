@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1B6E3A7A-ACBC-4194-BAF6-A6D34367DB49}</ProjectGuid>
+    <ProjectGuid>{D99031A4-F91E-4D94-8080-BE0375D3E83B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Aras.Model.Design</RootNamespace>
@@ -39,6 +39,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PartVariantRule.cs" />
+    <Compile Include="PartVariant.cs" />
+    <Compile Include="VariantContext.cs" />
+    <Compile Include="Order.cs" />
+    <Compile Include="OrderContext.cs" />
+    <Compile Include="PartBOM.cs" />
     <Compile Include="Part.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

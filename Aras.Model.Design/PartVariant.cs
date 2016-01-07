@@ -28,12 +28,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Design
+namespace Aras.Model.Design
 {
-    [Model.Attributes.ItemType("Part BOM")]
-    public class PartBOM : Model.Relationship
+    [Model.Attributes.ItemType("Part Variants")]
+    public class PartVariant : Model.Relationship
     {
-
         public Double Quantity
         {
             get
@@ -55,10 +54,44 @@ namespace Aras.Design
             }
         }
 
-        public PartBOM(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
+        private Dictionary<Part, PartBOM> _configuredPartBOM;
+        public PartBOM ConfiguredPartBOM(Order Order, Part Source)
+        {
+            OrderContext ordercontext = null;
+
+            foreach(PartVariantRule partvariantrule in this.Relationships("Part Variant Rule"))
+            {
+                ordercontext = partvariantrule.Selected(Order);
+
+                if (ordercontext == null)
+                {
+                    break;
+                }
+            }
+
+            if (ordercontext != null)
+            {
+                if (!this._configuredPartBOM.ContainsKey(Source))
+                {
+                    this._configuredPartBOM[Source] = (PartBOM)Source.Relationships("Part BOM").Create(this.Related);
+                }
+
+                // Update Properties
+                this._configuredPartBOM[Source].Quantity = this.Quantity * ordercontext.Quantity;
+
+                return this._configuredPartBOM[Source];
+            }
+            else
+            {
+                return null;
+            }
+          
+        }
+
+        public PartVariant(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
             :base(ID, Type, Source, Related)
         {
-
+            this._configuredPartBOM = new Dictionary<Part, PartBOM>();
         }
     }
 }

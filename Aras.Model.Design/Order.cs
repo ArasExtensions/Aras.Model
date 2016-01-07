@@ -28,7 +28,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Design
+namespace Aras.Model.Design
 {
     [Model.Attributes.ItemType("v_Order")]
     public class Order : Model.Item
@@ -95,7 +95,7 @@ namespace Aras.Design
 
         private Part GetConfiguredPart()
         {
-            Model.Queries.Item query = this.ItemType.Session.Query("Part", Conditions.Eq("item_number", this.ItemNumber));
+            Model.Queries.Item query = this.ItemType.Session.Query("Part", Aras.Conditions.Eq("item_number", this.ItemNumber));
     
             if (query.Count() == 0)
             {

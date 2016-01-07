@@ -28,7 +28,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Design
+namespace Aras.Model.Design
 {
     [Model.Attributes.ItemType("v_Order Context")]
     public class OrderContext : Model.Relationship

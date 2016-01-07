@@ -28,7 +28,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Design
+namespace Aras.Model.Design
 {
     [Model.Attributes.ItemType("Variant Context")]
     public class VariantContext : Model.Item
