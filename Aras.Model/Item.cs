@@ -85,11 +85,20 @@ namespace Aras.Model
             }
         }
 
-        public Boolean Locked
+        public Boolean Locked(Boolean Refresh)
         {
-            get
+            if (this.Runtime || this.Status == States.Create)
             {
-                if (this.Runtime || this.Status == States.Create || (this.LockedBy != null && this.LockedBy.Equals(this.Session.User)))
+                return true;
+            }
+            else
+            {
+                if (Refresh)
+                {
+                    this.Property("locked_by_id").Refresh();
+                }
+
+                if (this.LockedBy != null && this.LockedBy.Equals(this.Session.User))
                 {
                     return true;
                 }
