@@ -57,10 +57,13 @@ namespace Aras.Model.Design
             {
                 if (ordercontext.VariantContext.Equals(this.VariantContext))
                 {
-                    if (String.Compare(ordercontext.Value, this.Value) == 0)
+                    if (ordercontext.Value != null)
                     {
-                        ret = ordercontext;
-                        break;
+                        if (ordercontext.Value.Equals(this.Value))
+                        {
+                            ret = ordercontext;
+                            break;
+                        }
                     }
                 }
             }

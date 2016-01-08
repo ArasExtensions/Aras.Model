@@ -43,7 +43,7 @@ namespace Aras.Model
             {
                 foreach (ListValue listvalue in this.Relationships("Value"))
                 {
-                    if (String.Compare(listvalue.Value, Value) == 0)
+                    if (listvalue.Value.Equals(Value))
                     {
                         return listvalue;
                     }

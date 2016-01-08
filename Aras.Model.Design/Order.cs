@@ -180,6 +180,15 @@ namespace Aras.Model.Design
                         }
                     }
 
+                    // Ensure all Order Context are Locked
+                    foreach (OrderContext ordercontext in this.Relationships("v_Order Context"))
+                    {
+                        if (ordercontext.Transaction == null)
+                        {
+                            ordercontext.Update(this.Transaction);
+                        }
+                    }
+
                     // Evaluate any Method Variant Contexts
                     foreach (OrderContext ordercontext in this.Relationships("v_Order Context"))
                     {

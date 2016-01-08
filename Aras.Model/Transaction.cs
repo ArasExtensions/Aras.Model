@@ -48,7 +48,7 @@ namespace Aras.Model
 
         public Boolean Committed { get; private set; }
 
-        public void Commit(Boolean SaveOnly)
+        public void Commit()
         {
             if (!this.Committed && this._actions.Count() > 0)
             {
@@ -102,7 +102,7 @@ namespace Aras.Model
                     }
                 }
 
-                foreach(IO.Item dbrequestitem in dbitems.Values)
+                foreach (IO.Item dbrequestitem in dbitems.Values)
                 {
                     IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, dbrequestitem);
                     IO.SOAPResponse response = request.Execute();
@@ -115,11 +115,9 @@ namespace Aras.Model
                             Item item = this.Session.ItemFromCache(dbitem.ID, itemtype);
                             item.UpdateProperties(dbitem);
 
-                            if (!SaveOnly)
-                            {
-                                item.UnLock();
-                                item.Transaction = null;
-                            }
+                            // Unlock
+                            item.UnLock();
+                            item.Transaction = null;
                         }
                     }
                     else
@@ -130,10 +128,7 @@ namespace Aras.Model
 
             }
 
-            if (!SaveOnly)
-            {
-                this.Committed = true;
-            }
+            this.Committed = true;
         }
 
         public void RollBack()

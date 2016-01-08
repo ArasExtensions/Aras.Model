@@ -107,7 +107,7 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    this.SetValue(((PropertyTypes.List)this.Type).Values.ListValue(value));
+                    this.SetValue(this.Values.ListValue(value));
                 }
             }
         }
@@ -132,10 +132,11 @@ namespace Aras.Model.Properties
             }
         }
 
-        internal VariableList(Model.Item Item, PropertyTypes.VariableList Type, Model.List Values)
+        internal VariableList(Model.Item Item, PropertyTypes.VariableList Type, Model.List Values, Model.ListValue Default)
             :base(Item, Type)
         {
             this.Values = Values;
+            this.DBValue = Default.Value;
             this.PropertyChanged += VariableList_PropertyChanged;
         }
 

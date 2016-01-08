@@ -36,6 +36,11 @@ namespace Aras.Model
 
         internal Item Item { get; private set; }
 
+        public override string ToString()
+        {
+            return this.Name + " " + this.Item.KeyedName;
+        }
+
         internal Action(String Name, Item Item)
         {
             this.Name = Name;

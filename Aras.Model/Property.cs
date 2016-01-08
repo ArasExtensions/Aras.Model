@@ -116,21 +116,24 @@ namespace Aras.Model
             }
         }
 
+        private void SetReadOnly()
+        {
+            if (this.Type.ReadOnly || this.Item.Status == Model.Item.States.Read || this.Item.Status == Model.Item.States.Deleted)
+            {
+                this.ReadOnly = true;
+            }
+            else
+            {
+                this.ReadOnly = false;
+            }
+        }
+
         void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             switch(e.PropertyName)
             {
                 case "Status":
-
-                    if (this.Type.ReadOnly || this.Item.Status == Model.Item.States.Read || this.Item.Status == Model.Item.States.Deleted)
-                    {
-                        this.ReadOnly = true;
-                    }
-                    else
-                    {
-                        this.ReadOnly = false;
-                    }
-
+                    this.SetReadOnly();
                     break;
                 default:
                     break;
@@ -211,6 +214,7 @@ namespace Aras.Model
         {
             this.Item = Item;
             this.Type = Type;
+            this.SetReadOnly();
 
             // Set Default Value
             this._value = this.Type.Default;
