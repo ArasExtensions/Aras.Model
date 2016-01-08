@@ -141,8 +141,8 @@ namespace Aras.Model
         }
 
         private Object _value;
-        public virtual Object Value 
-        { 
+        public virtual Object Value
+        {
             get
             {
                 if (!this.Loaded)
@@ -154,32 +154,40 @@ namespace Aras.Model
             }
             set
             {
-                if (!this.ReadOnly)
+
+                if (this._value == null)
                 {
-                    if (this._value == null)
+                    if (value != null)
                     {
-                        if (value != null)
+                        if (!this.ReadOnly)
                         {
                             this._value = value;
                             this.Modified = true;
                             this.Loaded = true;
                             this.OnPropertyChanged("Value");
                         }
-                    }
-                    else
-                    {
-                        if (!this._value.Equals(value))
+                        else
                         {
-                            this._value = value;
-                            this.Modified = true;
-                            this.Loaded = true;
-                            this.OnPropertyChanged("Value");
+                            throw new Exceptions.ReadOnlyException();
                         }
                     }
                 }
                 else
                 {
-                    throw new Exceptions.ReadOnlyException();
+                    if (!this._value.Equals(value))
+                    {
+                        if (!this.ReadOnly)
+                        {
+                            this._value = value;
+                            this.Modified = true;
+                            this.Loaded = true;
+                            this.OnPropertyChanged("Value");
+                        }
+                        else
+                        {
+                            throw new Exceptions.ReadOnlyException();
+                        }
+                    }
                 }
             }
         }
