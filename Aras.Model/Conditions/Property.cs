@@ -63,23 +63,37 @@ namespace Aras.Model.Conditions
 
         internal override string Where(ItemType ItemType)
         {
-            PropertyType proptype = ItemType.PropertyType(this.Name);
-
-            switch(proptype.GetType().Name)
+            if (this.Name == "id")
             {
-                case "String":
-                    
-                    if (this.Value == null)
-                    {
-                        return "(" + proptype.ColumnName + " is null)";
-                    }
-                    else
-                    {
-                        return "(" + proptype.ColumnName + OperatorString(this.Operator) + "'" + this.Value.ToString() + "')";
-                    }
+                if (this.Value == null)
+                {
+                    return "(id is null)";
+                }
+                else
+                {
+                    return "(id" + OperatorString(this.Operator) + "'" + this.Value.ToString() + "')";
+                }
+            }
+            else
+            {
+                PropertyType proptype = ItemType.PropertyType(this.Name);
 
-                default:
-                    throw new Exceptions.ArgumentException("Property Type not implemented: " + proptype.GetType().Name);
+                switch (proptype.GetType().Name)
+                {
+                    case "String":
+
+                        if (this.Value == null)
+                        {
+                            return "(" + proptype.ColumnName + " is null)";
+                        }
+                        else
+                        {
+                            return "(" + proptype.ColumnName + OperatorString(this.Operator) + "'" + this.Value.ToString() + "')";
+                        }
+
+                    default:
+                        throw new Exceptions.ArgumentException("Property Type not implemented: " + proptype.GetType().Name);
+                }
             }
         }
 

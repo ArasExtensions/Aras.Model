@@ -28,6 +28,7 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.IO;
+using System.Reflection;
 using System.Xml;
 using System.Security.Cryptography;
 
@@ -35,7 +36,35 @@ namespace Aras.Model
 {
     public class Server
     {
+        public String ID { get; private set; }
+
         public String URL { get; private set; }
+
+        public DirectoryInfo AssemblyDirectory { get; set; }
+
+        public void LoadAssembly(String AssemblyFile)
+        {
+            this.LoadAssembly(new FileInfo(this.AssemblyDirectory.FullName + "\\" + AssemblyFile + ".dll"));
+        }
+
+        private List<Assembly> AssmeblyCache;
+        internal IEnumerable<Assembly> Assemblies
+        {
+            get
+            {
+                return this.AssmeblyCache;
+            }
+        }
+
+        private void LoadAssembly(FileInfo AssemblyFile)
+        {
+            Assembly assembly = Assembly.LoadFrom(AssemblyFile.FullName);
+            
+            if (!this.AssmeblyCache.Contains(assembly))
+            {
+                this.AssmeblyCache.Add(assembly);
+            }
+        }
 
         public static String PasswordHash(String Password)
         {
@@ -143,7 +172,20 @@ namespace Aras.Model
         public Server(String URL)
             :base()
         {
+            // Initialise Assebly Cache
+            this.AssmeblyCache = new List<Assembly>();
+
+            // Assign ID
+            this.ID = NewID();
+
+            // Store URL
             this.URL = URL;
+
+            // Default Assembly Directory
+            this.AssemblyDirectory = new DirectoryInfo(Environment.CurrentDirectory);
+
+            // Load this assembly
+            this.LoadAssembly(new FileInfo(System.Reflection.Assembly.GetExecutingAssembly().Location));
         }
     }
 }

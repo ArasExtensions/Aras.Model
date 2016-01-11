@@ -37,6 +37,8 @@ namespace Aras.Model
     {
         public Server Server { get; private set; }
 
+        public String ID { get; private set; }
+
         public String Name { get; private set; }
 
         public Session Login(String Username, String Password)
@@ -70,40 +72,6 @@ namespace Aras.Model
             }
         }
 
-        public void LoadAssembly(String AssemblyFile)
-        {
-            this.LoadAssembly(new FileInfo(AssemblyFile));
-        }
-
-        public void LoadAssembly(FileInfo AssemblyFile)
-        {
-            Assembly assembly = Assembly.LoadFrom(AssemblyFile.FullName);
-
-            foreach (Type type in assembly.GetTypes())
-            {
-                if (type.IsSubclassOf(typeof(Item)))
-                {
-                    // Get Atttribute
-                    Model.Attributes.ItemType itemtypeatt = (Model.Attributes.ItemType)type.GetCustomAttribute(typeof(Model.Attributes.ItemType));
-
-                    if (itemtypeatt != null)
-                    {
-                        if (!this.ItemTypesCache.ContainsKey(itemtypeatt.Name))
-                        {
-                            this.ItemTypesCache[itemtypeatt.Name] = type;
-                        }
-                        else
-                        {
-                            if (type.IsSubclassOf(this.ItemTypesCache[itemtypeatt.Name]))
-                            {
-                                this.ItemTypesCache[itemtypeatt.Name] = type;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         public override string ToString()
         {
             return this.Name;
@@ -114,10 +82,35 @@ namespace Aras.Model
         {
             this.ItemTypesCache = new Dictionary<String, Type>();
             this.Server = Server;
+            this.ID = Server.NewID();
             this.Name = Name;
 
-            // Load this assembly
-            this.LoadAssembly(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            foreach(Assembly assembly in this.Server.Assemblies)
+            {
+                foreach (Type type in assembly.GetTypes())
+                {
+                    if (type.IsSubclassOf(typeof(Item)))
+                    {
+                        // Get Atttribute
+                        Model.Attributes.ItemType itemtypeatt = (Model.Attributes.ItemType)type.GetCustomAttribute(typeof(Model.Attributes.ItemType));
+
+                        if (itemtypeatt != null)
+                        {
+                            if (!this.ItemTypesCache.ContainsKey(itemtypeatt.Name))
+                            {
+                                this.ItemTypesCache[itemtypeatt.Name] = type;
+                            }
+                            else
+                            {
+                                if (type.IsSubclassOf(this.ItemTypesCache[itemtypeatt.Name]))
+                                {
+                                    this.ItemTypesCache[itemtypeatt.Name] = type;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -36,8 +36,8 @@ namespace Aras.Model.Design.Debug
         static void Main(string[] args)
         {
             Server server = new Server("http://localhost/11SP1");
+            server.LoadAssembly("Aras.Model.Design.dll");
             Database database = server.Database("VariantsDemo11SP1");
-            database.LoadAssembly(Environment.CurrentDirectory + "\\Aras.Model.Design.dll");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
             session.ItemType("v_Order").AddToSelect("keyed_name,item_number,name,part,locked_by_id,configured_part");
@@ -53,7 +53,7 @@ namespace Aras.Model.Design.Debug
                 order.Update(transaction);
                 order.Property("name").Value = "Test Company 0002";
                 OrderContext ordercontext = (OrderContext)order.Relationships("v_Order Context").First();
-                ordercontext.ValueList.Selected = 2;
+                ordercontext.ValueList.Selected = 0;
             
                 transaction.Commit();
             }
