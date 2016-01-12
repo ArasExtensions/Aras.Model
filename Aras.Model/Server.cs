@@ -58,11 +58,14 @@ namespace Aras.Model
 
         private void LoadAssembly(FileInfo AssemblyFile)
         {
-            Assembly assembly = Assembly.LoadFrom(AssemblyFile.FullName);
-            
-            if (!this.AssmeblyCache.Contains(assembly))
+            if (AssemblyFile.Exists)
             {
-                this.AssmeblyCache.Add(assembly);
+                Assembly assembly = Assembly.LoadFrom(AssemblyFile.FullName);
+
+                if (!this.AssmeblyCache.Contains(assembly))
+                {
+                    this.AssmeblyCache.Add(assembly);
+                }
             }
         }
 
