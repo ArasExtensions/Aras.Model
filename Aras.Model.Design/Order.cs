@@ -263,7 +263,7 @@ namespace Aras.Model.Design
                         }
                     }
 
-                    // Add any Part BOM that no current in Configured Part
+                    // Add any Part BOM that not current in Configured Part
 
                     foreach(Part flatpart in flatbom.Keys)
                     {
@@ -314,7 +314,7 @@ namespace Aras.Model.Design
             this.OrderContextCache = new Dictionary<String, OrderContext>();
             this.Processing = false;
 
-            // Load Order Contect already in database
+            // Load Order Contexts already in database
             foreach (OrderContext ordercontext in this.Relationships("v_Order Context"))
             {
                 this.AddOrderContext(ordercontext);
