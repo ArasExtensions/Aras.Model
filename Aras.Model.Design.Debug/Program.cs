@@ -36,7 +36,7 @@ namespace Aras.Model.Design.Debug
         static void Main(string[] args)
         {
             Server server = new Server("http://localhost/11SP1");
-            server.LoadAssembly("Aras.Model.Design.dll");
+            server.LoadAssembly("Aras.Model.Design");
             Database database = server.Database("VariantsDemo11SP1");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 

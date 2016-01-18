@@ -136,7 +136,16 @@ namespace Aras.Model.Properties
             :base(Item, Type)
         {
             this.Values = Values;
-            this.DBValue = Default.Value;
+
+            if (Default == null)
+            {
+                this.DBValue = null;
+            }
+            else
+            {
+                this.DBValue = Default.Value;
+            }
+
             this.PropertyChanged += VariableList_PropertyChanged;
         }
 

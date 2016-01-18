@@ -35,7 +35,7 @@ namespace Aras.Model
     {
         public ListValue ListValue(String Value)
         {
-            if (Value == null)
+            if (System.String.IsNullOrEmpty(Value))
             {
                 return null;
             }

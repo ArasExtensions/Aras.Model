@@ -194,10 +194,21 @@ namespace Aras.Model
 
         protected void SetValue(Object Value)
         {
-            if (this._value != Value)
+            if (this._value == null)
             {
-                this._value = Value;
-                this.OnPropertyChanged("Value");
+                if (Value != null)
+                {
+                    this._value = Value;
+                    this.OnPropertyChanged("Value");
+                }
+            }
+            else
+            {
+                if (!this._value.Equals(Value))
+                {
+                    this._value = Value;
+                    this.OnPropertyChanged("Value");
+                }
             }
 
             this.Loaded = true;
