@@ -73,31 +73,18 @@ namespace Aras.Model.Design.Debug
 
                 while(true)
                 {
-                    for(int i=0; i<3; i++)
-                    {
-                        enginetype.ValueList.Selected = i;
-                        OutputOrder(order);
-                        System.Threading.Thread.Sleep(1000);
 
-                        luxarypack.ValueList.Selected = 0;
-                        OutputOrder(order);
-                        System.Threading.Thread.Sleep(1000);
+                    enginetype.ValueList.Value = (ListValue)enginetype.ValueList.Values.Relationships("Value").ToList()[0];
+                    OutputOrder(order);
+                    System.Threading.Thread.Sleep(1000);
 
-                        luxarypack.ValueList.Selected = 1;
-                        OutputOrder(order);
-                        System.Threading.Thread.Sleep(1000);
+                    enginetype.ValueList.Value = (ListValue)enginetype.ValueList.Values.Relationships("Value").ToList()[1];
+                    OutputOrder(order);
+                    System.Threading.Thread.Sleep(1000);
 
-                        if (i==2)
-                        {
-                            voltage.ValueList.Selected = 0;
-                            OutputOrder(order);
-                            System.Threading.Thread.Sleep(1000);
-
-                            voltage.ValueList.Selected = 1;
-                            OutputOrder(order);
-                            System.Threading.Thread.Sleep(1000);
-                        }
-                    }
+                    enginetype.ValueList.Value = (ListValue)enginetype.ValueList.Values.Relationships("Value").ToList()[2];
+                    OutputOrder(order);
+                    System.Threading.Thread.Sleep(1000);
                 }
 
          

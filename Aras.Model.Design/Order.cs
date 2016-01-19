@@ -306,6 +306,8 @@ namespace Aras.Model.Design
                     }
                 }
 
+                this.OnPropertyChanged("ConfiguredPart");
+                
                 this.Processing = false;
             }
         }

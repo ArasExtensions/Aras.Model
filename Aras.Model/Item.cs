@@ -35,7 +35,7 @@ namespace Aras.Model
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void OnPropertyChanged(String Name)
+        protected void OnPropertyChanged(String Name)
         {
             if (this.PropertyChanged != null)
             {
@@ -290,7 +290,14 @@ namespace Aras.Model
 
         public override string ToString()
         {
-            return this.KeyedName;
+            if (this.HasProperty("keyed_name"))
+            {
+                return this.KeyedName;
+            }
+            else
+            {
+                return this.ID;
+            }
         }
 
         public String State
@@ -367,6 +374,16 @@ namespace Aras.Model
             Properties.VariableList variablelist = new Properties.VariableList(this, proptype, ValueList, Default);
             this.PropertyCache[proptype] = variablelist;
             return variablelist;
+        }
+
+        public Boolean HasProperty(String Name)
+        {
+            return this.PropertyCache.ContainsKey(this.ItemType.PropertyType(Name));
+        }
+
+        public Boolean HasProperty(PropertyType Type)
+        {
+            return this.PropertyCache.ContainsKey(Type);
         }
 
         public Property Property(String Name)

@@ -33,7 +33,6 @@ namespace Aras.Model.Design
     [Model.Attributes.ItemType("Part BOM")]
     public class PartBOM : Model.Relationship
     {
-
         public Double Quantity
         {
             get
