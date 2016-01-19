@@ -132,7 +132,7 @@ namespace Aras.Model.Design
             {
                 this.Processing = true;
 
-                if (((this.Status == States.Create) || (this.Status == States.Update)) && (this.Part != null))
+                if (((this.Action == Actions.Create) || (this.Action == Actions.Update)) && (this.Part != null))
                 {
                     // Check Configured Part - same Item Number as Order
                     if (this.ConfiguredPart == null)
@@ -275,7 +275,7 @@ namespace Aras.Model.Design
                             {
                                 found = true;
 
-                                if (partbom.Status == States.Deleted)
+                                if (partbom.Action == Actions.Deleted)
                                 {
                                     partbom.Update(this.Transaction);
                                     partbom.Quantity = flatbom[flatpart];

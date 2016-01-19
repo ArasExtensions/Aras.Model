@@ -38,14 +38,14 @@ namespace Aras.Model
 
         public String UserID { get; private set; }
 
-        private Item _user;
-        public Item User
+        private User _user;
+        public User User
         {
             get
             {
                 if (this._user == null)
                 {
-                    this._user = this.ItemFromCache(this.UserID, this.ItemType("User"));
+                    this._user = (User)this.ItemFromCache(this.UserID, this.ItemType("User"));
                 }
 
                 return this._user;

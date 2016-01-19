@@ -51,21 +51,38 @@ namespace Aras.Model
             }
         }
 
-        public enum States { Create, Read, Update, Deleted };
+        public enum Actions { Create, Read, Update, Deleted };
 
-        private States _status;
-        public States Status 
+        private Actions _action;
+        public Actions Action 
         { 
             get
             {
-                return this._status;
+                return this._action;
             }
             private set
             {
-                if (this._status != value)
+                if (this._action != value)
                 {
-                    this._status = value;
-                    this.OnPropertyChanged("Status");
+                    this._action = value;
+                    this.OnPropertyChanged("Action");
+                }
+            }
+        }
+
+        private Boolean _isNew;
+        public Boolean IsNew
+        {
+            get
+            {
+                return this._isNew;
+            }
+            private set
+            {
+                if (this._isNew != value)
+                {
+                    this._isNew = value;
+                    this.OnPropertyChanged("IsNew");
                 }
             }
         }
@@ -74,7 +91,7 @@ namespace Aras.Model
         {
             get
             {
-                if ((this.Status == States.Create) && (this.Transaction == null))
+                if ((this.Action == Actions.Create) && (this.Transaction == null))
                 {
                     return true;
                 }
@@ -87,7 +104,7 @@ namespace Aras.Model
 
         public Boolean Locked(Boolean Refresh)
         {
-            if (this.Runtime || this.Status == States.Create)
+            if (this.Runtime || this.Action == Actions.Create)
             {
                 return true;
             }
@@ -208,6 +225,10 @@ namespace Aras.Model
             get
             {
                 return (User)this.Property("locked_by_id").Value;
+            }
+            private set
+            {
+                this.Property("locked_by_id").Value = value;
             }
         }
 
@@ -397,8 +418,15 @@ namespace Aras.Model
         {
             if (this.Lock())
             {
-                Transaction.Add("update", this);
-                this.OnUpdate();
+                if (this.IsNew)
+                {
+                    this.Action = Actions.Create;
+                }
+                else
+                {
+                    Transaction.Add("update", this);
+                    this.OnUpdate();
+                }
             }
             else
             {
@@ -410,46 +438,53 @@ namespace Aras.Model
         {
             Transaction.Add("delete", this);
             this.Transaction = Transaction;
-            this.Status = States.Deleted;
+            this.Action = Actions.Deleted;
         }
 
         protected virtual void OnUpdate()
         {
-            this.Status = States.Update;
+            this.Action = Actions.Update;
         }
 
         public Transaction Transaction { get; internal set; }
 
         private Boolean Lock()
         {
-            this.Property("locked_by_id").Refresh();
-            Item lockedby = (Item)this.Property("locked_by_id").Value;
-
-            if (lockedby == null)
-            {
-                IO.Item lockitem = new IO.Item(this.ItemType.Name, "lock");
-                lockitem.ID = this.ID;
-                lockitem.Select = "locked_by_id";
-                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, lockitem);
-                IO.SOAPResponse response = request.Execute();
-
-                if (!response.IsError)
-                {
-                    this.UpdateProperties(response.Items.First());
-                    return true;
-                }
-                else
-                {
-                    throw new Exceptions.ServerException(response);
-                }
-            }
-            else if (lockedby.ID.Equals(this.ItemType.Session.UserID))
+            if (this.IsNew)
             {
                 return true;
             }
             else
             {
-                return false;
+                this.Property("locked_by_id").Refresh();
+                Item lockedby = (Item)this.Property("locked_by_id").Value;
+
+                if (lockedby == null)
+                {
+                    IO.Item lockitem = new IO.Item(this.ItemType.Name, "lock");
+                    lockitem.ID = this.ID;
+                    lockitem.Select = "locked_by_id";
+                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, lockitem);
+                    IO.SOAPResponse response = request.Execute();
+
+                    if (!response.IsError)
+                    {
+                        this.UpdateProperties(response.Items.First());
+                        return true;
+                    }
+                    else
+                    {
+                        throw new Exceptions.ServerException(response);
+                    }
+                }
+                else if (lockedby.ID.Equals(this.ItemType.Session.UserID))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 
@@ -460,7 +495,7 @@ namespace Aras.Model
             if (lockedby == null)
             {
                 this.Transaction = null;
-                this.Status = States.Read;
+                this.Action = Actions.Read;
                 return true;
             }
             else
@@ -475,7 +510,7 @@ namespace Aras.Model
                     if (!response.IsError)
                     {
                         this.UpdateProperties(response.Items.First());
-                        this.Status = States.Read;
+                        this.Action = Actions.Read;
                         this.Transaction = null;
                         return true;
                     }
@@ -499,6 +534,8 @@ namespace Aras.Model
                 {
                     this.Property(propname).DBValue = DBItem.GetProperty(propname);
                 }
+
+                this.IsNew = false;
             }
             else
             {
@@ -569,12 +606,14 @@ namespace Aras.Model
             if (ID == null)
             {
                 this.ID = Server.NewID();
-                this._status = States.Create;
+                this._action = Actions.Create;
+                this._isNew = true;
             }
             else
             {
                 this.ID = ID;
-                this._status = States.Read;
+                this._action = Actions.Read;
+                this._isNew = false;
             }
 
         }

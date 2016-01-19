@@ -68,11 +68,11 @@ namespace Aras.Model
 
         public void Refresh()
         {
-            switch (this.Item.Status)
+            switch (this.Item.Action)
             {
-                case Model.Item.States.Read:
-                case Model.Item.States.Update:
-                case Model.Item.States.Deleted:
+                case Model.Item.Actions.Read:
+                case Model.Item.Actions.Update:
+                case Model.Item.Actions.Deleted:
                     IO.Item prop = new IO.Item(this.Item.ItemType.Name, "get");
                     prop.Select = this.Type.Name;
                     prop.SetProperty("id", this.Item.ID);
@@ -118,7 +118,7 @@ namespace Aras.Model
 
         private void SetReadOnly()
         {
-            if (this.Type.ReadOnly || this.Item.Status == Model.Item.States.Read || this.Item.Status == Model.Item.States.Deleted)
+            if (this.Type.ReadOnly || this.Item.Action == Model.Item.Actions.Read || this.Item.Action == Model.Item.Actions.Deleted)
             {
                 this.ReadOnly = true;
             }
@@ -132,7 +132,7 @@ namespace Aras.Model
         {
             switch(e.PropertyName)
             {
-                case "Status":
+                case "Action":
                     this.SetReadOnly();
                     break;
                 default:
