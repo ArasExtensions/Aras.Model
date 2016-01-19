@@ -77,6 +77,15 @@ namespace Aras.Model.Design
             {
                 this.OrderContextCache[OrderContext.ID] = OrderContext;
                 OrderContext.ValueList.PropertyChanged += ValueList_PropertyChanged;
+                OrderContext.Property("quantity").PropertyChanged += Quantity_PropertyChanged;
+            }
+        }
+
+        void Quantity_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Value")
+            {
+                this.Process();
             }
         }
 
@@ -176,7 +185,9 @@ namespace Aras.Model.Design
 
                         if (!exists)
                         {
-                            this.Relationships("v_Order Context").Create(variantcontext, this.Transaction);
+                            OrderContext ordecontext = (OrderContext)this.Relationships("v_Order Context").Create(variantcontext, this.Transaction);
+                            ordecontext.Quantity = 1.0;
+                            this.AddOrderContext(ordecontext);
                         }
                     }
 
@@ -277,9 +288,11 @@ namespace Aras.Model.Design
 
                                 if (partbom.Action == Actions.Deleted)
                                 {
-                                    partbom.Update(this.Transaction);
-                                    partbom.Quantity = flatbom[flatpart];
+                                    partbom.Update(this.Transaction);    
                                 }
+
+                                // Update Quantity
+                                partbom.Quantity = flatbom[flatpart];
 
                                 break;
                             }

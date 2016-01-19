@@ -52,7 +52,7 @@ namespace Aras.Model
         {
             if (!this.Committed && this._actions.Count() > 0)
             {
-                Dictionary<String, IO.Item> dbitems = new Dictionary<string, IO.Item>();
+                Dictionary<String, IO.Item> dbitems = new Dictionary<String, IO.Item>();
 
                 foreach (Action action in this._actions.Values)
                 {

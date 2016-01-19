@@ -33,6 +33,21 @@ namespace Aras.Model.Design.Debug
 {
     class Program
     {
+        static void OutputOrder(Order Order)
+        {
+            Part configuredpart = Order.ConfiguredPart;
+
+            foreach(PartBOM partbom in configuredpart.Relationships("Part BOM"))
+            {
+                if (partbom.Action != Item.Actions.Deleted)
+                {
+                    Console.WriteLine(partbom.Related.Property("name").Value + "\t" + partbom.Quantity.ToString());
+                }
+            }
+
+            Console.WriteLine();
+        }
+
         static void Main(string[] args)
         {
             Server server = new Server("http://localhost/11SP1");
@@ -53,9 +68,13 @@ namespace Aras.Model.Design.Debug
                 order.Update(transaction);
                 order.Property("name").Value = "Test Company 0002";
                 OrderContext ordercontext = (OrderContext)order.Relationships("v_Order Context").First();
-                ordercontext.ValueList.Selected = 0;
-            
-                transaction.Commit();
+                OutputOrder(order);
+                ordercontext.ValueList.Selected = 2;
+                OutputOrder(order);
+                ordercontext.Quantity = 10.0;
+                OutputOrder(order);
+
+                //transaction.Commit();
             }
         }
     }

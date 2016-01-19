@@ -75,7 +75,7 @@ namespace Aras.Model.Design
                     {
                         if (configurepartbom.Related.Class == configurepartbom.Related.ItemType.ClassStructure.Search("Variant"))
                         {
-                            foreach(PartBOM childpartbom in this.ConfiguredPartVariant(Order, (Part)configurepartbom.Related))
+                            foreach (PartBOM childpartbom in this.ConfiguredPartVariant(Order, (Part)configurepartbom.Related))
                             {
                                 ret.Add(childpartbom);
                             }
