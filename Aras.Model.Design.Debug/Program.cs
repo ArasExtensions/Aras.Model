@@ -73,8 +73,12 @@ namespace Aras.Model.Design.Debug
                 OutputOrder(order);
                 ordercontext.Quantity = 10.0;
                 OutputOrder(order);
+                ordercontext.ValueList.Selected = 0;
+                OutputOrder(order);
+                ordercontext.ValueList.Selected = 1;
+                OutputOrder(order);
 
-                //transaction.Commit();
+                transaction.Commit();
             }
         }
     }

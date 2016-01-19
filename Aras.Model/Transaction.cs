@@ -44,6 +44,19 @@ namespace Aras.Model
                 this._actions[Item.ID] = new Action(Name, Item);
                 Item.Transaction = this;
             }
+            else
+            {
+                if (this._actions[Item.ID].Name.Equals("add") && Name.Equals("delete"))
+                {
+                    // Remove from Transaction
+                    this._actions.Remove(Item.ID);
+                    Item.Transaction = null;
+                }
+                else
+                {
+                    this._actions[Item.ID].Name = Name;
+                }
+            }
         }
 
         public Boolean Committed { get; private set; }

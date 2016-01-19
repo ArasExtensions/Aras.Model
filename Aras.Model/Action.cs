@@ -32,13 +32,13 @@ namespace Aras.Model
 {
     internal class Action
     {
-        internal String Name { get; private set; }
+        internal String Name { get; set; }
 
         internal Item Item { get; private set; }
 
         public override string ToString()
         {
-            return this.Name + " " + this.Item.KeyedName;
+            return this.Name + " " + this.Item.ID;
         }
 
         internal Action(String Name, Item Item)
