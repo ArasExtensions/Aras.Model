@@ -67,18 +67,40 @@ namespace Aras.Model.Design.Debug
             {
                 order.Update(transaction);
                 order.Property("name").Value = "Test Company 0002";
-                OrderContext ordercontext = (OrderContext)order.Relationships("v_Order Context").First();
-                OutputOrder(order);
-                ordercontext.ValueList.Selected = 2;
-                OutputOrder(order);
-                ordercontext.Quantity = 10.0;
-                OutputOrder(order);
-                ordercontext.ValueList.Selected = 0;
-                OutputOrder(order);
-                ordercontext.ValueList.Selected = 1;
-                OutputOrder(order);
+                OrderContext enginetype = (OrderContext)order.Relationships("v_Order Context").Copy()[0];
+                OrderContext luxarypack = (OrderContext)order.Relationships("v_Order Context").Copy()[1];
+                OrderContext voltage = (OrderContext)order.Relationships("v_Order Context").Copy()[2];
 
-                transaction.Commit();
+                while(true)
+                {
+                    for(int i=0; i<3; i++)
+                    {
+                        enginetype.ValueList.Selected = i;
+                        OutputOrder(order);
+                        System.Threading.Thread.Sleep(1000);
+
+                        luxarypack.ValueList.Selected = 0;
+                        OutputOrder(order);
+                        System.Threading.Thread.Sleep(1000);
+
+                        luxarypack.ValueList.Selected = 1;
+                        OutputOrder(order);
+                        System.Threading.Thread.Sleep(1000);
+
+                        if (i==2)
+                        {
+                            voltage.ValueList.Selected = 0;
+                            OutputOrder(order);
+                            System.Threading.Thread.Sleep(1000);
+
+                            voltage.ValueList.Selected = 1;
+                            OutputOrder(order);
+                            System.Threading.Thread.Sleep(1000);
+                        }
+                    }
+                }
+
+         
             }
         }
     }
