@@ -67,6 +67,8 @@ namespace Aras.Model.Queries
 
         public override void Refresh()
         {
+            this.Relationships.NotifyListChanged = false;
+
             this.Relationships.Clear();
 
             IO.Item item = new IO.Item(this.Type.Name, "get");
@@ -100,9 +102,13 @@ namespace Aras.Model.Queries
                 {
                     this.Relationships.Add(relationship);
                 }
+
+                this.Relationships.NotifyListChanged = true;
             }
             else
             {
+                this.Relationships.NotifyListChanged = true;
+
                 if (!response.ErrorMessage.Equals("No items of type " + this.Type.Name + " found."))
                 {
                     throw new Exceptions.ServerException(response);

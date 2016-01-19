@@ -41,6 +41,8 @@ namespace Aras.Model.Queries
 
         public override void Refresh()
         {
+            this.Items.NotifyListChanged = false;
+
             this.Items.Clear();
 
             IO.Item item = new IO.Item(this.Type.Name, "get");
@@ -57,9 +59,13 @@ namespace Aras.Model.Queries
                     cacheitem.UpdateProperties(dbitem);
                     this.Items.Add(cacheitem);
                 }
+
+                this.Items.NotifyListChanged = true;
             }
             else
             {
+                this.Items.NotifyListChanged = true;
+
                 if (!response.ErrorMessage.Equals("No items of type " + this.Type.Name + " found."))
                 {
                     throw new Exceptions.ServerException(response);
