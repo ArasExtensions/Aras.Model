@@ -67,6 +67,7 @@ namespace Aras.Model.Design.Debug
             {
                 order.Update(transaction);
                 order.Property("name").Value = "Test Part";
+                transaction.Commit();
             }
         }
     }

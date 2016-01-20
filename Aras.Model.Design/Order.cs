@@ -169,6 +169,15 @@ namespace Aras.Model.Design
                     this.ConfiguredPart.Property("name").Value = this.Property("name").Value;
                     this.ConfiguredPart.Property("description").Value = this.Property("description").Value;
 
+                    //Ensure all Configured Part BOMS are locked
+                    foreach (PartBOM partbom in this.ConfiguredPart.Relationships("Part BOM"))
+                    {
+                        if (partbom.Transaction == null)
+                        {
+                            partbom.Update(this.Transaction);
+                        }
+                    }
+
                     // Add any missing Order Context
                     foreach(VariantContext variantcontext in this.Part.VariantContext(this))
                     {
