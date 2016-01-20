@@ -220,7 +220,6 @@ namespace Aras.Model
                                         case "list":
                                             List valuelist = this.Session.ListByID(thisprop.GetProperty("data_source"));
                                             this._propertyTypeCache[name] = new PropertyTypes.List(this, name, ReadOnly, false, valuelist);
-
                                             break;
                                         case "decimal":
 
@@ -265,6 +264,10 @@ namespace Aras.Model
                                             break;
                                         case "foreign":
                                             this._propertyTypeCache[name] = new PropertyTypes.Foreign(this, name, ReadOnly, false, DefaultString);
+                                            break;
+                                        case "filter list":
+                                            List valuefilterlist = this.Session.ListByID(thisprop.GetProperty("data_source"));
+                                            this._propertyTypeCache[name] = new PropertyTypes.FilterList(this, name, ReadOnly, false, valuefilterlist);
                                             break;
                                         default:
                                             throw new NotImplementedException("Property Type not implmented: " + thisprop.GetProperty("data_type"));

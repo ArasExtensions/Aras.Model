@@ -50,9 +50,9 @@ namespace Aras.Model.Design.Debug
 
         static void Main(string[] args)
         {
-            Server server = new Server("http://localhost/11SP1");
+            Server server = new Server("http://localhost/InnovatorServer10SP4");
             server.LoadAssembly("Aras.Model.Design");
-            Database database = server.Database("VariantsDemo11SP1");
+            Database database = server.Database("CMB");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
             session.ItemType("v_Order").AddToSelect("keyed_name,item_number,name,part,locked_by_id,configured_part");
@@ -61,33 +61,12 @@ namespace Aras.Model.Design.Debug
             session.ItemType("Part Variants").AddToSelect("quantity");
             session.ItemType("Part Variant Rule").AddToSelect("value");
 
-            Order order = (Order)session.Query("v_Order", Aras.Conditions.Eq("item_number", "0002")).First();
+            Order order = (Order)session.Query("v_Order", Aras.Conditions.Eq("item_number", "400_11111")).First();
 
             using (Transaction transaction = session.BeginTransaction())
             {
                 order.Update(transaction);
-                order.Property("name").Value = "Test Company 0002";
-                OrderContext enginetype = (OrderContext)order.Relationships("v_Order Context").Copy()[0];
-                OrderContext luxarypack = (OrderContext)order.Relationships("v_Order Context").Copy()[1];
-                OrderContext voltage = (OrderContext)order.Relationships("v_Order Context").Copy()[2];
-
-                while(true)
-                {
-
-                    enginetype.ValueList.Value = (ListValue)enginetype.ValueList.Values.Relationships("Value").ToList()[0];
-                    OutputOrder(order);
-                    System.Threading.Thread.Sleep(1000);
-
-                    enginetype.ValueList.Value = (ListValue)enginetype.ValueList.Values.Relationships("Value").ToList()[1];
-                    OutputOrder(order);
-                    System.Threading.Thread.Sleep(1000);
-
-                    enginetype.ValueList.Value = (ListValue)enginetype.ValueList.Values.Relationships("Value").ToList()[2];
-                    OutputOrder(order);
-                    System.Threading.Thread.Sleep(1000);
-                }
-
-         
+                order.Property("name").Value = "Test Part";
             }
         }
     }
