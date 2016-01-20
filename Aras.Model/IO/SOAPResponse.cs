@@ -51,13 +51,28 @@ namespace Aras.Model.IO
             {
                 List<Item> ret = new List<Item>();
 
-                XmlNodeList itemnodes = this.Result.SelectNodes("Item");
-
-                if (itemnodes != null)
+                if (this.Result != null)
                 {
-                    foreach(XmlNode itemnode in itemnodes)
+                    XmlNodeList itemnodes = this.Result.SelectNodes("Item");
+
+                    if (itemnodes != null)
                     {
-                        ret.Add(new Item(this.Doc, itemnode));
+                        foreach (XmlNode itemnode in itemnodes)
+                        {
+                            ret.Add(new Item(this.Doc, itemnode));
+                        }
+                    }
+                }
+                else
+                {
+                    XmlNodeList itemnodes = this.Doc.SelectNodes("Item");
+
+                    if (itemnodes != null)
+                    {
+                        foreach (XmlNode itemnode in itemnodes)
+                        {
+                            ret.Add(new Item(this.Doc, itemnode));
+                        }
                     }
                 }
 
