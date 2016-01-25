@@ -66,8 +66,8 @@ namespace Aras.Model.Design.Debug
             using (Transaction transaction = session.BeginTransaction())
             {
                 order.Update(transaction);
-                order.Property("name").Value = "Test Part";
-                transaction.Commit();
+                OrderContext neckerconfig = (OrderContext)order.Relationships("v_Order Context").First();
+                neckerconfig.Quantity = 3;
             }
         }
     }

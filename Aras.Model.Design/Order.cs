@@ -260,8 +260,7 @@ namespace Aras.Model.Design
 
                     foreach(PartBOM partbom in this.AllConfiguredPartBOM(this, this.Part))
                     {
-
-                        if (partbom.Related != null)
+                        if ((partbom.Related != null) && (partbom.Related.Class != null) && (partbom.Related.Class.Name == "BOM"))
                         {
                             if (flatbom.ContainsKey((Part)partbom.Related))
                             {
@@ -284,7 +283,6 @@ namespace Aras.Model.Design
                     }
 
                     // Add any Part BOM that not current in Configured Part
-
                     foreach(Part flatpart in flatbom.Keys)
                     {
                         Boolean found = false;
