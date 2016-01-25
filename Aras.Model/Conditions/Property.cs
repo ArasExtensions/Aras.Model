@@ -67,11 +67,11 @@ namespace Aras.Model.Conditions
             {
                 if (this.Value == null)
                 {
-                    return "(id is null)";
+                    return "(" + ItemType.TableName + ".[id] is null)";
                 }
                 else
                 {
-                    return "(id" + OperatorString(this.Operator) + "'" + this.Value.ToString() + "')";
+                    return "(" + ItemType.TableName + ".[id]" + OperatorString(this.Operator) + "'" + this.Value.ToString() + "')";
                 }
             }
             else

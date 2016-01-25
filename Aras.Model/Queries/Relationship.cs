@@ -72,7 +72,16 @@ namespace Aras.Model.Queries
             this.Relationships.Clear();
 
             IO.Item item = new IO.Item(this.Type.Name, "get");
-            item.Select = "id,related_id," + this.Type.Select;
+
+            if (System.String.IsNullOrEmpty(this.Type.Select))
+            {
+                item.Select = "id,related_id";
+            }
+            else
+            {
+                item.Select = "id,related_id," + this.Type.Select;
+            }
+
             item.SetProperty("source_id", this.Source.ID);
             IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, item);
             IO.SOAPResponse response = request.Execute();

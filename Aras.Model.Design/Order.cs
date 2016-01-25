@@ -328,6 +328,7 @@ namespace Aras.Model.Design
         protected override void OnRefresh()
         {
             base.OnRefresh();
+            this.Process();
         }
 
         public Order(String ID, Model.ItemType Type)

@@ -120,7 +120,19 @@ namespace Aras.Model.Design
         public OrderContext(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
             :base(ID, Type, Source, Related)
         {
-            this.ValueList = this.AddVariableListRuntime("value_list", false, this.VariantContext.Values, this.VariantContext.Values.ListValue(this.Value));
+            List contextlist = this.VariantContext.Values;
+            ListValue currentvalue = null;
+
+            try
+            {
+                currentvalue = contextlist.ListValue(this.Value);
+            }
+            catch(Model.Exceptions.ArgumentException e)
+            {
+                currentvalue = null;
+            }
+
+            this.ValueList = this.AddVariableListRuntime("value_list", false, contextlist, currentvalue);
             this.ValueList.PropertyChanged += ValueList_PropertyChanged;
         }
     }

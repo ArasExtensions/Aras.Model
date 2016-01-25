@@ -55,6 +55,8 @@ namespace Aras.Model.Design.Debug
             Database database = server.Database("CMB");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
+            Order order2 = new Order("B4F27233C77C4E768D85984CCD5C4CBA", session.ItemType("v_Order"));
+
             session.ItemType("v_Order").AddToSelect("keyed_name,item_number,name,part,locked_by_id,configured_part");
             session.ItemType("v_Order Context").AddToSelect("quantity");
             session.ItemType("Variant Context").AddToSelect("name,keyed_name,context_type,list,method,question");

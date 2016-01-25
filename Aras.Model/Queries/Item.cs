@@ -46,7 +46,16 @@ namespace Aras.Model.Queries
             this.Items.Clear();
 
             IO.Item item = new IO.Item(this.Type.Name, "get");
-            item.Select = "id," + this.Type.Select;
+
+            if (System.String.IsNullOrEmpty(this.Type.Select))
+            {
+                item.Select = "id";
+            }
+            else
+            {
+                item.Select = "id," + this.Type.Select;
+            }
+            
             item.Where = this.Where;
             IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, item);
             IO.SOAPResponse response = request.Execute();

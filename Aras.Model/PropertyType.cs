@@ -43,7 +43,7 @@ namespace Aras.Model
             {
                 if (this._columnName == null)
                 {
-                    this._columnName = this.Type.TableName + "." + this.Name;
+                    this._columnName = this.Type.TableName + ".[" + this.Name + "]";
                 }
 
                 return this._columnName;
