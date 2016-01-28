@@ -32,22 +32,6 @@ namespace Aras.Model.Queries
 {
     public class Item : Query<Model.Item>
     {
-        private ObservableList<Model.Item> Items;
-
-        public override System.Collections.Generic.IEnumerator<Model.Item> GetEnumerator()
-        {
-            return this.Items.GetEnumerator();
-        }
-
-        [System.Runtime.CompilerServices.IndexerName("ItemIndexer")]
-        public Model.Item this[int Index]
-        {
-            get
-            {
-                return this.Items[Index];
-            }
-        }
-
         public override void Refresh()
         {
             this.Items.NotifyListChanged = false;
@@ -91,16 +75,9 @@ namespace Aras.Model.Queries
             }
         }
 
-        void Items_ListChanged(object sender, EventArgs e)
-        {
-            this.OnQueryChanged();
-        }
-
         internal Item(ItemType Type, Condition Condition)
             :base(Type, Condition)
         {
-            this.Items = new ObservableList<Model.Item>();
-            this.Items.ListChanged += Items_ListChanged;
             this.Refresh();
         }
 

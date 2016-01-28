@@ -30,8 +30,11 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public abstract class Query<T> : System.Collections.Generic.IEnumerable<T>
+    public abstract class Query<T> : System.Collections.Generic.IEnumerable<T> where T : Model.Item
     {
+        protected ObservableList<T> CreatedItems;
+        protected ObservableList<T> Items;
+
         public delegate void QueryChangedEventHandler(object sender, EventArgs e);
 
         public event QueryChangedEventHandler QueryChanged;
@@ -56,7 +59,18 @@ namespace Aras.Model
             return ret;
         }
 
-        public abstract System.Collections.Generic.IEnumerator<T> GetEnumerator();
+        public T this[int Index]
+        {
+            get
+            {
+                return this.Items[Index];
+            }
+        }
+
+        public System.Collections.Generic.IEnumerator<T> GetEnumerator()
+        {
+            return this.Items.GetEnumerator();
+        }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
@@ -95,8 +109,16 @@ namespace Aras.Model
             }
         }
 
+        private void Items_ListChanged(object sender, EventArgs e)
+        {
+            this.OnQueryChanged();
+        }
+
         internal Query(ItemType Type, Condition Condition)
         {
+            this.CreatedItems = new ObservableList<T>();
+            this.Items = new ObservableList<T>();
+            this.Items.ListChanged += Items_ListChanged;
             this.Type = Type;
             this._condition = Condition;
         }

@@ -32,29 +32,13 @@ namespace Aras.Model.Queries
 {
     public class Relationship : Query<Model.Relationship>
     {
-        private ObservableList<Model.Relationship> CreatedRelationships;
-        private ObservableList<Model.Relationship> Relationships;
-
-        public override System.Collections.Generic.IEnumerator<Model.Relationship> GetEnumerator()
-        {
-            return this.Relationships.GetEnumerator();
-        }
-
-        public Model.Relationship this[int Index]
-        {
-            get
-            {
-                return this.Relationships[Index];
-            }
-        }
-
         public Model.Item Source { get; private set; }
 
         public Model.Item Create(Model.Item Related, Transaction Transaction)
         {
             Model.Relationship relationship = this.Type.Session.Create((RelationshipType)this.Type, this.Source, Related, Transaction);
-            this.CreatedRelationships.Add(relationship);
-            this.Relationships.Add(relationship);
+            this.CreatedItems.Add(relationship);
+            this.Items.Add(relationship);
             return relationship;
         }
 
@@ -75,9 +59,9 @@ namespace Aras.Model.Queries
 
         public override void Refresh()
         {
-            this.Relationships.NotifyListChanged = false;
+            this.Items.NotifyListChanged = false;
 
-            this.Relationships.Clear();
+            this.Items.Clear();
 
             IO.Item item = new IO.Item(this.Type.Name, "get");
 
@@ -112,19 +96,19 @@ namespace Aras.Model.Queries
 
                     Model.Relationship relationship = this.Type.Session.RelationshipFromCache(dbitem.ID, (RelationshipType)this.Type, this.Source, related);
                     relationship.UpdateProperties(dbitem);
-                    this.Relationships.Add(relationship);
+                    this.Items.Add(relationship);
                 }
 
-                foreach(Model.Relationship relationship in this.CreatedRelationships)
+                foreach(Model.Relationship relationship in this.CreatedItems)
                 {
-                    this.Relationships.Add(relationship);
+                    this.Items.Add(relationship);
                 }
 
-                this.Relationships.NotifyListChanged = true;
+                this.Items.NotifyListChanged = true;
             }
             else
             {
-                this.Relationships.NotifyListChanged = true;
+                this.Items.NotifyListChanged = true;
 
                 if (!response.ErrorMessage.Equals("No items of type " + this.Type.Name + " found."))
                 {
@@ -133,17 +117,9 @@ namespace Aras.Model.Queries
             }
         }
 
-        void Relationships_ListChanged(object sender, EventArgs e)
-        {
-            this.OnQueryChanged();
-        }
-
         internal Relationship(RelationshipType Type, Condition Condition, Model.Item Source)
             : base(Type, Condition)
         {
-            this.Relationships = new ObservableList<Model.Relationship>();
-            this.Relationships.ListChanged += Relationships_ListChanged;
-            this.CreatedRelationships = new ObservableList<Model.Relationship>();
             this.Source = Source;
             this.Refresh();
         }

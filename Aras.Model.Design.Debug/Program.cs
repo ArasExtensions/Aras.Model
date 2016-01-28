@@ -55,11 +55,7 @@ namespace Aras.Model.Design.Debug
             Database database = server.Database("VariantsDemo11SP1");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-
-
             Order order = (Order)session.Query("v_Order", Aras.Conditions.Eq("item_number", "400_1111"))[0];
-
-
             OrderContext neckerconfig = (OrderContext)order.Relationships("v_Order Context")[0];
         }
     }
