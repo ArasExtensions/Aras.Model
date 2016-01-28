@@ -577,6 +577,26 @@ namespace Aras.Model
             return this.Relationships(this.ItemType.RelationshipType(RelationshipType));
         }
 
+        public Queries.Relationship Query(RelationshipType Type, Condition Condition)
+        {
+            return new Queries.Relationship(Type, Condition, this);
+        }
+
+        public Queries.Relationship Query(RelationshipType Type)
+        {
+            return this.Query(Type, null);
+        }
+
+        public Queries.Relationship Query(String Type, Condition Condition)
+        {
+            return new Queries.Relationship(this.ItemType.RelationshipType(Type), Condition, this);
+        }
+
+        public Queries.Relationship Query(String Type)
+        {
+            return this.Query(Type, null);
+        }
+
         public Boolean Equals(Item other)
         {
             if (other == null)
