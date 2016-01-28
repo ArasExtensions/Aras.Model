@@ -127,7 +127,7 @@ namespace Aras.Model.Design
             {
                 currentvalue = contextlist.ListValue(this.Value);
             }
-            catch(Model.Exceptions.ArgumentException e)
+            catch(Model.Exceptions.ArgumentException)
             {
                 currentvalue = null;
             }

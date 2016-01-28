@@ -40,6 +40,14 @@ namespace Aras.Model.Queries
             return this.Relationships.GetEnumerator();
         }
 
+        public Model.Relationship this[int Index]
+        {
+            get
+            {
+                return this.Relationships[Index];
+            }
+        }
+
         public Model.Item Source { get; private set; }
 
         public Model.Item Create(Model.Item Related, Transaction Transaction)

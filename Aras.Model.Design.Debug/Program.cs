@@ -50,27 +50,17 @@ namespace Aras.Model.Design.Debug
 
         static void Main(string[] args)
         {
-            Server server = new Server("http://localhost/InnovatorServer10SP4");
+            Server server = new Server("http://localhost/11SP1");
             server.LoadAssembly("Aras.Model.Design");
-            Database database = server.Database("CMB");
+            Database database = server.Database("VariantsDemo11SP1");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-            Order order2 = new Order("B4F27233C77C4E768D85984CCD5C4CBA", session.ItemType("v_Order"));
 
-            session.ItemType("v_Order").AddToSelect("keyed_name,item_number,name,part,locked_by_id,configured_part");
-            session.ItemType("v_Order Context").AddToSelect("quantity");
-            session.ItemType("Variant Context").AddToSelect("name,keyed_name,context_type,list,method,question");
-            session.ItemType("Part Variants").AddToSelect("quantity");
-            session.ItemType("Part Variant Rule").AddToSelect("value");
 
-            Order order = (Order)session.Query("v_Order", Aras.Conditions.Eq("item_number", "400_11111")).First();
+            Order order = (Order)session.Query("v_Order", Aras.Conditions.Eq("item_number", "400_1111"))[0];
 
-            using (Transaction transaction = session.BeginTransaction())
-            {
-                order.Update(transaction);
-                OrderContext neckerconfig = (OrderContext)order.Relationships("v_Order Context").First();
-                neckerconfig.Quantity = 3;
-            }
+
+            OrderContext neckerconfig = (OrderContext)order.Relationships("v_Order Context")[0];
         }
     }
 }

@@ -39,6 +39,15 @@ namespace Aras.Model.Queries
             return this.Items.GetEnumerator();
         }
 
+        [System.Runtime.CompilerServices.IndexerName("ItemIndexer")]
+        public Model.Item this[int Index]
+        {
+            get
+            {
+                return this.Items[Index];
+            }
+        }
+
         public override void Refresh()
         {
             this.Items.NotifyListChanged = false;
