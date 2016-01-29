@@ -53,6 +53,14 @@ namespace Aras.Model
             }
         }
    
+        public IEnumerable<ListValue> Values
+        {
+            get
+            {
+                return this.Relationships("Value").Cast<ListValue>();
+            }
+        }
+
         public List(String ID, ItemType ItemType)
             :base(ID, ItemType)
         {

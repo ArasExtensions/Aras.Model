@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public abstract class Condition
+    public abstract class Condition : IEquatable<Condition>
     {
         private List<Condition> _children;
 
@@ -48,6 +48,29 @@ namespace Aras.Model
         }
 
         internal abstract String Where(ItemType ItemType);
+
+        public abstract bool Equals(Condition other);
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+            else
+            {
+                if (obj is Condition)
+                {
+                    return this.Equals((Condition)obj);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        public abstract override int GetHashCode();
 
         internal Condition()
         {

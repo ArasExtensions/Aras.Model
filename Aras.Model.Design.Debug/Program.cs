@@ -56,7 +56,19 @@ namespace Aras.Model.Design.Debug
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
             Order order = (Order)session.Query("v_Order", Aras.Conditions.Eq("item_number", "400_1111"))[0];
-            OrderContext neckerconfig = (OrderContext)order.Relationships("v_Order Context")[0];
+
+            using (Transaction transaction = session.BeginTransaction())
+            {
+                order.Update(transaction);
+                OrderContext neckerconfig = (OrderContext)order.Relationships("v_Order Context")[0];
+                IEnumerable<ListValue> test = neckerconfig.ValueList.Values.Values;
+                neckerconfig.ValueList.Selected = 1;
+                OutputOrder(order);
+                neckerconfig.Quantity = 11;
+                OutputOrder(order);
+                neckerconfig.ValueList.Selected = 0;
+                OutputOrder(order);
+            }
         }
     }
 }

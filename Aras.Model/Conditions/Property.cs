@@ -97,6 +97,23 @@ namespace Aras.Model.Conditions
             }
         }
 
+        public override bool Equals(Condition other)
+        {
+            if (other != null && other is Property)
+            {
+                return this.Name.Equals(((Property)other).Name) && this.Operator.Equals(((Property)other).Operator) && this.Value.Equals(((Property)other).Value);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Name.GetHashCode() ^ this.Operator.GetHashCode() ^ this.Value.GetHashCode();
+        }
+
         internal Property(String Name, Operators Operator, Object Value)
             : base()
         {
