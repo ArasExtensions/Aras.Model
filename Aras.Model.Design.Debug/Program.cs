@@ -35,7 +35,19 @@ namespace Aras.Model.Design.Debug
     {
         static void OutputOrder(Order Order)
         {
+            Console.WriteLine(Order.ItemNumber);
+
             Part configuredpart = Order.ConfiguredPart;
+
+            foreach (OrderContext ordercontext in Order.Store("v_Order Context"))
+            {
+                if (ordercontext.Action != Item.Actions.Deleted)
+                {
+                    Console.WriteLine(ordercontext.Property("value").Value + "\t" + ordercontext.ValueList.Value);
+                }
+            }
+
+            Console.WriteLine();
 
             foreach(PartBOM partbom in configuredpart.Store("Part BOM"))
             {
@@ -66,9 +78,9 @@ namespace Aras.Model.Design.Debug
                 OutputOrder(order);
                 neckerconfig.Quantity = 11;
                 OutputOrder(order);
-                //neckerconfig.ValueList.Selected = 0;
-                //OutputOrder(order);
-                transaction.Commit();
+                neckerconfig.ValueList.Selected = 0;
+                OutputOrder(order);
+                //transaction.Commit();
             }
         }
     }

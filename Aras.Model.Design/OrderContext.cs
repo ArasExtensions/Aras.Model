@@ -117,30 +117,13 @@ namespace Aras.Model.Design
             return dbitem;
         }
 
-        public OrderContext(Model.RelationshipType RelationshipType, Model.Item Source, Model.Item Related)
-            : base(RelationshipType, Source, Related)
+        private void Initalise()
         {
+            // Get List of Possible Values
             List contextlist = this.VariantContext.Values;
             ListValue currentvalue = null;
 
-            try
-            {
-                currentvalue = contextlist.ListValue(this.Value);
-            }
-            catch(Model.Exceptions.ArgumentException)
-            {
-                currentvalue = null;
-            }
-
-            this.ValueList = this.AddVariableListRuntime("value_list", false, contextlist, currentvalue);
-            this.ValueList.PropertyChanged += ValueList_PropertyChanged;
-        }
-
-        public OrderContext(Model.RelationshipType RelationshipType, Model.Item Source, IO.Item DBItem)
-            : base(RelationshipType, Source, DBItem)
-        {
-            List contextlist = this.VariantContext.Values;
-            ListValue currentvalue = null;
+            // Get Current ListValue
 
             try
             {
@@ -151,8 +134,38 @@ namespace Aras.Model.Design
                 currentvalue = null;
             }
 
+            // Add Runtime List Property
             this.ValueList = this.AddVariableListRuntime("value_list", false, contextlist, currentvalue);
             this.ValueList.PropertyChanged += ValueList_PropertyChanged;
+
+            // Watch for changes in Value
+            this.Property("value").PropertyChanged += Value_PropertyChanged;
+        }
+
+        void Value_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch(e.PropertyName)
+            {
+                case "Value":
+                    
+                    // Update List
+                    this.ValueList.Value = this.ValueList.Values.ListValue(this.Value);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public OrderContext(Model.RelationshipType RelationshipType, Model.Item Source, Model.Item Related)
+            : base(RelationshipType, Source, Related)
+        {
+            this.Initalise();
+        }
+
+        public OrderContext(Model.RelationshipType RelationshipType, Model.Item Source, IO.Item DBItem)
+            : base(RelationshipType, Source, DBItem)
+        {
+            this.Initalise();
         }
     }
 }
