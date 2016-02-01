@@ -65,12 +65,18 @@ namespace Aras.Model.Queries
                 {
                     foreach (IO.Item dbitem in response.Items)
                     {
-                        if (!this.Store.Cache.ContainsKey(dbitem.ID))
+                        if (!this.Store.ItemInCache(dbitem.ID))
                         {
-                            this.Store.Cache[dbitem.ID] = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, dbitem });
+                            Model.Relationship newrelationship = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, dbitem });
+                            this.Store.AddItemToCache(newrelationship);
+                            this.Items.Add(newrelationship);
                         }
-
-                        this.Items.Add(this.Store.Cache[dbitem.ID]);
+                        else
+                        {
+                            Model.Relationship existingrelationship = this.Store.GetItemFromCache(dbitem.ID);
+                            existingrelationship.UpdateProperties(dbitem);
+                            this.Items.Add(existingrelationship);
+                        }
                     }
                 }
                 else

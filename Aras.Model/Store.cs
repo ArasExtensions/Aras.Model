@@ -36,7 +36,7 @@ namespace Aras.Model
 
         public event StoreChangedEventHandler StoreChanged;
 
-        protected void OStoreChanged()
+        protected void OnStoreChanged()
         {
             if (this.StoreChanged != null)
             {
@@ -54,7 +54,26 @@ namespace Aras.Model
 
         public ItemType ItemType { get; private set; }
 
-        internal Dictionary<String, T> Cache;
+        private Dictionary<String, T> Cache;
+
+        internal Boolean ItemInCache(String ID)
+        {
+            return this.Cache.ContainsKey(ID);
+        }
+
+        internal void AddItemToCache(T Item)
+        {
+            if (!this.ItemInCache(Item.ID))
+            {
+                this.Cache[Item.ID] = Item;
+                this.OnStoreChanged();
+            }
+        }
+
+        internal T GetItemFromCache(String ID)
+        {
+            return this.Cache[ID];
+        }
 
         public System.Collections.Generic.IEnumerator<T> GetEnumerator()
         {

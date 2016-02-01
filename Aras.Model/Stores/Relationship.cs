@@ -70,12 +70,14 @@ namespace Aras.Model.Stores
             {
                 foreach (IO.Item dbitem in response.Items)
                 {
-                    if (!this.Cache.ContainsKey(dbitem.ID))
+                    if (!this.ItemInCache(dbitem.ID))
                     {
-                        this.Cache[dbitem.ID] = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, dbitem });
+                        this.AddItemToCache((Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, dbitem }));
                     }
-
-                    this.Cache[dbitem.ID].UpdateProperties(dbitem);
+                    else
+                    {
+                        this.GetItemFromCache(dbitem.ID).UpdateProperties(dbitem);
+                    }
                 }
             }
             else
@@ -89,7 +91,7 @@ namespace Aras.Model.Stores
 
         public override Model.Relationship Get(String ID)
         {
-            if (!this.Cache.ContainsKey(ID))
+            if (!this.ItemInCache(ID))
             {
                 IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
                 dbitem.ID = ID;
@@ -102,7 +104,7 @@ namespace Aras.Model.Stores
                     if (response.Items.Count() > 0)
                     {
                         // Get Related Item
-                        this.Cache[ID] = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, response.Items.First() });
+                        this.AddItemToCache((Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, response.Items.First() }));
                     }
                     else
                     {
@@ -115,7 +117,7 @@ namespace Aras.Model.Stores
                 }
             }
 
-            return this.Cache[ID];
+            return this.GetItemFromCache(ID);
         }
 
         public override Model.Relationship Create()
@@ -136,7 +138,7 @@ namespace Aras.Model.Stores
         public Model.Relationship Create(Model.Item Related, Transaction Transaction)
         {
             Model.Relationship relationship = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(Model.Item) }).Invoke(new object[] { RelationshipType, this.Source, Related });
-            this.Cache[relationship.ID] = relationship;
+            this.AddItemToCache(relationship);
 
             if (Transaction != null)
             {

@@ -49,12 +49,18 @@ namespace Aras.Model.Queries
                 {
                     foreach (IO.Item dbitem in response.Items)
                     {
-                        if (!this.Store.Cache.ContainsKey(dbitem.ID))
+                        if (!this.Store.ItemInCache(dbitem.ID))
                         {
-                            this.Store.Cache[dbitem.ID] = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, dbitem });
+                            Model.Item newitem = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, dbitem });
+                            this.Store.AddItemToCache(newitem);
+                            this.Items.Add(newitem);
                         }
-
-                        this.Items.Add(this.Store.Cache[dbitem.ID]);
+                        else
+                        {
+                            Model.Item existingitem = this.Store.GetItemFromCache(dbitem.ID);
+                            existingitem.UpdateProperties(dbitem);
+                            this.Items.Add(existingitem);
+                        }
                     }
                 }
                 else

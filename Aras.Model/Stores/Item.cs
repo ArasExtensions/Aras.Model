@@ -49,7 +49,7 @@ namespace Aras.Model.Stores
 
         public override Model.Item Get(String ID)
         {
-            if (!this.Cache.ContainsKey(ID))
+            if (!this.ItemInCache(ID))
             {
                 IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
                 dbitem.ID = ID;
@@ -61,7 +61,8 @@ namespace Aras.Model.Stores
                 {
                     if (response.Items.Count() > 0)
                     {
-                        this.Cache[ID] = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, response.Items.First() });
+                        Model.Item newitem = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, response.Items.First() });
+                        this.AddItemToCache(newitem);
                     }
                     else
                     {
@@ -74,7 +75,7 @@ namespace Aras.Model.Stores
                 }
             }
 
-            return this.Cache[ID];
+            return this.GetItemFromCache(ID);
         }
 
         public override Model.Item Create()
@@ -91,7 +92,7 @@ namespace Aras.Model.Stores
                 item.Transaction = Transaction;
             }
 
-            this.Cache[item.ID] = item;
+            this.AddItemToCache(item);
             return item;
         }
 
@@ -108,9 +109,9 @@ namespace Aras.Model.Stores
             {
                 foreach (IO.Item dbitem in response.Items)
                 {
-                    if (!this.Cache.ContainsKey(dbitem.ID))
+                    if (!this.ItemInCache(dbitem.ID))
                     {
-                        this.Cache[dbitem.ID] = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, dbitem });
+                        this.AddItemToCache((Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, dbitem }));
                     }
                 }
             }
