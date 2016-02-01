@@ -66,8 +66,9 @@ namespace Aras.Model.Design.Debug
                 OutputOrder(order);
                 neckerconfig.Quantity = 11;
                 OutputOrder(order);
-                neckerconfig.ValueList.Selected = 0;
-                OutputOrder(order);
+                //neckerconfig.ValueList.Selected = 0;
+                //OutputOrder(order);
+                transaction.Commit();
             }
         }
     }

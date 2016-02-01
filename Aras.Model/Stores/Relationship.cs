@@ -99,14 +99,14 @@ namespace Aras.Model.Stores
 
                 if (!response.IsError)
                 {
-                    if (response.Items.Count() > 1)
+                    if (response.Items.Count() > 0)
                     {
                         // Get Related Item
-                        this.Cache[ID] = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, dbitem });
+                        this.Cache[ID] = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, response.Items.First() });
                     }
                     else
                     {
-                        throw new NotImplementedException();
+                        throw new Exceptions.ArgumentException("Invalid Relationship ID: " + ID);
                     }
                 }
                 else
