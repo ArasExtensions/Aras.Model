@@ -60,6 +60,26 @@ namespace Aras.Model.Design.Debug
             Console.WriteLine();
         }
 
+        static String ItemNumber(int cnt)
+        {
+            return "DX-" + cnt.ToString().PadLeft(10, '0');
+        }
+
+        static void CreateBOM(Part Part, int cnt, int depth, Transaction Transaction)
+        {
+            if (depth < 1)
+            {
+                for(int i=0; i<10; i++)
+                {
+                    Part part = (Part)Part.Session.Store("Part").Create(Transaction);
+                    part.ItemNumber = ItemNumber(cnt);
+                    cnt++;
+
+                    Part.Store("Part BOM").Create(part, Transaction);
+                }
+            }
+        }
+
         static void Main(string[] args)
         {
             Server server = new Server("http://localhost/11SP1");
@@ -67,20 +87,20 @@ namespace Aras.Model.Design.Debug
             Database database = server.Database("VariantsDemo11SP1");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-            Order order = (Order)session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "400_1111"))[0];
-
             using (Transaction transaction = session.BeginTransaction())
             {
-                order.Update(transaction);
-                OrderContext neckerconfig = (OrderContext)order.Store("v_Order Context")[0];
-                IEnumerable<ListValue> test = neckerconfig.ValueList.Values.Values;
-                neckerconfig.ValueList.Selected = 1;
-                OutputOrder(order);
-                neckerconfig.Quantity = 11;
-                OutputOrder(order);
-                neckerconfig.ValueList.Selected = 0;
-                OutputOrder(order);
-                //transaction.Commit();
+                Part toplevel = (Part)session.Store("Part").Create(transaction);
+                toplevel.ItemNumber = ItemNumber(1);
+                
+                Part bompart = (Part)session.Store("Part").Create(transaction);
+                bompart.ItemNumber = ItemNumber(2);
+                toplevel.Store("Part BOM").Create(bompart, transaction);
+
+                Part bompart2 = (Part)session.Store("Part").Create(transaction);
+                bompart2.ItemNumber = ItemNumber(3);
+                bompart.Store("Part BOM").Create(bompart2, transaction);
+
+                transaction.Commit();
             }
         }
     }

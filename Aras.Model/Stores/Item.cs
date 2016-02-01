@@ -86,12 +86,12 @@ namespace Aras.Model.Stores
         public override Model.Item Create(Transaction Transaction)
         {
             Model.Item item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType) }).Invoke(new object[] { this.ItemType });
-            
+
             if (Transaction != null)
             {
-                item.Transaction = Transaction;
+                Transaction.Add("add", item);
             }
-
+                
             this.AddItemToCache(item);
             return item;
         }

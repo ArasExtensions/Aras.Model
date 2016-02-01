@@ -30,19 +30,108 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    internal class Action
+    internal abstract class Action
     {
-        internal String Name { get; set; }
+        internal Transaction Transaction { get; private set; }
+
+        private String _name;
+        internal String Name 
+        { 
+            get
+            {
+                return this._name;
+            }
+            set
+            {
+                if (value != null)
+                {
+                    if ((this._name == null || this._name.Equals("add")) && value.Equals("delete"))
+                    {
+                        // No Action needed on database
+                        this._name = null;
+                    }
+                    else
+                    {
+                        this._name = value;
+                    }
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Must specify Name of Action");
+                }
+            }
+        }
 
         internal Item Item { get; private set; }
+
+        private Dictionary<String, Actions.Relationship> RelationshipsCache;
+        internal void AddRelationship(Actions.Relationship Relationship)
+        {
+            this.RelationshipsCache[Relationship.Item.ID] = Relationship;
+        }
+
+        internal abstract IO.Item Process();
+
+        protected IO.Item BuildItem()
+        {
+            // Create IO Item
+            IO.Item dbitem = new IO.Item(this.Item.ItemType.Name, this.Name);
+            dbitem.ID = this.Item.ID;
+
+            // Add Properties
+            foreach (Property prop in this.Item.Properties)
+            {
+                if (!prop.Type.Runtime && !prop.Type.ReadOnly && (prop.Modified))
+                {
+                    dbitem.SetProperty(prop.Type.Name, prop.DBValue);
+                }
+            }
+
+            // Add Relations
+            foreach (Actions.Relationship relationshipaction in this.RelationshipsCache.Values)
+            {
+                IO.Item dbrelationship = relationshipaction.Process();
+                dbitem.AddRelationship(dbrelationship);
+            }
+
+            return dbitem;
+        }
+
+        protected IO.SOAPResponse SendItem(IO.Item DBItem)
+        {
+            // Send to Server
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Transaction.Session, DBItem);
+            return request.Execute();
+        }
+
+        protected void UpdateItem(IO.Item DBItem)
+        {
+            this.Item.UpdateProperties(DBItem);
+            
+            // Unlock
+            this.Item.UnLock();
+            this.Item.Transaction = null;
+
+            foreach(IO.Item dbrelationship in DBItem.Relationships)
+            {
+                if (this.RelationshipsCache.ContainsKey(dbrelationship.ID))
+                {
+                    this.RelationshipsCache[dbrelationship.ID].Item.UpdateProperties(dbrelationship);
+                    this.RelationshipsCache[dbrelationship.ID].Item.UnLock();
+                    this.RelationshipsCache[dbrelationship.ID].Item.Transaction = null;
+                }
+            }
+        }
 
         public override string ToString()
         {
             return this.Name + " " + this.Item.ID;
         }
 
-        internal Action(String Name, Item Item)
+        internal Action(Transaction Transaction, String Name, Item Item)
         {
+            this.RelationshipsCache = new Dictionary<string, Actions.Relationship>();
+            this.Transaction = Transaction;
             this.Name = Name;
             this.Item = Item;
         }

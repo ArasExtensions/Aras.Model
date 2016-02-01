@@ -34,28 +34,56 @@ namespace Aras.Model
     {
         public Session Session { get; private set; }
 
-        private Dictionary<String, Action> _actions;
+        private Dictionary<String, Action> ActionsCache;
 
-
-        internal void Add(String Name, Item Item)
+        internal void Add(String Name, Model.Item Item)
         {
-            if (!this._actions.ContainsKey(Item.ID))
+            if (Item is Relationship)
             {
-                this._actions[Item.ID] = new Action(Name, Item);
-                Item.Transaction = this;
-            }
-            else
-            {
-                if (this._actions[Item.ID].Name.Equals("add") && Name.Equals("delete"))
+                Model.Relationship relationship = (Model.Relationship)Item;
+
+                if (this.ActionsCache.ContainsKey(relationship.Source.ID))
                 {
-                    // Remove from Transaction
-                    this._actions.Remove(Item.ID);
-                    Item.Transaction = null;
+                    Action sourceaction = this.ActionsCache[relationship.Source.ID];
+
+                    if (this.ActionsCache.ContainsKey(relationship.ID))
+                    {
+                        this.ActionsCache[relationship.ID].Name = Name;
+                    }
+                    else
+                    {
+                        Actions.Relationship relationshipaction = new Actions.Relationship(this, Name, relationship);
+                        this.ActionsCache[relationship.Source.ID].AddRelationship(relationshipaction);
+                        this.ActionsCache[relationship.ID] = relationshipaction;
+                    }
                 }
                 else
                 {
-                    this._actions[Item.ID].Name = Name;
+                    throw new Exceptions.ArgumentException("Source Item not present in Transaction");
                 }
+            }
+            else
+            {
+                if (this.ActionsCache.ContainsKey(Item.ID))
+                {
+                    this.ActionsCache[Item.ID].Name = Name;
+                }
+                else
+                {
+                    this.ActionsCache[Item.ID] = new Actions.Item(this, Name, Item);
+                }  
+            }
+        }
+
+        internal Action Get(String ID)
+        {
+            if (this.ActionsCache.ContainsKey(ID))
+            {
+                return this.ActionsCache[ID];
+            }
+            else
+            {
+                return null;
             }
         }
 
@@ -63,82 +91,12 @@ namespace Aras.Model
 
         public void Commit()
         {
-            if (!this.Committed && this._actions.Count() > 0)
+            if (!this.Committed && this.ActionsCache.Count > 0)
             {
-                Dictionary<String, IO.Item> dbitems = new Dictionary<String, IO.Item>();
-
-                foreach (Action action in this._actions.Values)
+                foreach (Action action in this.ActionsCache.Values)
                 {
-                    if (action.Item is Relationship)
-                    {
-                        Relationship relationship = (Relationship)action.Item;
-
-                        if (dbitems.ContainsKey(relationship.Source.ID))
-                        {
-                            IO.Item dbrelation = new IO.Item(action.Item.ItemType.Name, action.Name);
-                            dbrelation.ID = action.Item.ID;
-
-                            if (relationship.Related != null)
-                            {
-                                dbrelation.SetProperty("related_id", relationship.Related.ID);
-                            }
-
-                            foreach (Property prop in relationship.Properties)
-                            {
-                                if (!prop.Type.Runtime && !prop.Type.ReadOnly && (prop.Modified))
-                                {
-                                    dbrelation.SetProperty(prop.Type.Name, prop.DBValue);
-                                }
-                            }
-
-                            dbitems[relationship.Source.ID].AddRelationship(dbrelation);
-                        }
-                        else
-                        {
-                            throw new Exceptions.ArgumentException("Source Item is not part of Transaction: " + relationship.Source.ID);
-                        }
-                    }
-                    else
-                    {
-                        IO.Item dbitem = new IO.Item(action.Item.ItemType.Name, action.Name);
-                        dbitem.ID = action.Item.ID;
-
-                        foreach (Property prop in action.Item.Properties)
-                        {
-                            if (!prop.Type.Runtime && !prop.Type.ReadOnly && (prop.Modified))
-                            {
-                                dbitem.SetProperty(prop.Type.Name, prop.DBValue);
-                            }
-                        }
-
-                        dbitems[dbitem.ID] = dbitem;
-                    }
+                    action.Process();
                 }
-
-                foreach (IO.Item dbrequestitem in dbitems.Values)
-                {
-                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, dbrequestitem);
-                    IO.SOAPResponse response = request.Execute();
-
-                    if (!response.IsError)
-                    {
-                        foreach (IO.Item dbitem in response.Items)
-                        {
-                            ItemType itemtype = Session.ItemType(dbitem.ItemType);
-                            Item item = this.Session.Get(itemtype, dbitem.ID);
-                            item.UpdateProperties(dbitem);
-
-                            // Unlock
-                            item.UnLock();
-                            item.Transaction = null;
-                        }
-                    }
-                    else
-                    {
-                        throw new Exceptions.ServerException(response);
-                    }
-                }
-
             }
 
             this.Committed = true;
@@ -160,7 +118,7 @@ namespace Aras.Model
         internal Transaction(Session Session)
         {
             this.Session = Session;
-            this._actions = new Dictionary<String, Action>();
+            this.ActionsCache = new Dictionary<String, Action>();
             this.Committed = false;
         }
     }
