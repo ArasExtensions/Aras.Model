@@ -41,7 +41,7 @@ namespace Aras.Model
             }
             else
             {
-                foreach (ListValue listvalue in this.Relationships("Value"))
+                foreach (ListValue listvalue in this.Store("Value"))
                 {
                     if (listvalue.Value.Equals(Value))
                     {
@@ -57,14 +57,20 @@ namespace Aras.Model
         {
             get
             {
-                return this.Relationships("Value").Cast<ListValue>();
+                return this.Store("Value").Cast<ListValue>();
             }
         }
 
-        public List(String ID, ItemType ItemType)
-            :base(ID, ItemType)
+        public List(ItemType ItemType)
+            :base(ItemType)
         {
            
+        }
+
+        public List(ItemType ItemType, IO.Item DBItem)
+            : base(ItemType, DBItem)
+        {
+
         }
     }
 }

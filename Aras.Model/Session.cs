@@ -45,7 +45,7 @@ namespace Aras.Model
             {
                 if (this._user == null)
                 {
-                    this._user = (User)this.ItemFromCache(this.UserID, this.ItemType("User"));
+                    this._user = (User)this.Store("User").Get(this.UserID);
                 }
 
                 return this._user;
@@ -145,43 +145,58 @@ namespace Aras.Model
 
             return this.ItemTypeIDCache[ID];
         }
-
-        internal List ListByID(String ID)
+ 
+        public Transaction BeginTransaction()
         {
-            return (List)this.ItemFromCache(ID, this.ItemType("List"));
+            return new Transaction(this);
         }
 
-        private Dictionary<String, Item> ItemCache;
+        private Dictionary<ItemType, Stores.Item> StoreCache;
 
-        internal Item ItemFromCache(String ID, ItemType Type)
+        public Stores.Item Store(ItemType ItemType)
         {
-            if (!this.ItemCache.ContainsKey(ID))
+            if (!(ItemType is RelationshipType))
             {
-                if (Type is RelationshipType)
+                if (!this.StoreCache.ContainsKey(ItemType))
                 {
-                    IO.Item dbitem = new IO.Item(Type.Name, "get");
+                    this.StoreCache[ItemType] = new Stores.Item(ItemType);
+                }
+
+                return this.StoreCache[ItemType];
+            }
+            else
+            {
+                throw new ArgumentException("Can not access store for a RelationshipType");
+            }
+        }
+
+        public Stores.Item Store(String Name)
+        {
+            return this.Store(this.ItemType(Name));
+        }
+
+        internal Item Get(ItemType ItemType, String ID)
+        {
+            if (String.IsNullOrEmpty(ID))
+            {
+                return null;
+            }
+            else
+            {
+                if (ItemType is RelationshipType)
+                {
+                    IO.Item dbitem = new IO.Item(ItemType.Name, "get");
                     dbitem.ID = ID;
-                    dbitem.Select = "source_id,related_id";
+                    dbitem.Select = "source_id";
                     IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, dbitem);
                     IO.SOAPResponse response = request.Execute();
 
                     if (!response.IsError)
                     {
-                        String sourceid = response.Items.First().GetProperty("source_id");
-                        Item source = this.ItemFromCache(sourceid, ((RelationshipType)Type).Source);
-                        Item related = null;
+                        Item source = this.Get(((RelationshipType)ItemType).Source, response.Items.First().GetProperty("source_id"));
 
-                        if (((RelationshipType)Type).Related != null)
-                        {
-                            String relatedid = response.Items.First().GetProperty("related_id");
-
-                            if (relatedid != null)
-                            {
-                                related = this.ItemFromCache(relatedid, ((RelationshipType)Type).Related);
-                            }
-                        }
-
-                        this.ItemCache[ID] = (Relationship)Type.Class.GetConstructor(new Type[] { typeof(String), typeof(RelationshipType), typeof(Item), typeof(Item) }).Invoke(new object[] { ID, Type, source, related });
+                        // Return Item from Source Store
+                        return source.Store((RelationshipType)ItemType).Get(ID);
                     }
                     else
                     {
@@ -190,100 +205,10 @@ namespace Aras.Model
                 }
                 else
                 {
-                    this.ItemCache[ID] = (Item)Type.Class.GetConstructor(new Type[] { typeof(String), typeof(ItemType) }).Invoke(new object[] { ID, Type });
+                    // Return Item from Store
+                    return this.Store(ItemType).Get(ID);
                 }
             }
-
-            return this.ItemCache[ID];
-        }
-
-
-
-        internal Relationship RelationshipFromCache(String ID, RelationshipType Type, Item Source, Item Related)
-        {
-            if (!this.ItemCache.ContainsKey(ID))
-            {
-                this.ItemCache[ID] = (Relationship)Type.Class.GetConstructor(new Type[] { typeof(String), typeof(RelationshipType), typeof(Item), typeof(Item)}).Invoke(new object[] { ID, Type, Source, Related });
-            }
-
-            return (Relationship)this.ItemCache[ID];
-        }
-
-        public Queries.Item Query(ItemType Type)
-        {
-            return new Queries.Item(Type);
-        }
-
-        public Queries.Item Query(String ItemTypeName)
-        {
-            return new Queries.Item(this.ItemType(ItemTypeName));
-        }
-
-        public Queries.Item Query(ItemType Type, Condition Condition)
-        {
-            return new Queries.Item(Type, Condition);
-        }
-
-        public Queries.Item Query(String ItemTypeName, Condition Condition)
-        {
-            return new Queries.Item(this.ItemType(ItemTypeName), Condition);
-        }
-
-        public Transaction BeginTransaction()
-        {
-            return new Transaction(this);
-        }
-
-        public Item Create(String Type, Transaction Transaction)
-        {
-            return this.Create(this.ItemType(Type), Transaction);
-        }
-
-        public Item Create(ItemType Type, Transaction Transaction)
-        {
-            if (!(Type is RelationshipType))
-            {
-                Item item = (Item)Type.Class.GetConstructor(new Type[] { typeof(String), typeof(ItemType) }).Invoke(new object[] { null, Type });                
-                this.ItemCache[item.ID] = item;
-
-                if (Transaction != null)
-                {
-                    Transaction.Add("add", item);
-                }
-                else
-                {
-                    item.Transaction = null;
-                }
-
-                return item;
-            }
-            else
-            {
-                throw new Exceptions.ArgumentException("Not possible to create a Relation");
-            }
-        }
-
-        public Item Create(ItemType Type)
-        {
-            return this.Create(Type, null);
-        }
-
-        public Item Create(String Type)
-        {
-            return this.Create(Type, null);
-        }
-
-        internal Relationship Create(RelationshipType RelationshipType, Item Source, Item Related, Transaction Transaction)
-        {
-            Relationship relationship = (Relationship)RelationshipType.Class.GetConstructor(new Type[] { typeof(String), typeof(RelationshipType), typeof(Item), typeof(Item) }).Invoke(new object[] { null, RelationshipType, Source, Related });
-            this.ItemCache[relationship.ID] = relationship;
-
-            if (Transaction != null)
-            {
-                Transaction.Add("add", relationship);
-            }
-
-            return relationship;
         }
 
         internal Session(Database Database, String UserID, String Username, String Password)
@@ -295,7 +220,7 @@ namespace Aras.Model
             this.Password = Password;
             this.ItemTypeNameCache = new Dictionary<String, ItemType>();
             this.ItemTypeIDCache = new Dictionary<String, ItemType>();
-            this.ItemCache = new Dictionary<String, Item>();
+            this.StoreCache = new Dictionary<ItemType, Stores.Item>();
 
             // Default Selections
             this.ItemType("Value").AddToSelect("value,label");

@@ -60,6 +60,9 @@
     <Compile Include="Props\Float.cs" />
     <Compile Include="Props\VariableList.cs" />
     <Compile Include="ConditionCreation.cs" />
+    <Compile Include="Store.cs" />
+    <Compile Include="Stores\Item.cs" />
+    <Compile Include="Stores\Relationship.cs" />
     <Compile Include="Team.cs" />
     <Compile Include="Permission.cs" />
     <Compile Include="IO\Item.cs" />

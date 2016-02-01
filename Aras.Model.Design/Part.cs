@@ -65,7 +65,7 @@ namespace Aras.Model.Design
             List<PartBOM> ret = new List<PartBOM>();
 
             // Add Configured Variants
-            foreach (PartVariant partvariant in Variant.Relationships("Part Variants"))
+            foreach (PartVariant partvariant in Variant.Store("Part Variants"))
             {
                 PartBOM configurepartbom = partvariant.ConfiguredPartBOM(Order, this);
 
@@ -96,7 +96,7 @@ namespace Aras.Model.Design
             List<PartBOM> ret = new List<PartBOM>();
 
             // Add PartBOM
-            foreach (PartBOM partbom in this.Relationships("Part BOM").Copy())
+            foreach (PartBOM partbom in this.Store("Part BOM").Copy())
             {
                 if (!partbom.Runtime)
                 {
@@ -136,9 +136,9 @@ namespace Aras.Model.Design
 
             if (this.Class == this.ItemType.ClassStructure.Search("Variant"))
             {    
-                foreach (PartVariant partvariant in this.Relationships("Part Variants"))
+                foreach (PartVariant partvariant in this.Store("Part Variants"))
                 {
-                    foreach (PartVariantRule partvariantrule in partvariant.Relationships("Part Variant Rule"))
+                    foreach (PartVariantRule partvariantrule in partvariant.Store("Part Variant Rule"))
                     {
                         VariantContext variantcontext = (VariantContext)partvariantrule.Related;
 
@@ -173,10 +173,16 @@ namespace Aras.Model.Design
             base.OnRefresh();
         }
 
-        public Part(String ID, Model.ItemType Type)
-            :base(ID, Type)
+        public Part(Model.ItemType ItemType)
+            : base(ItemType)
         {
  
+        }
+
+        public Part(Model.ItemType ItemType, IO.Item DBItem)
+            : base(ItemType, DBItem)
+        {
+
         }
     }
 }

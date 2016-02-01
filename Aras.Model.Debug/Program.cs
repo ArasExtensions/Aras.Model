@@ -38,16 +38,10 @@ namespace Aras.Model.Debug
             Database database = server.Database("VariantsDemo11SP1");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-            ItemType parttype = session.ItemType("Part");
-            IEnumerable<RelationshipType> reltypes = parttype.RelationshipTypes;
+            IEnumerable<Item> test = session.Store("Part").Query(Aras.Conditions.Eq("item_number", "400_1111"));
+            int cnt = test.Count();
 
-            Queries.Item partquery = session.Query("Part", "item_number,cmb_name,unit");
 
-            foreach (Item part in partquery)
-            {
-                ListValue test = (ListValue)part.Property("unit").Value;
-                String test3 = test.Label;
-            }
         }
     }
 }

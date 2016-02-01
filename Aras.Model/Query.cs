@@ -32,44 +32,49 @@ namespace Aras.Model
 {
     public abstract class Query<T> : System.Collections.Generic.IEnumerable<T> where T : Model.Item
     {
-        protected ObservableList<T> CreatedItems;
-        protected ObservableList<T> Items;
+        public Store<T> Store { get; private set; }
 
-        public delegate void QueryChangedEventHandler(object sender, EventArgs e);
-
-        public event QueryChangedEventHandler QueryChanged;
-
-        protected void OnQueryChanged()
-        {
-            if (this.QueryChanged != null)
-            {
-                QueryChanged(this, new EventArgs());
-            }
-        }
-
-        public List<T> Copy()
-        {
-            List<T> ret = new List<T>();
-
-            foreach(T item in this)
-            {
-                ret.Add(item);
-            }
-
-            return ret;
-        }
+        protected List<T> Items;
 
         public T this[int Index]
         {
             get
             {
-                return this.Items[Index];
+                if (this.Condition == null)
+                {
+                    return this.Store[Index];
+                }
+                else
+                {
+                    if (!this.Executed)
+                    {
+                        this.Execute();
+                        this.Executed = true;
+                    }
+
+                    return this.Items[Index];
+                }
             }
         }
 
         public System.Collections.Generic.IEnumerator<T> GetEnumerator()
         {
-            return this.Items.GetEnumerator();
+            if (this.Condition == null)
+            {
+                // No Condition, Rrfresh store and return all Items
+                this.Store.Refresh();
+                return this.Store.GetEnumerator();
+            }
+            else
+            {
+                if (!this.Executed)
+                {
+                    this.Execute();
+                    this.Executed = true;
+                }
+
+                return this.Items.GetEnumerator();
+            }
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -77,7 +82,13 @@ namespace Aras.Model
             return this.GetEnumerator();
         }
 
-        public ItemType Type { get; private set; }
+        public ItemType ItemType
+        {
+            get
+            {
+                return this.Store.ItemType;
+            }
+        }
 
         private Condition _condition;
         public Condition Condition 
@@ -88,11 +99,24 @@ namespace Aras.Model
             }
             set
             {
-                this._condition = value;
+                if (this._condition == null)
+                {
+                    if (value != null)
+                    {
+                        this._condition = value;
+                        this.Executed = false;
+                    }
+                }
+                else
+                {
+                    if (!this._condition.Equals(value))
+                    {
+                        this._condition = value;
+                        this.Executed = false;
+                    }
+                }
             }
         }
-
-        public abstract void Refresh();
 
         protected System.String Where
         {
@@ -104,23 +128,27 @@ namespace Aras.Model
                 }
                 else
                 {
-                    return this.Condition.Where(this.Type);
+                    return this.Condition.Where(this.ItemType);
                 }
             }
         }
 
-        private void Items_ListChanged(object sender, EventArgs e)
+        private Boolean Executed;
+
+        protected abstract void Execute();
+
+        public void Refresh()
         {
-            this.OnQueryChanged();
+            this.Execute();
+            this.Executed = true;
         }
 
-        internal Query(ItemType Type, Condition Condition)
+        internal Query(Store<T> Store, Condition Condition)
         {
-            this.CreatedItems = new ObservableList<T>();
-            this.Items = new ObservableList<T>();
-            this.Items.ListChanged += Items_ListChanged;
-            this.Type = Type;
+            this.Items = new List<T>();
+            this.Store = Store;
             this._condition = Condition;
+            this.Executed = false;
         }
     }
 }

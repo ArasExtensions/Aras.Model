@@ -33,8 +33,14 @@ namespace Aras.Model
     [Attributes.ItemType("Identity")]
     public class Identity : Item
     {
-        public Identity(String ID, ItemType Type)
-            :base(ID, Type)
+        public Identity(ItemType ItemType)
+            : base(ItemType)
+        {
+
+        }
+
+        public Identity(ItemType ItemType, IO.Item DBItem)
+            :base(ItemType, DBItem)
         {
 
         }

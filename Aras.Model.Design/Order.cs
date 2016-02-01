@@ -99,18 +99,18 @@ namespace Aras.Model.Design
 
         private Part GetConfiguredPart()
         {
-            Model.Queries.Item query = this.ItemType.Session.Query("Part", Aras.Conditions.Eq("item_number", this.ItemNumber));
-    
-            if (query.Count() == 0)
+            IEnumerable<Model.Item> parts = this.ItemType.Session.Store("Part").Query(Aras.Conditions.Eq("item_number", this.ItemNumber));
+
+            if (parts.Count() == 0)
             {
                 // Create Part
-                Part ret = (Part)this.ItemType.Session.Create("Part", this.Transaction);
+                Part ret = (Part)this.ItemType.Session.Store("Part").Create(this.Transaction);
                 ret.ItemNumber = this.ItemNumber;
                 return ret;
             }
             else
             {
-                return (Part)query.First();
+                return (Part)parts.First();
             }
         }
 
@@ -170,7 +170,7 @@ namespace Aras.Model.Design
                     this.ConfiguredPart.Property("description").Value = this.Property("description").Value;
 
                     //Ensure all Configured Part BOMS are locked
-                    foreach (PartBOM partbom in this.ConfiguredPart.Relationships("Part BOM"))
+                    foreach (PartBOM partbom in this.ConfiguredPart.Store("Part BOM"))
                     {
                         if (partbom.Transaction == null)
                         {
@@ -183,7 +183,7 @@ namespace Aras.Model.Design
                     {
                         Boolean exists = false;
 
-                        foreach (OrderContext ordercontext in this.Relationships("v_Order Context"))
+                        foreach (OrderContext ordercontext in this.Store("v_Order Context"))
                         {
                             if (ordercontext.Related.Equals(variantcontext))
                             {
@@ -194,14 +194,14 @@ namespace Aras.Model.Design
 
                         if (!exists)
                         {
-                            OrderContext ordecontext = (OrderContext)this.Relationships("v_Order Context").Create(variantcontext, this.Transaction);
+                            OrderContext ordecontext = (OrderContext)this.Store("v_Order Context").Create(variantcontext, this.Transaction);
                             ordecontext.Quantity = 1.0;
                             this.AddOrderContext(ordecontext);
                         }
                     }
 
                     // Ensure all Order Context are Locked
-                    foreach (OrderContext ordercontext in this.Relationships("v_Order Context"))
+                    foreach (OrderContext ordercontext in this.Store("v_Order Context"))
                     {
                         if (ordercontext.Transaction == null)
                         {
@@ -210,7 +210,7 @@ namespace Aras.Model.Design
                     }
 
                     // Evaluate any Method Variant Contexts
-                    foreach (OrderContext ordercontext in this.Relationships("v_Order Context"))
+                    foreach (OrderContext ordercontext in this.Store("v_Order Context"))
                     {
                         if (ordercontext.VariantContext.IsMethod && ordercontext.VariantContext.Method != null)
                         {
@@ -222,7 +222,7 @@ namespace Aras.Model.Design
                             dborder.AddRelationship(dbordercontext);
 
                             // Add all other order Context
-                            foreach (OrderContext otherordercontext in this.Relationships("v_Order Context"))
+                            foreach (OrderContext otherordercontext in this.Store("v_Order Context"))
                             {
                                 if (!otherordercontext.Equals(ordercontext))
                                 {
@@ -274,7 +274,7 @@ namespace Aras.Model.Design
                     }
 
                     // Remove any Part BOM no longer required in Configured Part
-                    foreach (PartBOM partbom in this.ConfiguredPart.Relationships("Part BOM"))
+                    foreach (PartBOM partbom in this.ConfiguredPart.Store("Part BOM"))
                     {
                         if ((partbom.Related != null) && !flatbom.ContainsKey((Part)partbom.Related))
                         {
@@ -287,7 +287,7 @@ namespace Aras.Model.Design
                     {
                         Boolean found = false;
 
-                        foreach (PartBOM partbom in this.ConfiguredPart.Relationships("Part BOM"))
+                        foreach (PartBOM partbom in this.ConfiguredPart.Store("Part BOM"))
                         {
                             if ((partbom.Related != null) && partbom.Related.Equals(flatpart))
                             {
@@ -307,7 +307,7 @@ namespace Aras.Model.Design
 
                         if (!found)
                         {
-                            PartBOM newpartbom = (PartBOM)this.ConfiguredPart.Relationships("Part BOM").Create(flatpart, this.Transaction);
+                            PartBOM newpartbom = (PartBOM)this.ConfiguredPart.Store("Part BOM").Create(flatpart, this.Transaction);
                             newpartbom.Quantity = flatbom[flatpart];
                         }
                     }
@@ -331,14 +331,21 @@ namespace Aras.Model.Design
             this.Process();
         }
 
-        public Order(String ID, Model.ItemType Type)
-            :base(ID, Type)
+        public Order(Model.ItemType ItemType)
+            : base(ItemType)
+        {
+            this.OrderContextCache = new Dictionary<String, OrderContext>();
+            this.Processing = false;
+        }
+
+        public Order(Model.ItemType ItemType, IO.Item DBItem)
+            : base(ItemType, DBItem)
         {
             this.OrderContextCache = new Dictionary<String, OrderContext>();
             this.Processing = false;
 
             // Load Order Contexts already in database
-            foreach (OrderContext ordercontext in this.Relationships("v_Order Context"))
+            foreach (OrderContext ordercontext in this.Store("v_Order Context"))
             {
                 this.AddOrderContext(ordercontext);
             }

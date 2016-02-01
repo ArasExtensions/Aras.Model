@@ -117,8 +117,8 @@ namespace Aras.Model.Design
             return dbitem;
         }
 
-        public OrderContext(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
-            :base(ID, Type, Source, Related)
+        public OrderContext(Model.RelationshipType RelationshipType, Model.Item Source, Model.Item Related)
+            : base(RelationshipType, Source, Related)
         {
             List contextlist = this.VariantContext.Values;
             ListValue currentvalue = null;
@@ -128,6 +128,25 @@ namespace Aras.Model.Design
                 currentvalue = contextlist.ListValue(this.Value);
             }
             catch(Model.Exceptions.ArgumentException)
+            {
+                currentvalue = null;
+            }
+
+            this.ValueList = this.AddVariableListRuntime("value_list", false, contextlist, currentvalue);
+            this.ValueList.PropertyChanged += ValueList_PropertyChanged;
+        }
+
+        public OrderContext(Model.RelationshipType RelationshipType, Model.Item Source, IO.Item DBItem)
+            : base(RelationshipType, Source, DBItem)
+        {
+            List contextlist = this.VariantContext.Values;
+            ListValue currentvalue = null;
+
+            try
+            {
+                currentvalue = contextlist.ListValue(this.Value);
+            }
+            catch (Model.Exceptions.ArgumentException)
             {
                 currentvalue = null;
             }

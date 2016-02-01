@@ -86,11 +86,11 @@ namespace Aras.Model.Design
                             break;
                         case "Boolean":
                         case "Method":
-                            this._values = (Model.List)this.ItemType.Session.Create("List");
-                            Model.ListValue falseval = (Model.ListValue)this._values.Relationships("Value").Create();
+                            this._values = (Model.List)this.ItemType.Session.Store("List").Create();
+                            Model.ListValue falseval = (Model.ListValue)this._values.Store("Value").Create();
                             falseval.Value = "0";
                             falseval.Label = "No";
-                            Model.ListValue trueval = (Model.ListValue)this._values.Relationships("Value").Create();
+                            Model.ListValue trueval = (Model.ListValue)this._values.Store("Value").Create();
                             trueval.Value = "1";
                             trueval.Label = "Yes";
                             break;
@@ -103,8 +103,14 @@ namespace Aras.Model.Design
             }
         }
 
-        public VariantContext(String ID, Model.ItemType Type)
-            :base(ID, Type)
+        public VariantContext(Model.ItemType ItemType)
+            : base(ItemType)
+        {
+
+        }
+
+        public VariantContext(Model.ItemType ItemType, IO.Item DBItem)
+            : base(ItemType, DBItem)
         {
 
         }

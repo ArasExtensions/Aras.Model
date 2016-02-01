@@ -59,7 +59,7 @@ namespace Aras.Model.Design
         {
             OrderContext ordercontext = null;
 
-            foreach(PartVariantRule partvariantrule in this.Relationships("Part Variant Rule"))
+            foreach(PartVariantRule partvariantrule in this.Store("Part Variant Rule"))
             {
                 ordercontext = partvariantrule.Selected(Order);
 
@@ -73,7 +73,7 @@ namespace Aras.Model.Design
             {
                 if (!this._configuredPartBOM.ContainsKey(Source))
                 {
-                    this._configuredPartBOM[Source] = (PartBOM)Source.Relationships("Part BOM").Create(this.Related);
+                    this._configuredPartBOM[Source] = (PartBOM)Source.Store("Part BOM").Create(this.Related);
                 }
 
                 // Update Properties
@@ -88,8 +88,14 @@ namespace Aras.Model.Design
           
         }
 
-        public PartVariant(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
-            :base(ID, Type, Source, Related)
+        public PartVariant(Model.RelationshipType RelationshipType, Model.Item Source, Model.Item Related)
+            : base(RelationshipType, Source, Related)
+        {
+            this._configuredPartBOM = new Dictionary<Part, PartBOM>();
+        }
+
+        public PartVariant(Model.RelationshipType RelationshipType, Model.Item Source, IO.Item DBItem)
+            : base(RelationshipType, Source, DBItem)
         {
             this._configuredPartBOM = new Dictionary<Part, PartBOM>();
         }

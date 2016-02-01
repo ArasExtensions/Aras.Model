@@ -543,7 +543,7 @@ namespace Aras.Model
             }
         }
 
-        internal void UpdateProperties(IO.Item DBItem)
+        internal virtual void UpdateProperties(IO.Item DBItem)
         {
             if (this.ID == DBItem.ID)
             {
@@ -560,41 +560,21 @@ namespace Aras.Model
             }
         }
 
-        private Dictionary<RelationshipType, Queries.Relationship> RelationshipsCache;
+        private Dictionary<RelationshipType, Stores.Relationship> StoreCache;
 
-        public Queries.Relationship Relationships(RelationshipType RelationshipType)
+        public Stores.Relationship Store(RelationshipType RelationshipType)
         {
-            if (!this.RelationshipsCache.ContainsKey(RelationshipType))
+            if (!this.StoreCache.ContainsKey(RelationshipType))
             {
-                this.RelationshipsCache[RelationshipType] = new Queries.Relationship(RelationshipType, this);
+                this.StoreCache[RelationshipType] = new Stores.Relationship(RelationshipType, this);
             }
 
-            return this.RelationshipsCache[RelationshipType];
+            return this.StoreCache[RelationshipType];
         }
 
-        public Queries.Relationship Relationships(String RelationshipType)
+        public Stores.Relationship Store(String RelationshipType)
         {
-            return this.Relationships(this.ItemType.RelationshipType(RelationshipType));
-        }
-
-        public Queries.Relationship Query(RelationshipType Type, Condition Condition)
-        {
-            return new Queries.Relationship(Type, Condition, this);
-        }
-
-        public Queries.Relationship Query(RelationshipType Type)
-        {
-            return this.Query(Type, null);
-        }
-
-        public Queries.Relationship Query(String Type, Condition Condition)
-        {
-            return new Queries.Relationship(this.ItemType.RelationshipType(Type), Condition, this);
-        }
-
-        public Queries.Relationship Query(String Type)
-        {
-            return this.Query(Type, null);
+            return this.Store(this.ItemType.RelationshipType(RelationshipType));
         }
 
         public Boolean Equals(Item other)
@@ -633,26 +613,27 @@ namespace Aras.Model
             return this.ID.GetHashCode();
         }
 
-        public Item(String ID, ItemType Type)
+        public Item(ItemType ItemType)
         {
             this.PropertyCache = new Dictionary<PropertyType, Property>();
-            this.RelationshipsCache = new Dictionary<RelationshipType, Queries.Relationship>();
-            this.ItemType = Type;
+            this.StoreCache = new Dictionary<RelationshipType, Stores.Relationship>();
+            this.ItemType = ItemType;
             this.Transaction = null;
+            this.ID = Server.NewID();
+            this._action = Actions.Create;
+            this._isNew = true;
+        }
 
-            if (ID == null)
-            {
-                this.ID = Server.NewID();
-                this._action = Actions.Create;
-                this._isNew = true;
-            }
-            else
-            {
-                this.ID = ID;
-                this._action = Actions.Read;
-                this._isNew = false;
-            }
-
+        public Item(ItemType ItemType, IO.Item DBItem)
+        {
+            this.PropertyCache = new Dictionary<PropertyType, Property>();
+            this.StoreCache = new Dictionary<RelationshipType, Stores.Relationship>();
+            this.ItemType = ItemType;
+            this.Transaction = null;
+            this.ID = DBItem.ID;
+            this._action = Actions.Read;
+            this._isNew = false;
+            this.UpdateProperties(DBItem);
         }
     }
 }

@@ -33,8 +33,15 @@ namespace Aras.Model
     [Attributes.ItemType("Permission")]
     public class Permission : Item
     {
-        public Permission(String ID, ItemType Type)
-            :base(ID, Type)
+
+        public Permission(ItemType ItemType)
+            : base(ItemType)
+        {
+
+        }
+
+        public Permission(ItemType ItemType, IO.Item DBItem)
+            : base(ItemType, DBItem)
         {
 
         }

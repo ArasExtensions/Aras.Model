@@ -32,57 +32,49 @@ namespace Aras.Model.Queries
 {
     public class Item : Query<Model.Item>
     {
-        public override void Refresh()
+        protected override void Execute()
         {
-            this.Items.NotifyListChanged = false;
-
-            this.Items.Clear();
-
-            IO.Item item = new IO.Item(this.Type.Name, "get");
-
-            if (System.String.IsNullOrEmpty(this.Type.Select))
+            if (this.Condition != null)
             {
-                item.Select = "id";
-            }
-            else
-            {
-                item.Select = "id," + this.Type.Select;
-            }
-            
-            item.Where = this.Where;
-            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, item);
-            IO.SOAPResponse response = request.Execute();
+                IO.Item item = new IO.Item(this.ItemType.Name, "get");
+                item.Select = this.Store.Select;
+                item.Where = this.Where;
 
-            if (!response.IsError)
-            {
-                foreach(IO.Item dbitem in response.Items)
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Store.Session, item);
+                IO.SOAPResponse response = request.Execute();
+
+                this.Items.Clear();
+
+                if (!response.IsError)
                 {
-                    Model.Item cacheitem = this.Type.Session.ItemFromCache(dbitem.ID, this.Type);
-                    cacheitem.UpdateProperties(dbitem);
-                    this.Items.Add(cacheitem);
+                    foreach (IO.Item dbitem in response.Items)
+                    {
+                        if (!this.Store.Cache.ContainsKey(dbitem.ID))
+                        {
+                            this.Store.Cache[dbitem.ID] = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, dbitem });
+                        }
+
+                        this.Items.Add(this.Store.Cache[dbitem.ID]);
+                    }
                 }
-
-                this.Items.NotifyListChanged = true;
-            }
-            else
-            {
-                this.Items.NotifyListChanged = true;
-
-                if (!response.ErrorMessage.Equals("No items of type " + this.Type.Name + " found."))
+                else
                 {
-                    throw new Exceptions.ServerException(response);
+                    if (!response.ErrorMessage.Equals("No items of type " + this.ItemType.Name + " found."))
+                    {
+                        throw new Exceptions.ServerException(response);
+                    }
                 }
             }
         }
 
-        internal Item(ItemType Type, Condition Condition)
-            :base(Type, Condition)
+        internal Item(Store<Model.Item> Store, Condition Condition)
+            : base(Store, Condition)
         {
-            this.Refresh();
+
         }
 
-        internal Item(ItemType Type)
-            :this(Type, null)
+        internal Item(Store<Model.Item> Store)
+            :this(Store, null)
         {
 
         }

@@ -60,12 +60,6 @@ namespace Aras.Model
             if (!response.IsError)
             {
                 this.UpdateProperties(response.Items.First());
-                IO.Item dbrelated = response.Items.First().GetPropertyItem("related_id");
-
-                if (dbrelated != null)
-                {
-                    this.Related = this.ItemType.Session.ItemFromCache(dbrelated.ID, this.RelationshipType.Related);
-                }
 
                 this.OnRefresh();
             }
@@ -77,13 +71,42 @@ namespace Aras.Model
 
         public Item Source { get; private set; }
 
-        public Item Related { get; private set; }
+        private Item _related;
+        public Item Related
+        {
+            get
+            {
+                return this._related;
+            }
+            set
+            {
+                this._related = value;
+            }
+        }
 
-        public Relationship(String ID, RelationshipType Type, Item Source, Item Related)
-            :base(ID, Type)
+        internal override void UpdateProperties(IO.Item DBItem)
+        {
+            base.UpdateProperties(DBItem);
+
+            IO.Item dbrelated = DBItem.GetPropertyItem("related_id");
+
+            if (dbrelated != null)
+            {
+                this._related = this.ItemType.Session.Get(this.RelationshipType.Related, dbrelated.ID);
+            }
+        }
+
+        public Relationship(RelationshipType RelationshipType, Item Source, Item Related)
+            : base(RelationshipType)
         {
             this.Source = Source;
-            this.Related = Related;
+            this._related = Related;
+        }
+
+        public Relationship(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
+            : base(RelationshipType, DBItem)
+        {
+            this.Source = Source;
         }
     }
 }

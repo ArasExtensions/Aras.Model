@@ -53,7 +53,7 @@ namespace Aras.Model.Design
         {
             OrderContext ret = null;
 
-            foreach (OrderContext ordercontext in Order.Relationships("v_Order Context"))
+            foreach (OrderContext ordercontext in Order.Store("v_Order Context"))
             {
                 if (ordercontext.VariantContext.Equals(this.VariantContext))
                 {
@@ -71,8 +71,14 @@ namespace Aras.Model.Design
             return ret;
         }
 
-        public PartVariantRule(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
-            :base(ID, Type, Source, Related)
+        public PartVariantRule(Model.RelationshipType Type, Model.Item Source, Model.Item Related)
+            :base(Type, Source, Related)
+        {
+
+        }
+
+        public PartVariantRule(Model.RelationshipType Type, Model.Item Source, IO.Item DBItem)
+            : base(Type, Source, DBItem)
         {
 
         }

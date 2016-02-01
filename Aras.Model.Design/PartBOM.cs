@@ -54,8 +54,14 @@ namespace Aras.Model.Design
             }
         }
 
-        public PartBOM(String ID, Model.RelationshipType Type, Model.Item Source, Model.Item Related)
-            :base(ID, Type, Source, Related)
+        public PartBOM(Model.RelationshipType Type, Model.Item Source, Model.Item Related)
+            :base(Type, Source, Related)
+        {
+
+        }
+
+        public PartBOM(Model.RelationshipType Type, Model.Item Source, IO.Item DBItem)
+            : base(Type, Source, DBItem)
         {
 
         }

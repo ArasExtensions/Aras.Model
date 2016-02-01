@@ -125,7 +125,7 @@ namespace Aras.Model
                         foreach (IO.Item dbitem in response.Items)
                         {
                             ItemType itemtype = Session.ItemType(dbitem.ItemType);
-                            Item item = this.Session.ItemFromCache(dbitem.ID, itemtype);
+                            Item item = this.Session.Get(itemtype, dbitem.ID);
                             item.UpdateProperties(dbitem);
 
                             // Unlock

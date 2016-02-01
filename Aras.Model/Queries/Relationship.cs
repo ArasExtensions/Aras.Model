@@ -32,100 +32,65 @@ namespace Aras.Model.Queries
 {
     public class Relationship : Query<Model.Relationship>
     {
-        public Model.Item Source { get; private set; }
-
-        public Model.Item Create(Model.Item Related, Transaction Transaction)
+        public Model.Item Source
         {
-            Model.Relationship relationship = this.Type.Session.Create((RelationshipType)this.Type, this.Source, Related, Transaction);
-            this.CreatedItems.Add(relationship);
-            this.Items.Add(relationship);
-            return relationship;
-        }
-
-        public Model.Item Create(Transaction Transaction)
-        {
-            return this.Create(null, Transaction);
-        }
-
-        public Model.Item Create(Model.Item Related)
-        {
-            return this.Create(Related, null);
-        }
-
-        public Model.Item Create()
-        {
-            return this.Create(null, null);
-        }
-
-        public override void Refresh()
-        {
-            this.Items.NotifyListChanged = false;
-
-            this.Items.Clear();
-
-            IO.Item item = new IO.Item(this.Type.Name, "get");
-
-            if (System.String.IsNullOrEmpty(this.Type.Select))
+            get
             {
-                item.Select = "id,related_id";
+                return ((Stores.Relationship)this.Store).Source;
             }
-            else
+        }
+
+        public RelationshipType RelationshipType
+        {
+            get
             {
-                item.Select = "id,related_id," + this.Type.Select;
+                return (RelationshipType)this.ItemType;
             }
+        }
 
-            item.SetProperty("source_id", this.Source.ID);
-            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Type.Session, item);
-            IO.SOAPResponse response = request.Execute();
-
-            if (!response.IsError)
+        protected override void Execute()
+        {
+            if (this.Condition != null)
             {
-                foreach (IO.Item dbitem in response.Items)
+                IO.Item item = new IO.Item(this.ItemType.Name, "get");
+                item.Select = this.Store.Select;
+                item.SetProperty("source_id", this.Source.ID);
+                item.Where = this.Where;
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Store.Session, item);
+                IO.SOAPResponse response = request.Execute();
+
+                this.Items.Clear();
+
+                if (!response.IsError)
                 {
-                    Model.Item related = null;
-                    
-                    if (((RelationshipType)this.Type).Related != null)
+                    foreach (IO.Item dbitem in response.Items)
                     {
-                        IO.Item dbrelated = dbitem.GetPropertyItem("related_id");
-
-                        if (dbrelated != null)
+                        if (!this.Store.Cache.ContainsKey(dbitem.ID))
                         {
-                            related = this.Type.Session.ItemFromCache(dbrelated.ID, ((RelationshipType)this.Type).Related);
+                            this.Store.Cache[dbitem.ID] = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, dbitem });
                         }
+
+                        this.Items.Add(this.Store.Cache[dbitem.ID]);
                     }
-
-                    Model.Relationship relationship = this.Type.Session.RelationshipFromCache(dbitem.ID, (RelationshipType)this.Type, this.Source, related);
-                    relationship.UpdateProperties(dbitem);
-                    this.Items.Add(relationship);
                 }
-
-                foreach(Model.Relationship relationship in this.CreatedItems)
+                else
                 {
-                    this.Items.Add(relationship);
-                }
-
-                this.Items.NotifyListChanged = true;
-            }
-            else
-            {
-                this.Items.NotifyListChanged = true;
-
-                if (!response.ErrorMessage.Equals("No items of type " + this.Type.Name + " found."))
-                {
-                    throw new Exceptions.ServerException(response);
+                    if (!response.ErrorMessage.Equals("No items of type " + this.RelationshipType.Name + " found."))
+                    {
+                        throw new Exceptions.ServerException(response);
+                    }
                 }
             }
         }
 
-        internal Relationship(RelationshipType Type, Condition Condition, Model.Item Source)
-            : base(Type, Condition)
+        internal Relationship(Store<Model.Relationship> Store, Condition Condition)
+            : base(Store, Condition)
         {
-            this.Source = Source;
-            this.Refresh();
+
         }
 
-        internal Relationship(RelationshipType Type, Model.Item Source)
-            :this(Type, null, Source)
+        internal Relationship(Store<Model.Relationship> Store)
+            :this(Store, null)
         {
 
         }

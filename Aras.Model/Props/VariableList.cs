@@ -63,7 +63,7 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    return this.Values.Relationships("Value").ToList().IndexOf((ListValue)this.Value);
+                    return this.Values.Store("Value").ToList().IndexOf((ListValue)this.Value);
                 }
             }
             set
@@ -74,9 +74,9 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    if (value >= 0 && value < this.Values.Relationships("Value").Count())
+                    if (value >= 0 && value < this.Values.Store("Value").Count())
                     {
-                        this.Value = this.Values.Relationships("Value").ToList()[value];
+                        this.Value = this.Values.Store("Value").ToList()[value];
                     }
                     else
                     {

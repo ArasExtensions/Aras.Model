@@ -33,57 +33,38 @@ namespace Aras.Model
     [Attributes.ItemType("User")]
     public class User : Item
     {
-        private Alias _alias;
         private Alias Alias
         {
             get
             {
-                this.LoadAlias();
-                return this._alias;
+                return (Alias)this.Store("Alias").First();
             }
         }
 
-        private Identity _identity;
         private Identity Identity
         {
             get
             {
-                this.LoadAlias();
-                return this._identity;
+                return (Identity)this.Alias.Related;
             }
         }
 
-        private Boolean AliasLoaded;
-        private void LoadAlias()
+        protected override void OnRefresh()
         {
-            if (!AliasLoaded)
-            {
-                IO.Item dbalias = new IO.Item("Alias", "get");
-                dbalias.Select = "id,related_id";
-                dbalias.SetProperty("source_id", this.ID);
-                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, dbalias);
-                IO.SOAPResponse response = request.Execute();
-
-                if (!response.IsError)
-                {
-                    dbalias = response.Items.First();
-                    IO.Item dbidenity = dbalias.GetPropertyItem("related_id");
-                    this._identity = (Identity)this.ItemType.Session.ItemFromCache(dbidenity.ID, this.ItemType.Session.ItemType("Identity"));
-                    this._alias = (Alias)this.ItemType.Session.RelationshipFromCache(dbalias.ID, this.ItemType.RelationshipType("Alias"), this, this._identity);
-                }
-                else
-                {
-                    throw new Exceptions.ServerException(response);
-                }
-
-                this.AliasLoaded = true;
-            }
+            base.OnRefresh();
+            this.Store("Alias").Refresh();
         }
 
-        public User(String ID, ItemType Type)
-            :base(ID, Type)
+        public User(ItemType ItemType)
+            : base(ItemType)
         {
-            this.AliasLoaded = false;
+          
+        }
+
+        public User(ItemType ItemType, IO.Item DBItem)
+            : base(ItemType, DBItem)
+        {
+
         }
     }
 }
