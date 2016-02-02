@@ -65,19 +65,25 @@ namespace Aras.Model.Design.Debug
             return "DX-" + cnt.ToString().PadLeft(10, '0');
         }
 
-        static void CreateBOM(Part Part, int cnt, int depth, Transaction Transaction)
+        static int CreateBOM(Part Part, int cnt, int depth, Transaction Transaction)
         {
-            if (depth < 1)
-            {
-                for(int i=0; i<10; i++)
-                {
-                    Part part = (Part)Part.Session.Store("Part").Create(Transaction);
-                    part.ItemNumber = ItemNumber(cnt);
-                    cnt++;
+            int thiscnt = cnt;
 
-                    Part.Store("Part BOM").Create(part, Transaction);
+            if (depth < 3)
+            {
+                for(int i=0; i<5; i++)
+                {
+                    Part childpart = (Part)Part.Session.Store("Part").Create(Transaction);
+                    childpart.ItemNumber = ItemNumber(thiscnt);
+                    thiscnt++;
+
+                    Part.Store("Part BOM").Create(childpart, Transaction);
+
+                    thiscnt = CreateBOM(childpart, thiscnt, depth + 1, Transaction);
                 }
             }
+
+            return thiscnt;
         }
 
         static void Main(string[] args)
@@ -87,18 +93,15 @@ namespace Aras.Model.Design.Debug
             Database database = server.Database("VariantsDemo11SP1");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
+            int cnt = 1;
+
             using (Transaction transaction = session.BeginTransaction())
             {
                 Part toplevel = (Part)session.Store("Part").Create(transaction);
-                toplevel.ItemNumber = ItemNumber(1);
-                
-                Part bompart = (Part)session.Store("Part").Create(transaction);
-                bompart.ItemNumber = ItemNumber(2);
-                toplevel.Store("Part BOM").Create(bompart, transaction);
+                toplevel.ItemNumber = ItemNumber(cnt);
+                cnt++;
 
-                Part bompart2 = (Part)session.Store("Part").Create(transaction);
-                bompart2.ItemNumber = ItemNumber(3);
-                bompart.Store("Part BOM").Create(bompart2, transaction);
+                cnt = CreateBOM(toplevel, cnt, 0, transaction);
 
                 transaction.Commit();
             }
