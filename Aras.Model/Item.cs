@@ -577,6 +577,27 @@ namespace Aras.Model
             return this.Store(this.ItemType.RelationshipType(RelationshipType));
         }
 
+        public IEnumerable<Model.Item> RelatedItems(IEnumerable<RelationshipType> RelationshipTypes)
+        {
+            List<Item> related = new List<Item>();
+
+            foreach(RelationshipType relationshiptype in RelationshipTypes)
+            {
+                if (this.ItemType.RelationshipTypes.Contains(relationshiptype))
+                {
+                    foreach(Relationship relationship in this.Store(relationshiptype))
+                    {
+                        if ((relationship.Related != null) && !related.Contains(relationship.Related))
+                        {
+                            related.Add(relationship.Related);
+                        }
+                    }
+                }
+            }
+
+            return related;
+        }
+
         public Boolean Equals(Item other)
         {
             if (other == null)

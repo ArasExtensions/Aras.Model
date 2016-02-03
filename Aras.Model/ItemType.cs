@@ -31,7 +31,7 @@ using System.Xml;
 
 namespace Aras.Model
 {
-    public class ItemType
+    public class ItemType : IEquatable<ItemType>
     {
         private readonly String[] SystemProperties = new String[] { "id", "source_id", "related_id" };
 
@@ -553,6 +553,35 @@ namespace Aras.Model
                     this._select = null;
                 }
             }
+        }
+
+        public bool Equals(ItemType other)
+        {
+            if (other != null && other is ItemType)
+            {
+                return this.ID.Equals(other.ID);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj != null && obj is ItemType)
+            {
+                return this.Equals((ItemType)obj);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ID.GetHashCode();
         }
 
         public override string ToString()
