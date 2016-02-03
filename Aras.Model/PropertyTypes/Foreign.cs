@@ -33,8 +33,8 @@ namespace Aras.Model.PropertyTypes
     public class Foreign : PropertyType
     {
 
-        internal Foreign(ItemType Type, System.String Name, System.Boolean ReadOnly, System.Boolean Runtime, System.String Default)
-            :base(Type, Name, ReadOnly, Runtime, Default)
+        internal Foreign(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Runtime, System.String Default)
+            :base(Type, Name, Label, ReadOnly, Runtime, Default)
         {
            
         }

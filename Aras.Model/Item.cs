@@ -368,9 +368,9 @@ namespace Aras.Model
             return this.PropertyCache[PropertyType];
         }
 
-        protected Properties.VariableList AddVariableListRuntime(String Name, System.Boolean ReadOnly, Model.List ValueList, Model.ListValue Default)
+        protected Properties.VariableList AddVariableListRuntime(String Name, String Label, System.Boolean ReadOnly, Model.List ValueList, Model.ListValue Default)
         {
-            PropertyTypes.VariableList proptype = this.ItemType.AddVariableListRuntime(Name, ReadOnly);
+            PropertyTypes.VariableList proptype = this.ItemType.AddVariableListRuntime(Name, Label, ReadOnly);
             Properties.VariableList variablelist = new Properties.VariableList(this, proptype, ValueList, Default);
             this.PropertyCache[proptype] = variablelist;
             return variablelist;

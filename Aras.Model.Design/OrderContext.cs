@@ -135,7 +135,7 @@ namespace Aras.Model.Design
             }
 
             // Add Runtime List Property
-            this.ValueList = this.AddVariableListRuntime("value_list", false, contextlist, currentvalue);
+            this.ValueList = this.AddVariableListRuntime("value_list", "Values", false, contextlist, currentvalue);
             this.ValueList.PropertyChanged += ValueList_PropertyChanged;
 
             // Watch for changes in Value

@@ -36,6 +36,8 @@ namespace Aras.Model
 
         public System.String Name { get; private set; }
 
+        public System.String Label { get; private set; }
+
         private String _columnName;
         internal String ColumnName
         {
@@ -61,10 +63,11 @@ namespace Aras.Model
             return this.Name;
         }
 
-        internal PropertyType(ItemType Type, System.String Name, System.Boolean ReadOnly, System.Boolean Runtime, Object Default)
+        internal PropertyType(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Runtime, Object Default)
         {
             this.Type = Type;
             this.Name = Name;
+            this.Label = Label;
             this.ReadOnly = ReadOnly;
             this.Runtime = Runtime;
             this.Default = Default;
