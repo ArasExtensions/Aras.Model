@@ -88,12 +88,12 @@ namespace Aras.Model.Design.Debug
 
         static void Main(string[] args)
         {
-            Server server = new Server("http://localhost/11SP1");
+            Server server = new Server("http://localhost/InnovatorServer10SP4");
             server.LoadAssembly("Aras.Model.Design");
-            Database database = server.Database("VariantsDemo11SP1");
+            Database database = server.Database("CMB");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-            Order order = (Order)session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "400_1111")).First();
+            Order order = (Order)session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "MJC_Order004")).First();
             using (Transaction transaction = session.BeginTransaction())
             {
                 order.Update(transaction);

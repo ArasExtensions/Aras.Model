@@ -114,19 +114,35 @@ namespace Aras.Model.Design
             }
         }
 
-        private IEnumerable<PartBOM> AllConfiguredPartBOM(Order Order, Part Part)
+        private Dictionary<Part, Double> AllConfiguredParts(Part Part, Double Quantity)
         {
-            List<PartBOM> ret = new List<PartBOM>();
+            Dictionary<Part, Double> ret = new Dictionary<Part, Double>();
 
-            foreach (PartBOM partbom in Part.ConfiguredPartBOM(Order, false))
+            if (ret.ContainsKey(Part))
             {
-                ret.Add(partbom);
+                ret[Part] += Quantity;
+            }
+            else
+            {
+                ret[Part] = Quantity;
+            }
 
+            foreach (PartBOM partbom in Part.ConfiguredPartBOM(this, false))
+            {
                 if (partbom.Related != null)
                 {
-                    foreach (PartBOM childpartbom in this.AllConfiguredPartBOM(Order, (Part)partbom.Related))
+                    Dictionary<Part, Double> childparts = this.AllConfiguredParts((Part)partbom.Related, partbom.Quantity * Quantity);
+                   
+                    foreach(Part childpart in childparts.Keys)
                     {
-                        ret.Add(childpartbom);
+                        if (ret.ContainsKey(childpart))
+                        {
+                            ret[childpart] += childparts[childpart];
+                        }
+                        else
+                        {
+                            ret[childpart] = childparts[childpart];
+                        }
                     }
                 }
             }
@@ -255,22 +271,22 @@ namespace Aras.Model.Design
                     }
 
                     // Build Flat BOM
-                    Dictionary<Part, Double> flatbom = new Dictionary<Part, Double>();
-                    flatbom[this.Part] = 1.0;
+                    Dictionary<Part, Double> flatbom = this.AllConfiguredParts(this.Part, 1.0);
+               
+                    // Remove any Parts that are not class BOM
+                    List<Part> partstoremove = new List<Part>();
 
-                    foreach(PartBOM partbom in this.AllConfiguredPartBOM(this, this.Part))
+                    foreach(Part part in flatbom.Keys)
                     {
-                        if ((partbom.Related != null) && (partbom.Related.Class != null) && (partbom.Related.Class.Name == "BOM"))
+                        if ((part.Class == null) || (part.Class.Name != "BOM"))
                         {
-                            if (flatbom.ContainsKey((Part)partbom.Related))
-                            {
-                                flatbom[(Part)partbom.Related] = flatbom[(Part)partbom.Related] + partbom.Quantity;
-                            }
-                            else
-                            {
-                                flatbom[(Part)partbom.Related] = partbom.Quantity;
-                            }
+                            partstoremove.Add(part);
                         }
+                    }
+
+                    foreach(Part part in partstoremove)
+                    {
+                        flatbom.Remove(part);
                     }
 
                     // Remove any Part BOM no longer required in Configured Part
