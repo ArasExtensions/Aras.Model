@@ -134,6 +134,7 @@ namespace Aras.Model
             this.Transaction = Transaction;
             this.Name = Name;
             this.Item = Item;
+            this.Item.Transaction = Transaction;
         }
     }
 }

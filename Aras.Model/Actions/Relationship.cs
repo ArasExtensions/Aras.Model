@@ -47,6 +47,10 @@ namespace Aras.Model.Actions
                     {
                         this.DBItem.SetProperty("related_id", relatedaction.Process().ID);
                     }
+                    else
+                    {
+                        this.DBItem.SetProperty("related_id", ((Model.Relationship)this.Item).Related.ID);
+                    }
                 }
             }
 

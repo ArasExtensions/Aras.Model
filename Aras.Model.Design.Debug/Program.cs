@@ -93,6 +93,14 @@ namespace Aras.Model.Design.Debug
             Database database = server.Database("VariantsDemo11SP1");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
+            Order order = (Order)session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "400_1111")).First();
+            using (Transaction transaction = session.BeginTransaction())
+            {
+                order.Update(transaction);
+                transaction.Commit();
+            }
+
+            /*
             int cnt = 1;
 
             using (Transaction transaction = session.BeginTransaction())
@@ -104,7 +112,7 @@ namespace Aras.Model.Design.Debug
                 cnt = CreateBOM(toplevel, cnt, 0, transaction);
 
                 transaction.Commit();
-            }
+            }*/
         }
     }
 }

@@ -358,7 +358,7 @@ namespace Aras.Model.IO
         {
             XmlNode propnode = this.Node.SelectSingleNode(Name);
 
-            if (propnode.FirstChild != null)
+            if ((propnode != null) && (propnode.FirstChild != null))
             {
                 return new Item(this.Doc, propnode.FirstChild);
             }
