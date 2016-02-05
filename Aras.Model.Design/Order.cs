@@ -210,9 +210,15 @@ namespace Aras.Model.Design
 
                         if (!exists)
                         {
-                            OrderContext ordecontext = (OrderContext)this.Store("v_Order Context").Create(variantcontext, this.Transaction);
-                            ordecontext.Quantity = 1.0;
-                            this.AddOrderContext(ordecontext);
+                            OrderContext ordercontext = (OrderContext)this.Store("v_Order Context").Create(variantcontext, this.Transaction);
+                            
+                            // Default Value to first value in List
+                            ordercontext.Value = ordercontext.ValueList.Values.Values.First().Value;
+
+                            // Default Quantity to 1.0
+                            ordercontext.Quantity = 1.0;
+
+                            this.AddOrderContext(ordercontext);
                         }
                     }
 
