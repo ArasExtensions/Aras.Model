@@ -181,7 +181,7 @@ namespace Aras.Model.Design
 
                     // Update Properties of Configured Part
                     this.ConfiguredPart.Update(this.Transaction);
-                    this.ConfiguredPart.Class = this.ConfiguredPart.ItemType.GetClassName("Assembly");
+                    this.ConfiguredPart.Class = this.ConfiguredPart.ItemType.GetClassName("NoTemplate");
                     this.ConfiguredPart.Property("name").Value = this.Property("name").Value;
                     this.ConfiguredPart.Property("description").Value = this.Property("description").Value;
 
