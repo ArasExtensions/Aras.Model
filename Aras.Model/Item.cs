@@ -442,6 +442,7 @@ namespace Aras.Model
                 else
                 {
                     Transaction.Add("update", this);
+                    this.Action = Actions.Update;
                     this.OnUpdate();
                 }
             }
@@ -453,14 +454,18 @@ namespace Aras.Model
 
         public void Delete(Transaction Transaction)
         {
-            Transaction.Add("delete", this);
-            this.Transaction = Transaction;
+            if (!this.IsNew)
+            {
+                Transaction.Add("delete", this);
+                this.Transaction = Transaction;
+            }
+
             this.Action = Actions.Deleted;
         }
 
         protected virtual void OnUpdate()
         {
-            this.Action = Actions.Update;
+           
         }
 
         public Transaction Transaction { get; internal set; }

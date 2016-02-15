@@ -83,6 +83,22 @@ namespace Aras.Model
             {
                 if (!prop.Type.Runtime && !prop.Type.ReadOnly && (prop.Modified))
                 {
+                    if (prop is Properties.Item)
+                    {
+                        // Check that related Item is processed
+                        Properties.Item itemprop = (Properties.Item)prop;
+
+                        if (itemprop.Value != null)
+                        {
+                            Action itempropaction = this.Transaction.Get(((Model.Item)itemprop.Value).ID);
+
+                            if (itempropaction != null)
+                            {
+                                itempropaction.Process();
+                            }
+                        }
+                    }
+
                     dbitem.SetProperty(prop.Type.Name, prop.DBValue);
                 }
             }

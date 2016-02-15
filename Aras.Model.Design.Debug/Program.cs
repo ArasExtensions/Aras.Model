@@ -93,26 +93,24 @@ namespace Aras.Model.Design.Debug
             Database database = server.Database("CMB");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-            Order order = (Order)session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "MJC_Order004")).First();
+            Order order = (Order)session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJM-0006")).First();
+            
             using (Transaction transaction = session.BeginTransaction())
             {
                 order.Update(transaction);
+
+                OrderContext ordercontext = (OrderContext)order.Store("v_Order Context").First();
+                ordercontext.ValueList.Value = ordercontext.ValueList.Values.Values.Last();
+                
                 transaction.Commit();
             }
 
-            /*
-            int cnt = 1;
-
             using (Transaction transaction = session.BeginTransaction())
             {
-                Part toplevel = (Part)session.Store("Part").Create(transaction);
-                toplevel.ItemNumber = ItemNumber(cnt);
-                cnt++;
+                order.Update(transaction);
+            }
 
-                cnt = CreateBOM(toplevel, cnt, 0, transaction);
-
-                transaction.Commit();
-            }*/
+            
         }
     }
 }

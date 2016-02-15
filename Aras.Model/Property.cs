@@ -68,35 +68,39 @@ namespace Aras.Model
 
         public void Refresh()
         {
-            switch (this.Item.Action)
+            if (!this.Modified)
             {
-                case Model.Item.Actions.Read:
-                case Model.Item.Actions.Update:
-                case Model.Item.Actions.Deleted:
-                    IO.Item prop = new IO.Item(this.Item.ItemType.Name, "get");
-                    prop.Select = this.Type.Name;
-                    prop.SetProperty("id", this.Item.ID);
+                switch (this.Item.Action)
+                {
+                    case Model.Item.Actions.Read:
+                    case Model.Item.Actions.Update:
+                    case Model.Item.Actions.Deleted:
+                        IO.Item prop = new IO.Item(this.Item.ItemType.Name, "get");
+                        prop.Select = this.Type.Name;
+                        prop.SetProperty("id", this.Item.ID);
 
-                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Item.ItemType.Session, prop);
-                    IO.SOAPResponse response = request.Execute();
+                        IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Item.ItemType.Session, prop);
+                        IO.SOAPResponse response = request.Execute();
 
-                    if (!response.IsError)
-                    {
-                        this.DBValue = response.Items.First().GetProperty(this.Type.Name);
-                    }
-                    else
-                    {
-                        throw new Exceptions.ServerException(response);
-                    }
+                        if (!response.IsError)
+                        {
+                            this.DBValue = response.Items.First().GetProperty(this.Type.Name);
+                        }
+                        else
+                        {
+                            throw new Exceptions.ServerException(response);
+                        }
 
-                    break;
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
+                }
+
+                this.Loaded = true;
+                this.Modified = false;
+
             }
-
-            this.Loaded = true;
-            this.Modified = false;
         }
 
         private Boolean _readOnly;
@@ -194,25 +198,28 @@ namespace Aras.Model
 
         protected void SetValue(Object Value)
         {
-            if (this._value == null)
+            if (!this.Modified)
             {
-                if (Value != null)
+                if (this._value == null)
                 {
-                    this._value = Value;
-                    this.OnPropertyChanged("Value");
+                    if (Value != null)
+                    {
+                        this._value = Value;
+                        this.OnPropertyChanged("Value");
+                    }
                 }
-            }
-            else
-            {
-                if (!this._value.Equals(Value))
+                else
                 {
-                    this._value = Value;
-                    this.OnPropertyChanged("Value");
+                    if (!this._value.Equals(Value))
+                    {
+                        this._value = Value;
+                        this.OnPropertyChanged("Value");
+                    }
                 }
-            }
 
-            this.Loaded = true;
-            this.Modified = false;            
+                this.Loaded = true;
+                this.Modified = false;
+            }
         }
 
         internal abstract String DBValue { get; set; }
