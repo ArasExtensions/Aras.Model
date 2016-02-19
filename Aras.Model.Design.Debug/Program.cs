@@ -88,28 +88,21 @@ namespace Aras.Model.Design.Debug
 
         static void Main(string[] args)
         {
-            Server server = new Server("http://localhost/InnovatorServer10SP4");
+            Server server = new Server("http://localhost/11SP1");
             server.LoadAssembly("Aras.Model.Design");
-            Database database = server.Database("CMB");
+            Database database = server.Database("VariantsDemo11SP1");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
+            session.ItemType("Part").AddToSelect("item_number");
 
-            Order order = (Order)session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJM-0006")).First();
-            
-            using (Transaction transaction = session.BeginTransaction())
+            Queries.Item partquery = (Queries.Item)session.Store("Part").Query();
+            partquery.Paging = true;
+            partquery.Page = 2;
+            Int32 len = partquery.Count();
+
+            foreach(Part part in partquery)
             {
-                order.Update(transaction);
-
-                OrderContext ordercontext = (OrderContext)order.Store("v_Order Context").First();
-                ordercontext.ValueList.Value = ordercontext.ValueList.Values.Values.Last();
-                
-                transaction.Commit();
+                Console.WriteLine(part.ItemNumber);
             }
-
-            using (Transaction transaction = session.BeginTransaction())
-            {
-                order.Update(transaction);
-            }
-
             
         }
     }

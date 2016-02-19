@@ -27,12 +27,125 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace Aras.Model
 {
-    public abstract class Query<T> : System.Collections.Generic.IEnumerable<T> where T : Model.Item
+    public abstract class Query<T> : System.Collections.Generic.IEnumerable<T> where T : Model.Item, INotifyPropertyChanged
     {
+        public const Int32 MinPageSize = 5;
+        public const Int32 DefaultPageSize = 25;
+        public const Int32 MaxPageSize = 100;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(String Name)
+        {
+            if (this.PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(Name));
+            }
+        }
+
         public Store<T> Store { get; private set; }
+
+        private Int32 _pageSize;
+        public Int32 PageSize
+        {
+            get
+            {
+                return this._pageSize;
+            }
+            set
+            {
+                if (this._pageSize != value)
+                {
+                    if (value >= MinPageSize && value <= MaxPageSize)
+                    {
+                        this._pageSize = value;
+                        this.OnPropertyChanged("PageSize");
+                    }
+                }
+            }
+        }
+
+        private Int32 _page;
+        public Int32 Page
+        {
+            get
+            {
+                return this._page;
+            }
+            set
+            {
+                if (this._page != value)
+                {
+                    if (value >= 1)
+                    {
+                        this._page = value;
+                        this.OnPropertyChanged("Page");
+                    }
+                }
+            }
+        }
+
+        private Int32 _noPages;
+        public Int32 NoPages
+        {
+            get
+            {
+                return this._noPages;
+            }
+            protected set
+            {
+                if (this._noPages != value)
+                {
+                    this._noPages = value;
+                    this.OnPropertyChanged("NoPages");
+                }
+            }
+        }
+
+        private Boolean _paging;
+        public Boolean Paging
+        {
+            get
+            {
+                return this._paging;
+            }
+            set
+            {
+                if (value != this._paging)
+                {
+                    this._paging = value;
+                    this.OnPropertyChanged("Paging");
+                }
+            }
+        }
+
+        protected void SetPaging(IO.Item Item)
+        {
+            if (this.Paging)
+            {
+                Item.PageSize = this.PageSize;
+                Item.Page = this.Page;
+            }
+        }
+
+        protected void UpdateNoPages(IO.SOAPResponse Response)
+        {
+            if (this.Paging)
+            {
+                if (Response.Items.Count() > 0)
+                {
+                    this.NoPages = Response.Items.First().PageMax;
+                }
+                else
+                {
+                    this.NoPages = 0;
+                }
+            }
+        }
 
         protected List<T> Items;
 
@@ -59,22 +172,13 @@ namespace Aras.Model
 
         public System.Collections.Generic.IEnumerator<T> GetEnumerator()
         {
-            if (this.Condition == null)
+            if (!this.Executed)
             {
-                // No Condition, Rrfresh store and return all Items
-                this.Store.Refresh();
-                return this.Store.GetEnumerator();
+                this.Execute();
+                this.Executed = true;
             }
-            else
-            {
-                if (!this.Executed)
-                {
-                    this.Execute();
-                    this.Executed = true;
-                }
 
-                return this.Items.GetEnumerator();
-            }
+            return this.Items.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -149,6 +253,10 @@ namespace Aras.Model
             this.Store = Store;
             this._condition = Condition;
             this.Executed = false;
+            this._pageSize = DefaultPageSize;
+            this._paging = false;
+            this._noPages = 0;
+            this._page = 1;
         }
     }
 }

@@ -34,41 +34,41 @@ namespace Aras.Model.Queries
     {
         protected override void Execute()
         {
-            if (this.Condition != null)
+            IO.Item item = new IO.Item(this.ItemType.Name, "get");
+            item.Select = this.Store.Select;
+            item.Where = this.Where;
+            this.SetPaging(item);
+
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Store.Session, item);
+            IO.SOAPResponse response = request.Execute();
+
+            this.Items.Clear();
+
+            if (!response.IsError)
             {
-                IO.Item item = new IO.Item(this.ItemType.Name, "get");
-                item.Select = this.Store.Select;
-                item.Where = this.Where;
-
-                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Store.Session, item);
-                IO.SOAPResponse response = request.Execute();
-
-                this.Items.Clear();
-
-                if (!response.IsError)
+                foreach (IO.Item dbitem in response.Items)
                 {
-                    foreach (IO.Item dbitem in response.Items)
+                    if (!this.Store.ItemInCache(dbitem.ID))
                     {
-                        if (!this.Store.ItemInCache(dbitem.ID))
-                        {
-                            Model.Item newitem = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, dbitem });
-                            this.Store.AddItemToCache(newitem);
-                            this.Items.Add(newitem);
-                        }
-                        else
-                        {
-                            Model.Item existingitem = this.Store.GetItemFromCache(dbitem.ID);
-                            existingitem.UpdateProperties(dbitem);
-                            this.Items.Add(existingitem);
-                        }
+                        Model.Item newitem = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, dbitem });
+                        this.Store.AddItemToCache(newitem);
+                        this.Items.Add(newitem);
+                    }
+                    else
+                    {
+                        Model.Item existingitem = this.Store.GetItemFromCache(dbitem.ID);
+                        existingitem.UpdateProperties(dbitem);
+                        this.Items.Add(existingitem);
                     }
                 }
-                else
+
+                this.UpdateNoPages(response);
+            }
+            else
+            {
+                if (!response.ErrorMessage.Equals("No items of type " + this.ItemType.Name + " found."))
                 {
-                    if (!response.ErrorMessage.Equals("No items of type " + this.ItemType.Name + " found."))
-                    {
-                        throw new Exceptions.ServerException(response);
-                    }
+                    throw new Exceptions.ServerException(response);
                 }
             }
         }
