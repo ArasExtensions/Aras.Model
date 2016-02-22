@@ -153,20 +153,13 @@ namespace Aras.Model
         {
             get
             {
-                if (this.Condition == null)
+                if (!this.Executed)
                 {
-                    return this.Store[Index];
+                    this.Execute();
+                    this.Executed = true;
                 }
-                else
-                {
-                    if (!this.Executed)
-                    {
-                        this.Execute();
-                        this.Executed = true;
-                    }
 
-                    return this.Items[Index];
-                }
+                return this.Items[Index];
             }
         }
 
