@@ -88,22 +88,43 @@ namespace Aras.Model.Design.Debug
 
         static void Main(string[] args)
         {
+            // Connect to Server
             Server server = new Server("http://localhost/11SP1");
             server.LoadAssembly("Aras.Model.Design");
             Database database = server.Database("VariantsDemo11SP1");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
+            
+            // Ensure item_number selected for Parts
             session.ItemType("Part").AddToSelect("item_number");
 
-            Queries.Item partquery = (Queries.Item)session.Store("Part").Query();
+            // Query Parts
+            Queries.Item partquery = (Queries.Item)session.Store("Part").Query(Aras.Conditions.Eq("item_number", "RJM-999999"));
             partquery.Paging = true;
-            partquery.Page = 2;
+            partquery.Page = 1;
+
+            // Look at Query Results
             Int32 len = partquery.Count();
 
             foreach(Part part in partquery)
             {
                 Console.WriteLine(part.ItemNumber);
+                Console.WriteLine(part.KeyedName);
             }
             
+            // Creating New Parts
+            using(Transaction transaction = session.BeginTransaction())
+            {
+                Design.Part childpart = (Design.Part)session.Store("Part").Create(transaction);
+                childpart.ItemNumber = "RJM-999997";
+
+                Design.Part parentpart = (Design.Part)session.Store("Part").Create(transaction);
+                parentpart.ItemNumber = "RJM-999996";
+
+                Design.PartBOM partbom = (Design.PartBOM)parentpart.Store("Part BOM").Create(childpart, transaction);
+                partbom.Quantity = 3.0;
+
+                transaction.Commit();
+            }
         }
     }
 }
