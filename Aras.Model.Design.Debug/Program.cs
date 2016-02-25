@@ -98,9 +98,12 @@ namespace Aras.Model.Design.Debug
             // Ensure item_number selected for Parts
             session.ItemType("Part").AddToSelect("item_number");
 
-            using (MemoryStream test = session.ItemType("Part").Icon)
+            String testname = session.ItemType("Part").Icon.Name;
+            String testname2 = session.ItemType("Part").OpenIcon.Name;
+
+            using (MemoryStream test = session.ItemType("Part").Icon.Read())
             {
-                using (FileStream outst = new FileStream("c:\\temp\\test.svg", FileMode.Create))
+                using (FileStream outst = new FileStream("c:\\temp\\" + session.ItemType("Part").Icon.Name, FileMode.Create))
                 {
                     byte[] buffer = new byte[test.Length];
                     int length = test.Read(buffer, 0, (int)test.Length);
@@ -108,15 +111,6 @@ namespace Aras.Model.Design.Debug
                 }
             }
 
-            using (MemoryStream test = session.ItemType("Part").Icon)
-            {
-                using (FileStream outst = new FileStream("c:\\temp\\test2.svg", FileMode.Create))
-                {
-                    byte[] buffer = new byte[test.Length];
-                    int length = test.Read(buffer, 0, (int)test.Length);
-                    outst.Write(buffer, 0, length);
-                }
-            }
 
             // Query Parts
             Queries.Item partquery = (Queries.Item)session.Store("Part").Query(Aras.Conditions.Eq("item_number", "RJM-999999"));

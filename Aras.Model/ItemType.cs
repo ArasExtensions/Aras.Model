@@ -134,12 +134,8 @@ namespace Aras.Model
             }
         }
 
-        private byte[] ReadIcon(String PropertyName)
+        private Icon ReadIcon(String PropertyName)
         {
-            const int buffersize = 1024;
-            byte[] buffer = new byte[buffersize];
-            int length = 0;
-
             IO.Item itemtype = new IO.Item("ItemType", "get");
             itemtype.Select = PropertyName;
             itemtype.ID = this.ID;
@@ -148,27 +144,7 @@ namespace Aras.Model
 
             if (!response.IsError)
             {
-                String iconurl = this.Session.Database.Server.JavascriptClientURL + "/" + response.Items.First().GetProperty(PropertyName);
-
-                HttpWebRequest webrequest = (HttpWebRequest)WebRequest.Create(iconurl);
-                webrequest.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-                webrequest.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
-                webrequest.Headers.Add("Cache-Control", "no-cache");
-
-                using (WebResponse webresponse = webrequest.GetResponse())
-                {
-                    using (Stream result = webresponse.GetResponseStream())
-                    {
-                        MemoryStream ret = new MemoryStream();
-
-                        while((length = result.Read(buffer, 0, buffersize)) > 0)
-                        {
-                            ret.Write(buffer, 0, length);
-                        }
-
-                        return ret.ToArray();
-                    }
-                }
+                return this.Session.Database.Server.ReadIcon(response.Items.First().GetProperty(PropertyName));
             }
             else
             {
@@ -176,8 +152,8 @@ namespace Aras.Model
             }
         }
 
-        private byte[] _icon;
-        public MemoryStream Icon
+        private Icon _icon;
+        public Icon Icon
         {
             get
             {
@@ -186,12 +162,12 @@ namespace Aras.Model
                     this._icon = this.ReadIcon("large_icon");
                 }
 
-                return new MemoryStream(this._icon);
+                return this._icon;
             }
         }
 
-        private byte[] _openIcon;
-        public MemoryStream OpenIcon
+        private Icon _openIcon;
+        public Icon OpenIcon
         {
             get
             {
@@ -200,12 +176,12 @@ namespace Aras.Model
                     this._openIcon = this.ReadIcon("open_icon");
                 }
 
-                return new MemoryStream(this._openIcon);
+                return this._openIcon;
             }
         }
 
-        private byte[] _closedIcon;
-        public MemoryStream ClosedIcon
+        private Icon _closedIcon;
+        public Icon ClosedIcon
         {
             get
             {
@@ -214,7 +190,7 @@ namespace Aras.Model
                     this._closedIcon = this.ReadIcon("closed_icon");
                 }
 
-                return new MemoryStream(this._closedIcon);
+                return this._closedIcon;
             }
         }
 
