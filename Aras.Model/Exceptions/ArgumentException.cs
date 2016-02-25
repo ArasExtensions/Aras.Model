@@ -35,5 +35,10 @@ namespace Aras.Model.Exceptions
             : base(Message)
         {
         }
+
+        public ArgumentException(String Message, Exception innerException)
+            : base(Message, innerException)
+        {
+        }
     }
 }

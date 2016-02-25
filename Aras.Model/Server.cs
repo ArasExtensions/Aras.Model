@@ -38,7 +38,102 @@ namespace Aras.Model
     {
         public String ID { get; private set; }
 
-        public String URL { get; private set; }
+        private String _uRL;
+        public String URL 
+        { 
+            get
+            {
+                return this._uRL;
+            }
+            private set
+            {
+                if (value != null)
+                {
+                    try
+                    {
+                        this._uRL = new Uri(value).AbsoluteUri;
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exceptions.ArgumentException("Invalid URL Format: " + value, e);
+                    }
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Invalid URL: null");
+                }
+            }
+        }
+
+        private String _serverURL;
+        public String ServerURL
+        {
+            get
+            {
+                if (this._serverURL == null)
+                {
+                    this._serverURL = this.URL + "/Server";
+                }
+
+                return this._serverURL;
+            }
+        }
+
+        private String _apiURL;
+        public String ApiURL
+        {
+            get
+            {
+                if (this._apiURL == null)
+                {
+                    this._apiURL = this.ServerURL + "/InnovatorServer.aspx";
+                }
+
+                return this._apiURL;
+            }
+        }
+
+        private String _dBListURL;
+        public String DBListURL
+        {
+            get
+            {
+                if (this._dBListURL == null)
+                {
+                    this._dBListURL = this.ServerURL + "/dblist.aspx";
+                }
+
+                return this._dBListURL;
+            }
+        }
+
+        private String _clientURL;
+        public String ClientURL
+        {
+            get
+            {
+                if (this._clientURL == null)
+                {
+                    this._clientURL = this.URL + "/Client";
+                }
+
+                return this._clientURL;
+            }
+        }
+
+        private String _javascriptClientURL;
+        public String JavascriptClientURL
+        {
+            get
+            {
+                if (this._javascriptClientURL == null)
+                {
+                    this._javascriptClientURL = this.ClientURL + "/javascript";
+                }
+
+                return this._javascriptClientURL;
+            }
+        }
 
         public DirectoryInfo AssemblyDirectory { get; set; }
 
@@ -115,7 +210,7 @@ namespace Aras.Model
 
                         try
                         {
-                            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.URL + "/Server/dblist.aspx");
+                            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.DBListURL);
                             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                             request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
                             request.Headers.Add("Cache-Control", "no-cache");

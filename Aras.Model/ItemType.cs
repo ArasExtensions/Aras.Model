@@ -28,6 +28,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.IO;
+using System.Net;
 
 namespace Aras.Model
 {
@@ -129,6 +131,90 @@ namespace Aras.Model
                 }
 
                 return this._class;
+            }
+        }
+
+        private byte[] ReadIcon(String PropertyName)
+        {
+            const int buffersize = 1024;
+            byte[] buffer = new byte[buffersize];
+            int length = 0;
+
+            IO.Item itemtype = new IO.Item("ItemType", "get");
+            itemtype.Select = PropertyName;
+            itemtype.ID = this.ID;
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, itemtype);
+            IO.SOAPResponse response = request.Execute();
+
+            if (!response.IsError)
+            {
+                String iconurl = this.Session.Database.Server.JavascriptClientURL + "/" + response.Items.First().GetProperty(PropertyName);
+
+                HttpWebRequest webrequest = (HttpWebRequest)WebRequest.Create(iconurl);
+                webrequest.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                webrequest.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
+                webrequest.Headers.Add("Cache-Control", "no-cache");
+
+                using (WebResponse webresponse = webrequest.GetResponse())
+                {
+                    using (Stream result = webresponse.GetResponseStream())
+                    {
+                        MemoryStream ret = new MemoryStream();
+
+                        while((length = result.Read(buffer, 0, buffersize)) > 0)
+                        {
+                            ret.Write(buffer, 0, length);
+                        }
+
+                        return ret.ToArray();
+                    }
+                }
+            }
+            else
+            {
+                throw new Exceptions.ServerException(response);
+            }
+        }
+
+        private byte[] _icon;
+        public MemoryStream Icon
+        {
+            get
+            {
+                if (this._icon == null)
+                {
+                    this._icon = this.ReadIcon("large_icon");
+                }
+
+                return new MemoryStream(this._icon);
+            }
+        }
+
+        private byte[] _openIcon;
+        public MemoryStream OpenIcon
+        {
+            get
+            {
+                if (this._openIcon == null)
+                {
+                    this._openIcon = this.ReadIcon("open_icon");
+                }
+
+                return new MemoryStream(this._openIcon);
+            }
+        }
+
+        private byte[] _closedIcon;
+        public MemoryStream ClosedIcon
+        {
+            get
+            {
+                if (this._closedIcon == null)
+                {
+                    this._closedIcon = this.ReadIcon("closed_icon");
+                }
+
+                return new MemoryStream(this._closedIcon);
             }
         }
 

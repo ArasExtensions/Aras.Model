@@ -54,7 +54,7 @@ namespace Aras.Model.IO
             {
                 if (this._request == null)
                 {
-                    this._request = (HttpWebRequest)WebRequest.Create(this.Database.Server.URL + "/Server/InnovatorServer.aspx");
+                    this._request = (HttpWebRequest)WebRequest.Create(this.Database.Server.ApiURL);
                     this._request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                     this._request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
                     this._request.Headers.Add("Cache-Control", "no-cache");

@@ -28,6 +28,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Aras.Model;
+using System.IO;
 
 namespace Aras.Model.Design.Debug
 {
@@ -97,6 +98,26 @@ namespace Aras.Model.Design.Debug
             // Ensure item_number selected for Parts
             session.ItemType("Part").AddToSelect("item_number");
 
+            using (MemoryStream test = session.ItemType("Part").Icon)
+            {
+                using (FileStream outst = new FileStream("c:\\temp\\test.svg", FileMode.Create))
+                {
+                    byte[] buffer = new byte[test.Length];
+                    int length = test.Read(buffer, 0, (int)test.Length);
+                    outst.Write(buffer, 0, length);
+                }
+            }
+
+            using (MemoryStream test = session.ItemType("Part").Icon)
+            {
+                using (FileStream outst = new FileStream("c:\\temp\\test2.svg", FileMode.Create))
+                {
+                    byte[] buffer = new byte[test.Length];
+                    int length = test.Read(buffer, 0, (int)test.Length);
+                    outst.Write(buffer, 0, length);
+                }
+            }
+
             // Query Parts
             Queries.Item partquery = (Queries.Item)session.Store("Part").Query(Aras.Conditions.Eq("item_number", "RJM-999999"));
             partquery.Paging = true;
@@ -111,6 +132,7 @@ namespace Aras.Model.Design.Debug
                 Console.WriteLine(part.KeyedName);
             }
             
+            /*
             // Creating New Parts
             using(Transaction transaction = session.BeginTransaction())
             {
@@ -124,7 +146,7 @@ namespace Aras.Model.Design.Debug
                 partbom.Quantity = 3.0;
 
                 transaction.Commit();
-            }
+            } */
         }
     }
 }
