@@ -137,7 +137,7 @@ namespace Aras.Model
 
         private Dictionary<String, Icon> IconCache;
 
-        internal Icon ReadIcon(String URL)
+        internal Icon GetIconByURL(String URL)
         {
             if (!this.IconCache.ContainsKey(URL))
             {
@@ -169,6 +169,11 @@ namespace Aras.Model
             }
 
             return this.IconCache[URL];
+        }
+
+        public Icon GetIcon(String Name)
+        {
+            return this.GetIconByURL("../images/" + Name);
         }
 
         public DirectoryInfo AssemblyDirectory { get; set; }

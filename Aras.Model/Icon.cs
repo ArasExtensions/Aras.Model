@@ -28,11 +28,37 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Security.Cryptography;
 
 namespace Aras.Model
 {
     public class Icon
     {
+        private String _iD;
+        public String ID
+        {
+            get
+            {
+                if (this._iD == null)
+                {
+                    using (MD5 md5Hash = MD5.Create())
+                    {
+                        byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(this.URL));
+                        StringBuilder stringbuilder = new StringBuilder();
+
+                        for (int i = 0; i < data.Length; i++)
+                        {
+                            stringbuilder.Append(data[i].ToString("X2"));
+                        }
+
+                        this._iD = stringbuilder.ToString();
+                    }
+                }
+
+                return this._iD;
+            }
+        }
+
         public String URL { get; private set; }
 
         private String _name;

@@ -98,7 +98,7 @@ namespace Aras.Model.Design.Debug
             // Ensure item_number selected for Parts
             session.ItemType("Part").AddToSelect("item_number");
 
-            String testname = session.ItemType("Part").Icon.Name;
+            Icon testname = session.ItemType("Part").Icon;
             String testname2 = session.ItemType("Part").OpenIcon.Name;
 
             using (MemoryStream test = session.ItemType("Part").Icon.Read())

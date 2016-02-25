@@ -144,7 +144,7 @@ namespace Aras.Model
 
             if (!response.IsError)
             {
-                return this.Session.Database.Server.ReadIcon(response.Items.First().GetProperty(PropertyName));
+                return this.Session.Database.Server.GetIconByURL(response.Items.First().GetProperty(PropertyName));
             }
             else
             {
