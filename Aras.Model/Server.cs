@@ -171,9 +171,22 @@ namespace Aras.Model
             return this.IconCache[URL];
         }
 
-        public Icon GetIcon(String Name)
+        public Icon GetIconByName(String Name)
         {
             return this.GetIconByURL("../images/" + Name);
+        }
+
+        public Icon GetIconByID(String ID)
+        {
+           foreach(Icon icon in this.IconCache.Values)
+           {
+               if (icon.ID.Equals(ID))
+               {
+                   return icon;
+               }
+           }
+
+           throw new Exceptions.ArgumentException("Invalid Icon ID: " + ID);
         }
 
         public DirectoryInfo AssemblyDirectory { get; set; }
