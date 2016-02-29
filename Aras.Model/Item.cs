@@ -603,6 +603,24 @@ namespace Aras.Model
             return related;
         }
 
+        public IEnumerable<Model.Relationship> Relationships(IEnumerable<RelationshipType> RelationshipTypes)
+        {
+            List<Model.Relationship> relationships = new List<Model.Relationship>();
+
+            foreach (RelationshipType relationshiptype in RelationshipTypes)
+            {
+                if (this.ItemType.RelationshipTypes.Contains(relationshiptype))
+                {
+                    foreach (Relationship relationship in this.Store(relationshiptype))
+                    {
+                        relationships.Add(relationship);
+                    }
+                }
+            }
+
+            return relationships;
+        }
+
         public Boolean Equals(Item other)
         {
             if (other == null)
