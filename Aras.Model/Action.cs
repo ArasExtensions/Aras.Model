@@ -45,7 +45,7 @@ namespace Aras.Model
             {
                 if (value != null)
                 {
-                    if ((this._name == null || this._name.Equals("add")) && value.Equals("delete"))
+                    if ((this._name != null) && (this._name.Equals("add")) && value.Equals("delete"))
                     {
                         // No Action needed on database
                         this._name = null;

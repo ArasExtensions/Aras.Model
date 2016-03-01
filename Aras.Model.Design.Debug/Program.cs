@@ -98,49 +98,22 @@ namespace Aras.Model.Design.Debug
             // Ensure item_number selected for Parts
             session.ItemType("Part").AddToSelect("item_number");
 
-            Icon testname = session.ItemType("Part").Icon;
-            String testname2 = session.ItemType("Part").OpenIcon.Name;
-
-            using (MemoryStream test = session.ItemType("Part").Icon.Read())
-            {
-                using (FileStream outst = new FileStream("c:\\temp\\" + session.ItemType("Part").Icon.Name, FileMode.Create))
-                {
-                    byte[] buffer = new byte[test.Length];
-                    int length = test.Read(buffer, 0, (int)test.Length);
-                    outst.Write(buffer, 0, length);
-                }
-            }
-
-
             // Query Parts
-            Queries.Item partquery = (Queries.Item)session.Store("Part").Query(Aras.Conditions.Eq("item_number", "RJM-999999"));
-            partquery.Paging = true;
-            partquery.Page = 1;
+            Queries.Item partquery = (Queries.Item)session.Store("Part").Query(Aras.Conditions.Eq("item_number", "CDE0001"));
+            partquery.Paging = false;
 
-            // Look at Query Results
-            Int32 len = partquery.Count();
 
-            foreach(Part part in partquery)
+
+            Part part = (Part)partquery.First();
+            PartBOM partbom = (PartBOM)part.Store("Part BOM").Last();
+
+            using(Transaction trans = session.BeginTransaction())
             {
-                Console.WriteLine(part.ItemNumber);
-                Console.WriteLine(part.KeyedName);
+                part.Update(trans);
+                partbom.Delete(trans);
+                trans.Commit();
             }
-            
-            /*
-            // Creating New Parts
-            using(Transaction transaction = session.BeginTransaction())
-            {
-                Design.Part childpart = (Design.Part)session.Store("Part").Create(transaction);
-                childpart.ItemNumber = "RJM-999997";
 
-                Design.Part parentpart = (Design.Part)session.Store("Part").Create(transaction);
-                parentpart.ItemNumber = "RJM-999996";
-
-                Design.PartBOM partbom = (Design.PartBOM)parentpart.Store("Part BOM").Create(childpart, transaction);
-                partbom.Quantity = 3.0;
-
-                transaction.Commit();
-            } */
         }
     }
 }
