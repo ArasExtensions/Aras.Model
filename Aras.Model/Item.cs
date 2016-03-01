@@ -613,7 +613,10 @@ namespace Aras.Model
                 {
                     foreach (Relationship relationship in this.Store(relationshiptype))
                     {
-                        relationships.Add(relationship);
+                        if (relationship.Action != Actions.Deleted)
+                        {
+                            relationships.Add(relationship);
+                        }
                     }
                 }
             }
