@@ -41,20 +41,38 @@ namespace Aras.Model
 
         public String Name { get; private set; }
 
+        private object SessionCacheLock = new object();
+        private Dictionary<String, Session> SessionCache;
+
         public Session Login(String Username, String Password)
         {
-            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ValidateUser, this, Username, Password);
-            IO.SOAPResponse response = request.Execute();
+            lock (this.SessionCacheLock)
+            {
+                if (!this.SessionCache.ContainsKey(Username))
+                {
+                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ValidateUser, this, Username, Password);
+                    IO.SOAPResponse response = request.Execute();
 
-            if (!response.IsError)
-            {
-                String id = response.Result.SelectSingleNode("id").InnerText;
-                Session session = new Session(this, id, Username, Password);
-                return session;
-            }
-            else
-            {
-                throw new Exceptions.ServerException(response);
+                    if (!response.IsError)
+                    {
+                        String id = response.Result.SelectSingleNode("id").InnerText;
+                        this.SessionCache[Username] = new Session(this, id, Username, Password);
+                    }
+                    else
+                    {
+                        throw new Exceptions.ServerException(response);
+                    }
+                }
+                else
+                {
+                    // Check Password
+                    if (!this.SessionCache[Username].Password.Equals(Password))
+                    {
+                        throw new Exceptions.ArgumentException("Invalid Password");
+                    }
+                }
+
+                return this.SessionCache[Username];
             }
         }
 
@@ -80,6 +98,7 @@ namespace Aras.Model
         internal Database(Server Server, String Name)
             : base()
         {
+            this.SessionCache = new Dictionary<String, Session>();
             this.ItemTypesCache = new Dictionary<String, Type>();
             this.Server = Server;
             this.ID = Server.NewID();
