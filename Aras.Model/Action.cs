@@ -65,12 +65,25 @@ namespace Aras.Model
         internal Item Item { get; private set; }
 
         private Dictionary<String, Actions.Relationship> RelationshipsCache;
+
         internal void AddRelationship(Actions.Relationship Relationship)
         {
             this.RelationshipsCache[Relationship.Item.ID] = Relationship;
         }
 
-        internal abstract IO.Item Process();
+        protected IEnumerable<Actions.Relationship> Relationships
+        {
+            get
+            {
+                return this.RelationshipsCache.Values;
+            }
+        }
+
+        protected Boolean Completed;
+
+        internal abstract void Rollback();
+
+        internal abstract IO.Item Commit();
 
         protected IO.Item BuildItem()
         {
@@ -94,7 +107,7 @@ namespace Aras.Model
 
                             if (itempropaction != null)
                             {
-                                itempropaction.Process();
+                                itempropaction.Commit();
                             }
                         }
                     }
@@ -106,7 +119,7 @@ namespace Aras.Model
             // Add Relations
             foreach (Actions.Relationship relationshipaction in this.RelationshipsCache.Values)
             {
-                IO.Item dbrelationship = relationshipaction.Process();
+                IO.Item dbrelationship = relationshipaction.Commit();
                 dbitem.AddRelationship(dbrelationship);
             }
 
@@ -151,6 +164,7 @@ namespace Aras.Model
             this.Name = Name;
             this.Item = Item;
             this.Item.Transaction = Transaction;
+            this.Completed = false;
         }
     }
 }

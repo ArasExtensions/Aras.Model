@@ -33,10 +33,10 @@ namespace Aras.Model.Actions
     internal class Item : Action
     {
         private IO.Item Result;
-        private Boolean Processed;
-        internal override IO.Item Process()
+        
+        internal override IO.Item Commit()
         {
-            if (!this.Processed)
+            if (!this.Completed)
             {
                 IO.Item dbitem = this.BuildItem();
                 IO.SOAPResponse response = this.SendItem(dbitem);
@@ -49,11 +49,11 @@ namespace Aras.Model.Actions
                         this.UpdateItem(this.Result);
                     }
 
-                    this.Processed = true;
+                    this.Completed = true;
                 }
                 else
                 {
-                    this.Processed = true;
+                    this.Completed = true;
                     throw new Exceptions.ServerException(response);
                 }
             }
@@ -61,11 +61,28 @@ namespace Aras.Model.Actions
             return this.Result;
         }
 
+        internal override void Rollback()
+        {
+            if (!this.Completed)
+            {
+                foreach(Actions.Relationship relationship in this.Relationships)
+                {
+                    relationship.Rollback();
+                }
+
+                if (this.Item.UnLock())
+                {
+                    this.Item.Refresh();
+                }
+
+                this.Completed = true;
+            }
+        }
+
         internal Item(Transaction Transaction, String Name, Model.Item Item)
             : base(Transaction, Name, Item)
         {
             this.Result = null;
-            this.Processed = false;
         }
     }
 }

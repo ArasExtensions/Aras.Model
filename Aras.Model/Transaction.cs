@@ -87,39 +87,44 @@ namespace Aras.Model
             }
         }
 
-        public Boolean Committed { get; private set; }
+        public Boolean Completed { get; private set; }
 
         public void Commit()
         {
-            if (!this.Committed && this.ActionsCache.Count > 0)
+            if (!this.Completed && this.ActionsCache.Count > 0)
             {
                 foreach (Action action in this.ActionsCache.Values)
                 {
-                    action.Process();
+                    action.Commit();
                 }
             }
 
-            this.Committed = true;
+            this.Completed = true;
         }
 
         public void RollBack()
         {
+            if (!this.Completed)
+            {
+                foreach (Action action in this.ActionsCache.Values)
+                {
+                    action.Rollback();
+                }
 
+                this.Completed = true;
+            }
         }
 
         public void Dispose()
         {
-            if (!this.Committed)
-            {
-                this.RollBack();
-            }
+            this.RollBack();
         }
 
         internal Transaction(Session Session)
         {
             this.Session = Session;
             this.ActionsCache = new Dictionary<String, Action>();
-            this.Committed = false;
+            this.Completed = false;
         }
     }
 }

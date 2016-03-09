@@ -99,10 +99,8 @@ namespace Aras.Model.Design.Debug
             session.ItemType("Part").AddToSelect("item_number");
 
             // Query Parts
-            Queries.Item partquery = (Queries.Item)session.Store("Part").Query(Aras.Conditions.Eq("item_number", "CDE0001"));
+            Queries.Item partquery = (Queries.Item)session.Store("Part").Query(Aras.Conditions.Eq("item_number", "DX-0000000001"));
             partquery.Paging = false;
-
-
 
             Part part = (Part)partquery.First();
             PartBOM partbom = (PartBOM)part.Store("Part BOM").Last();
@@ -110,8 +108,12 @@ namespace Aras.Model.Design.Debug
             using(Transaction trans = session.BeginTransaction())
             {
                 part.Update(trans);
-                partbom.Delete(trans);
-                trans.Commit();
+
+                foreach(Relationship rel in part.Store("Part BOM"))
+                {
+                    rel.Update(trans);
+                }
+
             }
 
         }

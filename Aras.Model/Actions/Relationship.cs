@@ -33,9 +33,9 @@ namespace Aras.Model.Actions
     internal class Relationship : Action
     {
         private IO.Item DBItem;
-        internal override IO.Item Process()
+        internal override IO.Item Commit()
         {
-            if (this.DBItem == null)
+            if (!this.Completed)
             {
                 this.DBItem = this.BuildItem();
 
@@ -45,16 +45,31 @@ namespace Aras.Model.Actions
 
                     if (relatedaction != null)
                     {
-                        this.DBItem.SetProperty("related_id", relatedaction.Process().ID);
+                        this.DBItem.SetProperty("related_id", relatedaction.Commit().ID);
                     }
                     else
                     {
                         this.DBItem.SetProperty("related_id", ((Model.Relationship)this.Item).Related.ID);
                     }
                 }
+
+                this.Completed = true;
             }
 
             return this.DBItem;
+        }
+
+        internal override void Rollback()
+        {
+            if (!this.Completed)
+            {
+                if (this.Item.UnLock())
+                {
+                    this.Item.Refresh();
+                }
+
+                this.Completed = true;
+            }
         }
 
         internal Relationship(Transaction Transaction, String Name, Model.Relationship Relationship)
