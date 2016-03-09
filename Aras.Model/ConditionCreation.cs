@@ -62,6 +62,11 @@ namespace Aras
             return new Model.Conditions.Property(Name, Model.Conditions.Operators.ne, Value);
         }
 
+        public static Model.Conditions.Property Like(String Name, Object Value)
+        {
+            return new Model.Conditions.Property(Name, Model.Conditions.Operators.like, Value);
+        }
+
         public static Model.Conditions.And And(Model.Condition Left, Model.Condition Right)
         {
             return new Model.Conditions.And(Left, Right);

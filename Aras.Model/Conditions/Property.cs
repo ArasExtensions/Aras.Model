@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 
 namespace Aras.Model.Conditions
 {
-    public enum Operators { eq, ne, lt, gt, le, ge };
+    public enum Operators { eq, ne, lt, gt, le, ge, like };
 
     public class Property : Condition
     {
@@ -56,6 +56,8 @@ namespace Aras.Model.Conditions
                     return "<=";
                 case Conditions.Operators.ge:
                     return ">=";
+                case Conditions.Operators.like:
+                    return "like";
                 default:
                     throw new NotImplementedException("Property Condition Operator not implemented");
             }
@@ -88,7 +90,7 @@ namespace Aras.Model.Conditions
                         }
                         else
                         {
-                            return "(" + proptype.ColumnName + OperatorString(this.Operator) + "'" + this.Value.ToString() + "')";
+                            return "(" + proptype.ColumnName + OperatorString(this.Operator) + "'" + this.Value.ToString().Replace('*', '%') + "')";
                         }
 
                     default:
