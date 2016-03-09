@@ -117,7 +117,7 @@ namespace Aras.Model
 
         public void Dispose()
         {
-            this.RollBack();
+
         }
 
         internal Transaction(Session Session)

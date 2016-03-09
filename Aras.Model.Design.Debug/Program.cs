@@ -114,6 +114,8 @@ namespace Aras.Model.Design.Debug
                     rel.Update(trans);
                 }
 
+                trans.RollBack();
+
             }
 
         }
