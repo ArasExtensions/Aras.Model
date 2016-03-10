@@ -70,9 +70,23 @@ namespace Aras.Model.Actions
                     relationship.Rollback();
                 }
 
-                if (this.Item.UnLock())
+                switch (this.Item.Action)
                 {
-                    this.Item.Refresh();
+                    case Model.Item.Actions.Create:
+
+                        // Remove from Store
+                        this.Item.Session.Store(this.Item.ItemType).RemoveItemFromCache(this.Item);
+
+                        break;
+                    case Model.Item.Actions.Deleted:
+                    case Model.Item.Actions.Update:
+
+                        // Unlock
+                        this.Item.UnLock();
+
+                        break;
+                    default:
+                        break;
                 }
 
                 this.Completed = true;

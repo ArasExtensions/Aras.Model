@@ -70,6 +70,15 @@ namespace Aras.Model
             }
         }
 
+        internal void RemoveItemFromCache(T Item)
+        {
+            if (this.ItemInCache(Item.ID))
+            {
+                this.Cache.Remove(Item.ID);
+                this.OnStoreChanged();
+            }
+        }
+
         internal T GetItemFromCache(String ID)
         {
             return this.Cache[ID];

@@ -63,9 +63,23 @@ namespace Aras.Model.Actions
         {
             if (!this.Completed)
             {
-                if (this.Item.UnLock())
+                switch(this.Item.Action)
                 {
-                    this.Item.Refresh();
+                    case Model.Item.Actions.Create:
+
+                        // Remove from Parent Store
+                        ((Model.Relationship)this.Item).Source.Store(((Model.Relationship)this.Item).RelationshipType).RemoveItemFromCache((Model.Relationship)this.Item);
+
+                        break;
+                    case Model.Item.Actions.Deleted:
+                    case Model.Item.Actions.Update:
+
+                        // Unlock
+                        this.Item.UnLock();
+
+                        break;
+                    default:
+                        break;
                 }
 
                 this.Completed = true;
