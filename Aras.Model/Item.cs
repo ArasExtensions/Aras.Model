@@ -431,9 +431,9 @@ namespace Aras.Model
 
         }
 
-        public void Update(Transaction Transaction)
+        public void Update(Transaction Transaction, Boolean UnLock = false)
         {
-            if (this.Lock())
+            if (this.Lock(UnLock))
             {
                 if (this.IsNew)
                 {
@@ -470,7 +470,7 @@ namespace Aras.Model
 
         public Transaction Transaction { get; internal set; }
 
-        private Boolean Lock()
+        private Boolean Lock(Boolean UnLock)
         {
             if (this.IsNew)
             {
@@ -502,6 +502,37 @@ namespace Aras.Model
                 else if (lockedby.ID.Equals(this.ItemType.Session.UserID))
                 {
                     return true;
+                }
+                else if (!lockedby.ID.Equals(this.ItemType.Session.UserID) && UnLock)
+                {
+                    // Force Unlock
+                    IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
+                    unlockitem.ID = this.ID;
+                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, unlockitem);
+                    IO.SOAPResponse response = request.Execute();
+
+                    if (!response.IsError)
+                    {
+                        IO.Item lockitem = new IO.Item(this.ItemType.Name, "lock");
+                        lockitem.ID = this.ID;
+                        lockitem.Select = "locked_by_id";
+                        request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, lockitem);
+                        response = request.Execute();
+
+                        if (!response.IsError)
+                        {
+                            this.UpdateProperties(response.Items.First());
+                            return true;
+                        }
+                        else
+                        {
+                            throw new Exceptions.ServerException(response);
+                        }
+                    }
+                    else
+                    {
+                        throw new Exceptions.ServerException(response);
+                    }
                 }
                 else
                 {

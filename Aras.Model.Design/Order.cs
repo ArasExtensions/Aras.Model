@@ -150,7 +150,7 @@ namespace Aras.Model.Design
             return ret;
         }
 
-        private Boolean Processing;
+        private Boolean Processing = false;
         private void Process()
         {
             if (!this.Processing)
@@ -180,7 +180,7 @@ namespace Aras.Model.Design
                     }
 
                     // Update Properties of Configured Part
-                    this.ConfiguredPart.Update(this.Transaction);
+                    this.ConfiguredPart.Update(this.Transaction, true);
                     this.ConfiguredPart.Class = this.ConfiguredPart.ItemType.GetClassName("NoTemplate");
                     this.ConfiguredPart.Property("name").Value = this.Property("name").Value;
                     this.ConfiguredPart.Property("description").Value = this.Property("description").Value;
@@ -190,7 +190,7 @@ namespace Aras.Model.Design
                     {
                         if (partbom.Transaction == null)
                         {
-                            partbom.Update(this.Transaction);
+                            partbom.Update(this.Transaction, true);
                         }
                     }
 
@@ -227,7 +227,7 @@ namespace Aras.Model.Design
                     {
                         if (ordercontext.Transaction == null)
                         {
-                            ordercontext.Update(this.Transaction);
+                            ordercontext.Update(this.Transaction, true);
                         }
                     }
 
