@@ -133,7 +133,6 @@ namespace Aras.Model.Design
             List<VariantContext> ret = new List<VariantContext>();
 
             // Check Variants on this Part
-
             if (this.Class == this.ItemType.ClassStructure.Search("Variant"))
             {    
                 foreach (PartVariant partvariant in this.Store("Part Variants"))
