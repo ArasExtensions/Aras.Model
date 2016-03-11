@@ -52,12 +52,28 @@ namespace Aras.Model
                 throw new Exceptions.ArgumentException("Invalid List Value");
             }
         }
-   
+
+        private List<ListValue> _values;
         public IEnumerable<ListValue> Values
         {
             get
             {
-                return this.Store("Value").Cast<ListValue>();
+                if (this._values == null)
+                {
+                    this._values = new List<ListValue>();
+
+                    foreach (ListValue listvalue in this.Store("Value"))
+                    {
+                        // Ignore ListValues with blank Value
+
+                        if (!String.IsNullOrEmpty(listvalue.Value))
+                        {
+                            this._values.Add(listvalue);
+                        }
+                    }
+                }
+
+                return this._values;
             }
         }
 

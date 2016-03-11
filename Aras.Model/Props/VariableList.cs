@@ -63,7 +63,19 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    return this.Values.Store("Value").ToList().IndexOf((ListValue)this.Value);
+                    int index = 0;
+
+                    foreach(ListValue listvalue in this.Values.Values)
+                    {
+                        if (listvalue.Equals(this.Value))
+                        {
+                            return index;
+                        }
+
+                        index++;
+                    }
+
+                    return -1;
                 }
             }
             set
@@ -74,9 +86,9 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    if (value >= 0 && value < this.Values.Store("Value").Count())
+                    if (value >= 0 && value < this.Values.Values.Count())
                     {
-                        this.Value = this.Values.Store("Value").ToList()[value];
+                        this.Value = this.Values.Values.ElementAt(value);
                     }
                     else
                     {
