@@ -103,20 +103,10 @@ namespace Aras.Model.Design.Debug
             partquery.Paging = false;
 
             Part part = (Part)partquery.First();
-            PartBOM partbom = (PartBOM)part.Store("Part BOM").Last();
 
-            using(Transaction trans = session.BeginTransaction())
-            {
-                part.Update(trans);
+            Identity alias = session.Alias;
 
-                foreach(Relationship rel in part.Store("Part BOM"))
-                {
-                    rel.Update(trans);
-                }
-
-                trans.RollBack();
-
-            }
+            IEnumerable<Identity> identities = session.Identities;
 
         }
     }

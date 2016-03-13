@@ -52,6 +52,120 @@ namespace Aras.Model
             }
         }
 
+        private Identity _alias;
+        public Identity Alias
+        {
+            get
+            {
+                if (this._alias == null)
+                {
+                    this._alias = (Identity)this.User.Store("Alias").First().Related;
+                }
+
+                return this._alias;
+            }
+        }
+
+        private List<Identity> GetParentIdentities(Identity Identity)
+        {
+            List<Identity> identities = new List<Identity>();
+
+            foreach(Identity thisidentity in this.IdentityCache.Values)
+            {
+                foreach (Identity thischildidentity in this.IdentityMemberCache[thisidentity])
+                {
+                    if (thischildidentity.Equals(Identity))
+                    {
+                        if (!identities.Contains(thisidentity))
+                            identities.Add(thisidentity);
+                    }
+                }
+            }
+
+            List<Identity> ret = new List<Identity>();
+
+            foreach(Identity identity in identities)
+            {
+                ret.Add(identity);
+
+                foreach(Identity parentidentiy in this.GetParentIdentities(identity))
+                {
+                    if (!ret.Contains(parentidentiy))
+                    {
+                        ret.Add(parentidentiy);
+                    }
+                }
+            }
+
+            return identities;
+        }
+
+        Dictionary<String, Identity> IdentityCache;
+        Dictionary<Identity, List<Identity>> IdentityMemberCache;
+        private List<Identity> _identities;
+        public IEnumerable<Identity> Identities
+        {
+            get
+            {
+                if (this._identities == null)
+                {
+                    this._identities = new List<Identity>();
+
+                    IO.Item identityrequest = new IO.Item("Identity", "get");
+                    identityrequest.Select = "id";
+                    identityrequest.SetProperty("is_alias", "0");
+                    IO.Item memberrequest = new IO.Item("Member", "get");
+                    memberrequest.Select = "related_id";
+                    identityrequest.AddRelationship(memberrequest);
+
+                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, identityrequest);
+                    IO.SOAPResponse response = request.Execute();
+
+                    if (!response.IsError)
+                    {
+                        IdentityCache = new Dictionary<String, Identity>();
+                        IdentityMemberCache = new Dictionary<Identity, List<Identity>>();
+
+                        foreach(IO.Item dbidentity in response.Items)
+                        {
+                            this.IdentityCache[dbidentity.ID] = (Identity)this.Store("Identity").GetByDBItem(dbidentity);
+                            this.IdentityMemberCache[this.IdentityCache[dbidentity.ID]] = new List<Identity>();
+                        }
+
+                        foreach (IO.Item dbidentity in response.Items)
+                        {
+                            Identity identity = this.IdentityCache[dbidentity.ID];
+
+                            foreach (IO.Item dbmember in dbidentity.Relationships)
+                            {
+                                String childidentityid = dbmember.GetPropertyItem("related_id").ID;
+
+                                if (childidentityid.Equals(this.Alias.ID))
+                                {
+                                    this.IdentityMemberCache[identity].Add(this.Alias);
+                                }
+                                else if (this.IdentityCache.ContainsKey(childidentityid))
+                                {
+                                    Identity childidentity = this.IdentityCache[childidentityid];
+                                    this.IdentityMemberCache[identity].Add(childidentity);
+                                }
+                            }
+                        }
+
+                        this._identities = this.GetParentIdentities(this.Alias);
+                        this._identities.Add(this.Alias);
+                    }
+                    else
+                    {
+                        throw new Exceptions.ServerException(response);
+                    }
+
+                }
+
+                return this._identities;
+            }
+        }
+
         public String Username { get; private set; }
 
         public String Password { get; private set; }

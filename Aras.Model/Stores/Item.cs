@@ -47,6 +47,24 @@ namespace Aras.Model.Stores
             }
         }
 
+        internal Model.Item GetByDBItem(IO.Item Item)
+        {
+            if (Item.ItemType.Equals(this.ItemType.Name))
+            {
+                if (!this.ItemInCache(Item.ID))
+                {
+                    Model.Item newitem = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, Item });
+                    this.AddItemToCache(newitem);
+                }
+
+                return this.GetItemFromCache(Item.ID);
+            }
+            else
+            {
+                throw new ArgumentException("Invalid ItemType");
+            }
+        }
+
         public override Model.Item Get(String ID)
         {
             if (!this.ItemInCache(ID))
