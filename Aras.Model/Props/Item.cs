@@ -72,7 +72,14 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    this.SetValue(this.Item.ItemType.Session.Get(((PropertyTypes.Item)this.Type).ValueType, value));
+                    if (this.Item.ID.Equals(value))
+                    {
+                        this.SetValue(this.Item);
+                    }
+                    else
+                    {
+                        this.SetValue(this.Item.ItemType.Session.Get(((PropertyTypes.Item)this.Type).ValueType, value));
+                    }
                 }
             }
         }

@@ -112,7 +112,7 @@ namespace Aras.Model
                     this._identities = new List<Identity>();
 
                     IO.Item identityrequest = new IO.Item("Identity", "get");
-                    identityrequest.Select = "id";
+                    identityrequest.Select = "id,name";
                     identityrequest.SetProperty("is_alias", "0");
                     IO.Item memberrequest = new IO.Item("Member", "get");
                     memberrequest.Select = "related_id";
@@ -153,7 +153,18 @@ namespace Aras.Model
                         }
 
                         this._identities = this.GetParentIdentities(this.Alias);
+
+                        // Add Alias
                         this._identities.Add(this.Alias);
+
+                        // Add Owner and Manager
+                        foreach(Identity identity in this.IdentityCache.Values)
+                        {
+                            if (identity.Name.Equals("Owner") || identity.Equals("Manager"))
+                            {
+                                this._identities.Add(identity);
+                            }
+                        }
                     }
                     else
                     {
@@ -338,6 +349,7 @@ namespace Aras.Model
 
             // Default Selections
             this.ItemType("Value").AddToSelect("value,label");
+            this.ItemType("Access").AddToSelect("can_get,can_update,can_delete,can_discover,can_change_access");
         }
     }
 }

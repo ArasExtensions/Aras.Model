@@ -99,7 +99,7 @@ namespace Aras.Model.Design.Debug
             session.ItemType("Part").AddToSelect("item_number");
 
             // Query Parts
-            Queries.Item partquery = (Queries.Item)session.Store("Part").Query(Aras.Conditions.Eq("item_number", "DX-0000000001"));
+            Queries.Item partquery = (Queries.Item)session.Store("Part").Query(Aras.Conditions.Eq("item_number", "DX-0000000002"));
             partquery.Paging = false;
 
             Part part = (Part)partquery.First();
@@ -107,6 +107,11 @@ namespace Aras.Model.Design.Debug
             Identity alias = session.Alias;
 
             IEnumerable<Identity> identities = session.Identities;
+
+            Permission permisson = part.Permission;
+            Permission per = permisson.Permission;
+            IEnumerable<Access> access = permisson.Access;
+            Boolean cd = permisson.CanDelete;
 
         }
     }

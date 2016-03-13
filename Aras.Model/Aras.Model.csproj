@@ -42,6 +42,7 @@
     <Compile Include="Action.cs" />
     <Compile Include="Actions\Item.cs" />
     <Compile Include="Actions\Relationship.cs" />
+    <Compile Include="Access.cs" />
     <Compile Include="Attributes\ItemType.cs" />
     <Compile Include="Class.cs" />
     <Compile Include="Condition.cs" />

@@ -428,7 +428,15 @@ namespace Aras.Model
 
         protected virtual void OnRefresh()
         {
+            // Clear Access
+            this._access = null;
 
+            // Clear Permissions
+            this._canGet = null;
+            this._canUpdate = null;
+            this._canDelete = null;
+            this._canDiscover = null;
+            this._canChangeAccess = null;
         }
 
         public void Update(Transaction Transaction, Boolean UnLock = false)
@@ -653,6 +661,203 @@ namespace Aras.Model
             }
 
             return relationships;
+        }
+
+        public Boolean IsManager
+        {
+            get
+            {
+                if (this.Session.Alias.Equals(this.ManagedBy))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        public Boolean IsOwner
+        {
+            get
+            {
+                if (this.Session.Alias.Equals(this.OwnedBy) || this.Session.User.Equals(this.CreatedBy))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }  
+            }
+        }
+
+        private List<Access> _access;
+        public IEnumerable<Access> Access
+        {
+            get
+            {
+                if (this._access == null)
+                {
+                    this._access = new List<Access>();
+
+                    if (this.Permission != null)
+                    {
+                        Queries.Relationship accessquery = (Queries.Relationship)this.Permission.Store("Access").Query();
+                        accessquery.Paging = false;
+                        accessquery.Refresh();
+
+                        foreach (Access access in accessquery)
+                        {
+                            switch (access.Identity.Name)
+                            {
+                                case "Owner":
+
+                                    if (this.IsOwner)
+                                    {
+                                        this._access.Add(access);
+                                    }
+
+                                    break;
+                                case "Manager":
+
+                                    if (this.IsManager)
+                                    {
+                                        this._access.Add(access);
+                                    }
+
+                                    break;
+                                default:
+
+                                    if (this.Session.Identities.Contains(access.Identity))
+                                    {
+                                        this._access.Add(access);
+                                    }
+
+                                    break;
+                            }
+                        }
+                    }
+                }
+
+                return this._access;
+            }
+        }
+
+        private Boolean? _canGet;
+        public Boolean CanGet
+        {
+            get
+            {
+                if (this._canGet == null)
+                {
+                    this._canGet = false;
+
+                    foreach (Access access in this.Access)
+                    {
+                        if (access.IdentityCanGet)
+                        {
+                            this._canGet = true;
+                            break;
+                        }
+                    }
+                }
+
+                return (Boolean)this._canGet;
+            }
+        }
+
+        private Boolean? _canUpdate;
+        public Boolean CanUpdate
+        {
+            get
+            {
+                if (this._canUpdate == null)
+                {
+                    this._canUpdate = false;
+
+                    foreach (Access access in this.Access)
+                    {
+                        if (access.IdentityCanUpdate)
+                        {
+                            this._canUpdate = true;
+                            break;
+                        }
+                    }
+                }
+
+                return (Boolean)this._canUpdate;
+            }
+        }
+
+        private Boolean? _canDelete;
+        public Boolean CanDelete
+        {
+            get
+            {
+                if (this._canDelete == null)
+                {
+                    this._canDelete = false;
+
+                    foreach (Access access in this.Access)
+                    {
+                        if (access.IdentityCanDelete)
+                        {
+                            this._canDelete = true;
+                            break;
+                        }
+                    }
+                }
+
+                return (Boolean)this._canDelete;
+            }
+        }
+
+        private Boolean? _canDiscover;
+        public Boolean CanDiscover
+        {
+            get
+            {
+                if (this._canDiscover == null)
+                {
+                    this._canDiscover = false;
+
+                    foreach (Access access in this.Access)
+                    {
+                        if (access.IdentityCanDiscover)
+                        {
+                            this._canDiscover = true;
+                            break;
+                        }
+                    }
+                }
+
+                return (Boolean)this._canDiscover;
+            }
+        }
+
+        private Boolean? _canChangeAccess;
+        public Boolean CanChangeAccess
+        {
+            get
+            {
+                if (this._canChangeAccess == null)
+                {
+                    this._canChangeAccess = false;
+
+                    foreach (Access access in this.Access)
+                    {
+                        if (access.IdentityCanChangeAccess)
+                        {
+                            this._canChangeAccess = true;
+                            break;
+                        }
+                    }
+                }
+
+                return (Boolean)this._canChangeAccess;
+            }
         }
 
         public Boolean Equals(Item other)

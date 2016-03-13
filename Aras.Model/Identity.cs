@@ -33,6 +33,19 @@ namespace Aras.Model
     [Attributes.ItemType("Identity")]
     public class Identity : Item
     {
+        public String Name
+        {
+            get
+            {
+                return (String)this.Property("name").Value;
+            }
+        }
+
+        public override String ToString()
+        {
+            return this.Name;
+        }
+
         public Identity(ItemType ItemType)
             : base(ItemType)
         {
