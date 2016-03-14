@@ -428,8 +428,8 @@ namespace Aras.Model
 
         protected virtual void OnRefresh()
         {
-            // Clear Access
-            this._access = null;
+            // Clear Item Access
+            this._itemAccess = null;
 
             // Clear Permissions
             this._canGet = null;
@@ -693,22 +693,18 @@ namespace Aras.Model
             }
         }
 
-        private List<Access> _access;
-        public IEnumerable<Access> Access
+        private List<Access> _itemAccess;
+        private IEnumerable<Access> ItemAccess
         {
             get
             {
-                if (this._access == null)
+                if (this._itemAccess == null)
                 {
-                    this._access = new List<Access>();
+                    this._itemAccess = new List<Access>();
 
                     if (this.Permission != null)
                     {
-                        Queries.Relationship accessquery = (Queries.Relationship)this.Permission.Store("Access").Query();
-                        accessquery.Paging = false;
-                        accessquery.Refresh();
-
-                        foreach (Access access in accessquery)
+                        foreach (Access access in this.Permission.Access)
                         {
                             switch (access.Identity.Name)
                             {
@@ -716,7 +712,7 @@ namespace Aras.Model
 
                                     if (this.IsOwner)
                                     {
-                                        this._access.Add(access);
+                                        this._itemAccess.Add(access);
                                     }
 
                                     break;
@@ -724,7 +720,7 @@ namespace Aras.Model
 
                                     if (this.IsManager)
                                     {
-                                        this._access.Add(access);
+                                        this._itemAccess.Add(access);
                                     }
 
                                     break;
@@ -732,7 +728,7 @@ namespace Aras.Model
 
                                     if (this.Session.Identities.Contains(access.Identity))
                                     {
-                                        this._access.Add(access);
+                                        this._itemAccess.Add(access);
                                     }
 
                                     break;
@@ -741,7 +737,7 @@ namespace Aras.Model
                     }
                 }
 
-                return this._access;
+                return this._itemAccess;
             }
         }
 
@@ -754,7 +750,7 @@ namespace Aras.Model
                 {
                     this._canGet = false;
 
-                    foreach (Access access in this.Access)
+                    foreach (Access access in this.ItemAccess)
                     {
                         if (access.IdentityCanGet)
                         {
@@ -777,7 +773,7 @@ namespace Aras.Model
                 {
                     this._canUpdate = false;
 
-                    foreach (Access access in this.Access)
+                    foreach (Access access in this.ItemAccess)
                     {
                         if (access.IdentityCanUpdate)
                         {
@@ -800,7 +796,7 @@ namespace Aras.Model
                 {
                     this._canDelete = false;
 
-                    foreach (Access access in this.Access)
+                    foreach (Access access in this.ItemAccess)
                     {
                         if (access.IdentityCanDelete)
                         {
@@ -823,7 +819,7 @@ namespace Aras.Model
                 {
                     this._canDiscover = false;
 
-                    foreach (Access access in this.Access)
+                    foreach (Access access in this.ItemAccess)
                     {
                         if (access.IdentityCanDiscover)
                         {
@@ -846,7 +842,7 @@ namespace Aras.Model
                 {
                     this._canChangeAccess = false;
 
-                    foreach (Access access in this.Access)
+                    foreach (Access access in this.ItemAccess)
                     {
                         if (access.IdentityCanChangeAccess)
                         {

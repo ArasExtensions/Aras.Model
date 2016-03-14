@@ -34,6 +34,58 @@ namespace Aras.Model
     public class Permission : Item
     {
 
+        private List<Access> _access;
+        public IEnumerable<Access> Access
+        {
+            get
+            {
+                if (this._access == null)
+                {
+                    this._access = new List<Access>();
+
+
+                    Queries.Relationship accessquery = (Queries.Relationship)this.Permission.Store("Access").Query();
+                    accessquery.Paging = false;
+                    accessquery.Refresh();
+
+                    foreach (Access access in accessquery)
+                    {
+                        switch (access.Identity.Name)
+                        {
+                            case "Owner":
+                            case "Manager":
+
+                                // Always add special System Identities
+                                this._access.Add(access);
+
+                                break;
+                            default:
+
+                                // Add other Identities if this User is a member
+
+                                if (this.Session.Identities.Contains(access.Identity))
+                                {
+                                    this._access.Add(access);
+                                }
+
+                                break;
+                        }
+                    }
+
+                }
+
+                return this._access;
+            }
+        }
+
+        protected override void OnRefresh()
+        {
+            base.OnRefresh();
+
+            // Clear Acess
+            this._access = null;
+        }
+
         public Permission(ItemType ItemType)
             : base(ItemType)
         {
