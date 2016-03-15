@@ -35,22 +35,21 @@ namespace Aras.Model
     {
         public ListValue ListValue(String Value)
         {
-            if (System.String.IsNullOrEmpty(Value))
-            {
-                return null;
-            }
-            else
+            ListValue ret = null;
+
+            if (!System.String.IsNullOrEmpty(Value))
             {
                 foreach (ListValue listvalue in this.Store("Value"))
                 {
                     if (listvalue.Value.Equals(Value))
                     {
-                        return listvalue;
+                        ret = listvalue;
+                        break;
                     }
                 }
-
-                throw new Exceptions.ArgumentException("Invalid List Value");
             }
+
+            return ret;
         }
 
         private List<ListValue> _values;

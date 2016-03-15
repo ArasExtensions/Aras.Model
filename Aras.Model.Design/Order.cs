@@ -194,6 +194,15 @@ namespace Aras.Model.Design
                         }
                     }
 
+                    // Ensure all Order Context are Locked
+                    foreach (OrderContext ordercontext in this.OrderContextCache.Values)
+                    {
+                        if (ordercontext.Transaction == null)
+                        {
+                            ordercontext.Update(this.Transaction, true);
+                        }
+                    }
+
                     // Add any missing Order Context
                     foreach(VariantContext variantcontext in this.Part.VariantContext(this))
                     {
@@ -222,14 +231,7 @@ namespace Aras.Model.Design
                         }
                     }
 
-                    // Ensure all Order Context are Locked
-                    foreach (OrderContext ordercontext in this.Store("v_Order Context"))
-                    {
-                        if (ordercontext.Transaction == null)
-                        {
-                            ordercontext.Update(this.Transaction, true);
-                        }
-                    }
+
 
                     // Evaluate any Method Variant Contexts
                     foreach (OrderContext ordercontext in this.Store("v_Order Context"))
@@ -353,6 +355,16 @@ namespace Aras.Model.Design
             this.Process();
         }
 
+        private void Initialise()
+        {
+            // Load Order Contexts already in database
+            foreach (OrderContext ordercontext in this.Store("v_Order Context").Query())
+            {
+                this.AddOrderContext(ordercontext);
+            }
+        }
+
+
         public Order(Model.ItemType ItemType)
             : base(ItemType)
         {
@@ -366,11 +378,7 @@ namespace Aras.Model.Design
             this.OrderContextCache = new Dictionary<String, OrderContext>();
             this.Processing = false;
 
-            // Load Order Contexts already in database
-            foreach (OrderContext ordercontext in this.Store("v_Order Context"))
-            {
-                this.AddOrderContext(ordercontext);
-            }
+            this.Initialise();
         }
     }
 }
