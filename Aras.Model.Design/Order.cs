@@ -185,7 +185,7 @@ namespace Aras.Model.Design
                     this.ConfiguredPart.Property("name").Value = this.Property("name").Value;
                     this.ConfiguredPart.Property("description").Value = this.Property("description").Value;
 
-                    //Ensure all Configured Part BOMS are locked
+                    //Ensure all Configured Part BOMS cen be updated
                     foreach (PartBOM partbom in this.ConfiguredPart.Store("Part BOM"))
                     {
                         if (partbom.Transaction == null)
