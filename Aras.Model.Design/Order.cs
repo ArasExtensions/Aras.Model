@@ -132,7 +132,7 @@ namespace Aras.Model.Design
             // Update Order Contexts
             foreach (OrderContext ordercontext in this.OrderContextCache.Values)
             {
-                ordercontext.Update(Transaction, true);
+                ordercontext.Update(this.Transaction, true);
             }
 
             // Update Configured Part
@@ -320,11 +320,9 @@ namespace Aras.Model.Design
                             {
                                 found = true;
 
-                                if ((partbom.Action == Actions.Deleted) || (partbom.Action == Actions.Read))
-                                {
-                                    partbom.Update(this.Transaction);
-                                }
-
+                                //Update
+                                partbom.Update(this.Transaction);
+                            
                                 // Update Quantity
                                 partbom.Quantity = flatbom[flatpart];
 
