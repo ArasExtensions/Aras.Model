@@ -39,7 +39,7 @@ namespace Aras.Model
 
             if (!System.String.IsNullOrEmpty(Value))
             {
-                foreach (ListValue listvalue in this.Store("Value"))
+                foreach (ListValue listvalue in this.Values)
                 {
                     if (listvalue.Value.Equals(Value))
                     {

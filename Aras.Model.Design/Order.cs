@@ -69,19 +69,22 @@ namespace Aras.Model.Design
             }
         }
 
-        private Dictionary<String, OrderContext> _orderContextCache;
-        private Dictionary<String, OrderContext> OrderContextCache
+        private Dictionary<VariantContext, OrderContext> _orderContextCache;
+        private Dictionary<VariantContext, OrderContext> OrderContextCache
         {
             get
             {
                 if (this._orderContextCache == null)
                 {
-                    this._orderContextCache = new Dictionary<string, OrderContext>();
+                    this._orderContextCache = new Dictionary<VariantContext, OrderContext>();
 
                     // Load Order Contexts already in database
                     foreach (OrderContext ordercontext in this.Store("v_Order Context").Query())
                     {
-                        this.AddOrderContext(ordercontext);
+                        if (!this._orderContextCache.ContainsKey(ordercontext.VariantContext))
+                        {
+                            this._orderContextCache[ordercontext.VariantContext] = ordercontext;
+                        }
                     }
                 }
 
@@ -97,15 +100,92 @@ namespace Aras.Model.Design
             }
         }
 
-        private void AddOrderContext(OrderContext OrderContext)
+        internal OrderContext OrderContext(VariantContext VariantContext)
         {
-            if (!this.OrderContextCache.ContainsKey(OrderContext.ID))
+            if (this.Transaction != null)
             {
-                this.OrderContextCache[OrderContext.ID] = OrderContext;
+                if (!this.OrderContextCache.ContainsKey(VariantContext))
+                {
+                    this.OrderContextCache[VariantContext] = (OrderContext)this.Store("v_Order Context").Create(VariantContext, this.Transaction);
 
-                // Watch for changes
-                OrderContext.ValueList.PropertyChanged += ValueList_PropertyChanged;
-                OrderContext.Property("quantity").PropertyChanged += Quantity_PropertyChanged;
+                    // Default Value to first value in List
+                    this.OrderContextCache[VariantContext].Value = this.OrderContextCache[VariantContext].ValueList.Values.Values.First().Value;
+
+                    // Default Quantity to 1.0
+                    this.OrderContextCache[VariantContext].Quantity = 1.0;
+
+                    // Watch for changes
+                    this.OrderContextCache[VariantContext].ValueList.PropertyChanged += ValueList_PropertyChanged;
+                    this.OrderContextCache[VariantContext].Property("quantity").PropertyChanged += Quantity_PropertyChanged;
+                }
+                else
+                {
+                    if (this.OrderContextCache[VariantContext].Value == null)
+                    {
+                        // Default Value to first value in List
+                        this.OrderContextCache[VariantContext].Value = this.OrderContextCache[VariantContext].ValueList.Values.Values.First().Value;
+
+                        // Default Quantity to 1.0
+                        this.OrderContextCache[VariantContext].Quantity = 1.0;
+                    }
+                }
+
+                if (this.OrderContextCache[VariantContext].VariantContext.IsMethod)
+                {
+                    if (this.OrderContextCache[VariantContext].VariantContext.Method != null)
+                    {
+                        Model.IO.Item dborder = new Model.IO.Item(this.ItemType.Name, this.OrderContextCache[VariantContext].VariantContext.Method);
+                        dborder.ID = this.ID;
+
+                        // Add this Order Context
+                        Model.IO.Item dbordercontext = this.OrderContextCache[VariantContext].GetIOItem();
+                        dborder.AddRelationship(dbordercontext);
+
+                        // Add all other order Context
+                        foreach (OrderContext otherordercontext in this.OrderContexts)
+                        {
+                            if (!otherordercontext.Equals(this.OrderContextCache[VariantContext]))
+                            {
+                                Model.IO.Item dbotherordercontext = otherordercontext.GetIOItem();
+                                dborder.AddRelationship(dbotherordercontext);
+                            }
+                        }
+
+                        Model.IO.SOAPRequest request = new Model.IO.SOAPRequest(Model.IO.SOAPOperation.ApplyItem, this.ItemType.Session, dborder);
+                        Model.IO.SOAPResponse response = request.Execute();
+
+                        if (!response.IsError)
+                        {
+                            if (response.Items.Count() == 1)
+                            {
+                                this.OrderContextCache[VariantContext].Value = response.Items.First().GetProperty("value");
+                                this.OrderContextCache[VariantContext].Quantity = Double.Parse(response.Items.First().GetProperty("quantity"));
+                            }
+                            else
+                            {
+                                this.OrderContextCache[VariantContext].Value = "0";
+                                this.OrderContextCache[VariantContext].Quantity = 0.0;
+                            }
+                        }
+                        else
+                        {
+                            throw new Model.Exceptions.ServerException(response);
+                        }
+                    }
+                    else
+                    {
+                        this.OrderContextCache[VariantContext].Value = "0";
+                        this.OrderContextCache[VariantContext].Quantity = 0.0;
+                    }
+
+
+                }
+
+                return this.OrderContextCache[VariantContext];
+            }
+            else
+            {
+                throw new Exceptions.ReadOnlyException();
             }
         }
 
@@ -133,6 +213,10 @@ namespace Aras.Model.Design
             foreach (OrderContext ordercontext in this.OrderContextCache.Values)
             {
                 ordercontext.Update(this.Transaction, true);
+
+                // Watch for changes
+                ordercontext.ValueList.PropertyChanged += ValueList_PropertyChanged;
+                ordercontext.Property("quantity").PropertyChanged += Quantity_PropertyChanged;
             }
 
             // Update Configured Part
@@ -170,7 +254,7 @@ namespace Aras.Model.Design
                 ret[Part] = Quantity;
             }
 
-            foreach (PartBOM partbom in Part.ConfiguredPartBOM(this, false))
+            foreach (PartBOM partbom in Part.ConfiguredPartBOM(this))
             {
                 if (partbom.Related != null)
                 {
@@ -207,79 +291,6 @@ namespace Aras.Model.Design
                     this.ConfiguredPart.Class = this.ConfiguredPart.ItemType.GetClassName("NoTemplate");
                     this.ConfiguredPart.Property("name").Value = this.Property("name").Value;
                     this.ConfiguredPart.Property("description").Value = this.Property("description").Value;
-
-                    // Add any missing Order Context
-                    foreach (VariantContext variantcontext in this.Part.VariantContext(this))
-                    {
-                        Boolean exists = false;
-
-                        foreach (OrderContext ordercontext in this.OrderContextCache.Values)
-                        {
-                            if (ordercontext.Related.Equals(variantcontext))
-                            {
-                                exists = true;
-                                break;
-                            }
-                        }
-
-                        if (!exists)
-                        {
-                            OrderContext ordercontext = (OrderContext)this.Store("v_Order Context").Create(variantcontext, this.Transaction);
-
-                            // Default Value to first value in List
-                            ordercontext.Value = ordercontext.ValueList.Values.Values.First().Value;
-
-                            // Default Quantity to 1.0
-                            ordercontext.Quantity = 1.0;
-
-                            this.AddOrderContext(ordercontext);
-                        }
-                    }
-
-                    // Evaluate any Method Variant Contexts
-                    foreach (OrderContext ordercontext in this.Store("v_Order Context"))
-                    {
-                        if (ordercontext.VariantContext.IsMethod && ordercontext.VariantContext.Method != null)
-                        {
-                            Model.IO.Item dborder = new Model.IO.Item(this.ItemType.Name, ordercontext.VariantContext.Method);
-                            dborder.ID = this.ID;
-
-                            // Add this Order Context
-                            Model.IO.Item dbordercontext = ordercontext.GetIOItem();
-                            dborder.AddRelationship(dbordercontext);
-
-                            // Add all other order Context
-                            foreach (OrderContext otherordercontext in this.Store("v_Order Context"))
-                            {
-                                if (!otherordercontext.Equals(ordercontext))
-                                {
-                                    Model.IO.Item dbotherordercontext = otherordercontext.GetIOItem();
-                                    dborder.AddRelationship(dbotherordercontext);
-                                }
-                            }
-
-                            Model.IO.SOAPRequest request = new Model.IO.SOAPRequest(Model.IO.SOAPOperation.ApplyItem, this.ItemType.Session, dborder);
-                            Model.IO.SOAPResponse response = request.Execute();
-
-                            if (!response.IsError)
-                            {
-                                if (response.Items.Count() == 1)
-                                {
-                                    ordercontext.Value = response.Items.First().GetProperty("value");
-                                    ordercontext.Quantity = Double.Parse(response.Items.First().GetProperty("quantity"));
-                                }
-                                else
-                                {
-                                    ordercontext.Value = "0";
-                                    ordercontext.Quantity = 0.0;
-                                }
-                            }
-                            else
-                            {
-                                throw new Model.Exceptions.ServerException(response);
-                            }
-                        }
-                    }
 
                     // Build Flat BOM
                     Dictionary<Part, Double> flatbom = this.AllConfiguredParts(this.Part, 1.0);

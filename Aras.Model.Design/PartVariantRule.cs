@@ -53,18 +53,14 @@ namespace Aras.Model.Design
         {
             OrderContext ret = null;
 
-            foreach (OrderContext ordercontext in Order.Store("v_Order Context"))
+            if (this.VariantContext != null)
             {
-                if (ordercontext.VariantContext.Equals(this.VariantContext))
+                // Get OrderContext for the Variant Context
+                OrderContext ordercontext = Order.OrderContext(this.VariantContext);
+
+                if (ordercontext.Value.Equals(this.Value))
                 {
-                    if (ordercontext.Value != null)
-                    {
-                        if (ordercontext.Value.Equals(this.Value))
-                        {
-                            ret = ordercontext;
-                            break;
-                        }
-                    }
+                    ret = ordercontext;
                 }
             }
 

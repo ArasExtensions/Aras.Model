@@ -54,12 +54,34 @@ namespace Aras.Model.Design
             }
         }
 
-        private Dictionary<Part, PartBOM> _configuredPartBOM;
+        private List<PartVariantRule> _partVariantRules;
+        public IEnumerable<PartVariantRule> PartVariantRules
+        {
+            get
+            {
+                if (this._partVariantRules == null)
+                {
+                    this._partVariantRules = new List<PartVariantRule>();
+
+                    Queries.Relationship pvrquery = (Queries.Relationship)this.Store("Part Variant Rule").Query();
+                    pvrquery.Refresh();
+
+                    foreach(PartVariantRule pvr in pvrquery)
+                    {
+                        this._partVariantRules.Add(pvr);
+                    }
+                }
+
+                return this._partVariantRules;
+            }
+        }
+
+        private Dictionary<Order, PartBOM> _configuredPartBOM;
         public PartBOM ConfiguredPartBOM(Order Order, Part Source)
         {
             OrderContext ordercontext = null;
 
-            foreach(PartVariantRule partvariantrule in this.Store("Part Variant Rule"))
+            foreach (PartVariantRule partvariantrule in this.PartVariantRules)
             {
                 ordercontext = partvariantrule.Selected(Order);
 
@@ -71,33 +93,40 @@ namespace Aras.Model.Design
 
             if (ordercontext != null)
             {
-                if (!this._configuredPartBOM.ContainsKey(Source))
+                if (!this._configuredPartBOM.ContainsKey(Order))
                 {
-                    this._configuredPartBOM[Source] = (PartBOM)Source.Store("Part BOM").Create(this.Related);
+                    this._configuredPartBOM[Order] = (PartBOM)Source.Store("Part BOM").Create(this.Related);
                 }
 
                 // Update Properties
-                this._configuredPartBOM[Source].Quantity = this.Quantity * ordercontext.Quantity;
+                this._configuredPartBOM[Order].Quantity = this.Quantity * ordercontext.Quantity;
 
-                return this._configuredPartBOM[Source];
+                return this._configuredPartBOM[Order];
             }
             else
             {
                 return null;
             }
-          
+        }
+
+        protected override void OnRefresh()
+        {
+            base.OnRefresh();
+        
+            // Reset PartVariantRules
+            this._partVariantRules = null;
         }
 
         public PartVariant(Model.RelationshipType RelationshipType, Model.Item Source, Model.Item Related)
             : base(RelationshipType, Source, Related)
         {
-            this._configuredPartBOM = new Dictionary<Part, PartBOM>();
+            this._configuredPartBOM = new Dictionary<Order, PartBOM>();
         }
 
         public PartVariant(Model.RelationshipType RelationshipType, Model.Item Source, IO.Item DBItem)
             : base(RelationshipType, Source, DBItem)
         {
-            this._configuredPartBOM = new Dictionary<Part, PartBOM>();
+            this._configuredPartBOM = new Dictionary<Order, PartBOM>();
         }
     }
 }

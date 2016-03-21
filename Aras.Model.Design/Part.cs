@@ -45,7 +45,7 @@ namespace Aras.Model.Design
             }
         }
 
-        public Boolean Variant
+        public Boolean IsVariant
         {
             get
             {
@@ -60,12 +60,56 @@ namespace Aras.Model.Design
             }
         }
 
+        private List<PartBOM> _partBOMS;
+        public IEnumerable<PartBOM> PartBOMS
+        {
+            get
+            {
+                if (this._partBOMS == null)
+                {
+                    this._partBOMS = new List<PartBOM>();
+
+                    Queries.Relationship pbquery = (Queries.Relationship)this.Store("Part BOM").Query();
+                    pbquery.Refresh();
+
+                    foreach (PartBOM pb in pbquery)
+                    {
+                        this._partBOMS.Add(pb);
+                    }
+                }
+
+                return this._partBOMS;
+            }
+        }
+
+        private List<PartVariant> _partVariants;
+        public IEnumerable<PartVariant> PartVariants
+        {
+            get
+            {
+                if (this._partVariants == null)
+                {
+                    this._partVariants = new List<PartVariant>();
+
+                    Queries.Relationship pvquery = (Queries.Relationship)this.Store("Part Variants").Query();
+                    pvquery.Refresh();
+
+                    foreach(PartVariant pv in pvquery)
+                    {
+                        this._partVariants.Add(pv);
+                    }
+                }
+
+                return this._partVariants;
+            }
+        }
+
         private IEnumerable<PartBOM> ConfiguredPartVariant(Order Order, Part Variant)
         {
             List<PartBOM> ret = new List<PartBOM>();
 
             // Add Configured Variants
-            foreach (PartVariant partvariant in Variant.Store("Part Variants"))
+            foreach (PartVariant partvariant in Variant.PartVariants)
             {
                 PartBOM configurepartbom = partvariant.ConfiguredPartBOM(Order, this);
 
@@ -73,7 +117,7 @@ namespace Aras.Model.Design
                 {
                     if (configurepartbom.Related != null)
                     {
-                        if (configurepartbom.Related.Class == configurepartbom.Related.ItemType.ClassStructure.Search("Variant"))
+                        if (((Part)configurepartbom.Related).IsVariant)
                         {
                             foreach (PartBOM childpartbom in this.ConfiguredPartVariant(Order, (Part)configurepartbom.Related))
                             {
@@ -91,77 +135,32 @@ namespace Aras.Model.Design
             return ret;
         }
 
-        public IEnumerable<PartBOM> ConfiguredPartBOM(Order Order, Boolean IncludeVariants)
+        public IEnumerable<PartBOM> ConfiguredPartBOM(Order Order)
         {
             List<PartBOM> ret = new List<PartBOM>();
 
             // Add PartBOM
-            foreach (PartBOM partbom in this.Store("Part BOM").Copy())
+            foreach (PartBOM partbom in this.PartBOMS)
             {
-                if (!partbom.Runtime)
+
+                Part related = (Part)partbom.Related;
+
+                if (related != null)
                 {
-                    Part related = (Part)partbom.Related;
-
-                    if (related != null)
+                    if (related.IsVariant)
                     {
-                        if (related.Class == related.ItemType.ClassStructure.Search("Variant"))
+                        // Add Configured Variants
+                        foreach (PartBOM configurepartbom in this.ConfiguredPartVariant(Order, related))
                         {
-                            // Add Configured Variants
-                            foreach (PartBOM configurepartbom in this.ConfiguredPartVariant(Order, related))
-                            {
-                                ret.Add(configurepartbom);
-                            }
-
-                            if (IncludeVariants)
-                            {
-                                ret.Add(partbom);
-                            }
-                        }
-                        else
-                        {
-                            ret.Add(partbom);
+                            ret.Add(configurepartbom);
                         }
                     }
-                }
-            }
-
-            return ret;
-        }
-
-        public IEnumerable<VariantContext> VariantContext(Order Order)
-        {
-            List<VariantContext> ret = new List<VariantContext>();
-
-            // Check Variants on this Part
-            if (this.Class == this.ItemType.ClassStructure.Search("Variant"))
-            {    
-                foreach (PartVariant partvariant in this.Store("Part Variants"))
-                {
-                    foreach (PartVariantRule partvariantrule in partvariant.Store("Part Variant Rule"))
+                    else
                     {
-                        VariantContext variantcontext = (VariantContext)partvariantrule.Related;
-
-                        if (!ret.Contains(variantcontext))
-                        {
-                            ret.Add(variantcontext);
-                        }
+                        ret.Add(partbom);
                     }
                 }
-            }
 
-            // Check Configured Part BOM
-            foreach(PartBOM partbom in this.ConfiguredPartBOM(Order, true))
-            {
-                if (partbom.Related != null)
-                {
-                    foreach (VariantContext variantcontext in ((Part)partbom.Related).VariantContext(Order))
-                    {
-                        if (!ret.Contains(variantcontext))
-                        {
-                            ret.Add(variantcontext);
-                        }
-                    }
-                }
             }
 
             return ret;
@@ -170,6 +169,12 @@ namespace Aras.Model.Design
         protected override void OnRefresh()
         {
             base.OnRefresh();
+
+            // Reset PartBOMS
+            this._partBOMS = null;
+
+            // Reset PartVariants
+            this._partVariants = null;
         }
 
         public Part(Model.ItemType ItemType)

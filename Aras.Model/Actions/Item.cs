@@ -78,13 +78,14 @@ namespace Aras.Model.Actions
                         this.Item.Session.Store(this.Item.ItemType).RemoveItemFromCache(this.Item);
 
                         break;
-                    case Model.Item.Actions.Deleted:
+                    
                     case Model.Item.Actions.Update:
 
                         // Unlock
                         this.Item.UnLock();
 
                         break;
+             
                     default:
                         break;
                 }

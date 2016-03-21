@@ -71,7 +71,7 @@ namespace Aras.Model.Actions
                         ((Model.Relationship)this.Item).Source.Store(((Model.Relationship)this.Item).RelationshipType).RemoveItemFromCache((Model.Relationship)this.Item);
 
                         break;
-                    case Model.Item.Actions.Deleted:
+         
                     case Model.Item.Actions.Update:
 
                         // Unlock

@@ -34,72 +34,19 @@ namespace Aras.Model.Design.Debug
 {
     class Program
     {
-        static void OutputOrder(Order Order)
-        {
-            Console.WriteLine(Order.ItemNumber);
-
-            Part configuredpart = Order.ConfiguredPart;
-
-            foreach (OrderContext ordercontext in Order.Store("v_Order Context"))
-            {
-                if (ordercontext.Action != Item.Actions.Deleted)
-                {
-                    Console.WriteLine(ordercontext.Property("value").Value + "\t" + ordercontext.ValueList.Value);
-                }
-            }
-
-            Console.WriteLine();
-
-            foreach(PartBOM partbom in configuredpart.Store("Part BOM"))
-            {
-                if (partbom.Action != Item.Actions.Deleted)
-                {
-                    Console.WriteLine(partbom.Related.Property("name").Value + "\t" + partbom.Quantity.ToString());
-                }
-            }
-
-            Console.WriteLine();
-        }
-
-        static String ItemNumber(int cnt)
-        {
-            return "DX-" + cnt.ToString().PadLeft(10, '0');
-        }
-
-        static int CreateBOM(Part Part, int cnt, int depth, Transaction Transaction)
-        {
-            int thiscnt = cnt;
-
-            if (depth < 3)
-            {
-                for(int i=0; i<5; i++)
-                {
-                    Part childpart = (Part)Part.Session.Store("Part").Create(Transaction);
-                    childpart.ItemNumber = ItemNumber(thiscnt);
-                    thiscnt++;
-
-                    Part.Store("Part BOM").Create(childpart, Transaction);
-
-                    thiscnt = CreateBOM(childpart, thiscnt, depth + 1, Transaction);
-                }
-            }
-
-            return thiscnt;
-        }
-
         static void Main(string[] args)
         {
             // Connect to Server
-            Server server = new Server("http://localhost/11SP1");
+            Server server = new Server("http://localhost/InnovatorServer10SP4");
             server.LoadAssembly("Aras.Model.Design");
-            Database database = server.Database("VariantsDemo11SP1");
+            Database database = server.Database("CMB");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
             
             // Ensure item_number selected for Parts
             session.ItemType("Part").AddToSelect("item_number");
 
             // Query Order
-            Queries.Item orderquery = (Queries.Item)session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "400_1111"));
+            Queries.Item orderquery = (Queries.Item)session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "DJA9th"));
             
 
             Order order = (Order)orderquery.First();
@@ -107,7 +54,16 @@ namespace Aras.Model.Design.Debug
             Transaction transaction = session.BeginTransaction();
             order.Update(transaction);
             OrderContext ordercontext = order.OrderContexts.First();
-            ordercontext.Quantity = 55;
+            DateTime start = DateTime.Now;
+            ordercontext.Quantity = 2;
+            DateTime end = DateTime.Now;
+            Console.WriteLine((end - start).Seconds.ToString());
+
+            //start = DateTime.Now;
+            //ordercontext.Quantity = 51;
+            //end = DateTime.Now;
+            //Console.WriteLine((end - start).Seconds.ToString());
+
             transaction.Commit();
             
 
