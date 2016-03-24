@@ -312,7 +312,7 @@ namespace Aras.Model.Design
                     }
 
                     // Remove any Part BOM no longer required in Configured Part
-                    foreach (PartBOM partbom in this.ConfiguredPart.Store("Part BOM"))
+                    foreach (PartBOM partbom in this.ConfiguredPart.Store("Part BOM").Copy())
                     {
                         if ((partbom.Related != null) && !flatbom.ContainsKey((Part)partbom.Related))
                         {
@@ -325,7 +325,7 @@ namespace Aras.Model.Design
                     {
                         Boolean found = false;
 
-                        foreach (PartBOM partbom in this.ConfiguredPart.Store("Part BOM"))
+                        foreach (PartBOM partbom in this.ConfiguredPart.Store("Part BOM").Copy())
                         {
                             if ((partbom.Related != null) && partbom.Related.Equals(flatpart))
                             {

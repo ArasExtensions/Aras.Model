@@ -86,6 +86,15 @@ namespace Aras.Model.Actions
             }
         }
 
+        internal override void UpdateStore()
+        {
+            if (this.Item.Action == Model.Item.Actions.Deleted)
+            {
+                // Remove from Parent Store
+                ((Model.Relationship)this.Item).Source.Store(((Model.Relationship)this.Item).RelationshipType).RemoveItemFromCache((Model.Relationship)this.Item);
+            }
+        }
+
         internal Relationship(Transaction Transaction, String Name, Model.Relationship Relationship)
             : base(Transaction, Name, Relationship)
         {

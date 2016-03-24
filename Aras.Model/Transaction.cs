@@ -93,9 +93,16 @@ namespace Aras.Model
         {
             if (!this.Completed && this.ActionsCache.Count > 0)
             {
+                // Process Actions
                 foreach (Action action in this.ActionsCache.Values)
                 {
                     action.Commit();
+                }
+
+                // Update Stores
+                foreach (Action action in this.ActionsCache.Values)
+                {
+                    action.UpdateStore();
                 }
             }
 

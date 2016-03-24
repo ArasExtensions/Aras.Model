@@ -94,6 +94,14 @@ namespace Aras.Model.Actions
             }
         }
 
+        internal override void UpdateStore()
+        {
+            if (this.Item.Action == Model.Item.Actions.Deleted)
+            {
+                this.Item.Session.Store(this.Item.ItemType).RemoveItemFromCache(this.Item);
+            }
+        }
+
         internal Item(Transaction Transaction, String Name, Model.Item Item)
             : base(Transaction, Name, Item)
         {

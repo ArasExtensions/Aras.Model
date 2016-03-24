@@ -51,21 +51,37 @@ namespace Aras.Model.Design.Debug
 
             Order order = (Order)orderquery.First();
 
-            Transaction transaction = session.BeginTransaction();
-            order.Update(transaction);
-            OrderContext ordercontext = order.OrderContexts.First();
-            DateTime start = DateTime.Now;
-            ordercontext.Quantity = 2;
-            DateTime end = DateTime.Now;
-            Console.WriteLine((end - start).Seconds.ToString());
+            using (Transaction transaction = session.BeginTransaction())
+            {
+                order.Update(transaction);
+                OrderContext ordercontext = order.OrderContexts.First();
+                ordercontext.Value = "0";
+                transaction.Commit();
+            }
 
-            //start = DateTime.Now;
-            //ordercontext.Quantity = 51;
-            //end = DateTime.Now;
-            //Console.WriteLine((end - start).Seconds.ToString());
+            using (Transaction transaction = session.BeginTransaction())
+            {
+                order.Update(transaction);
+                OrderContext ordercontext = order.OrderContexts.First();
+                ordercontext.Value = "1";
+                transaction.Commit();
+            }
 
-            transaction.Commit();
-            
+            using (Transaction transaction = session.BeginTransaction())
+            {
+                order.Update(transaction);
+                OrderContext ordercontext = order.OrderContexts.First();
+                ordercontext.Value = "0";
+                transaction.Commit();
+            }
+
+            using (Transaction transaction = session.BeginTransaction())
+            {
+                order.Update(transaction);
+                OrderContext ordercontext = order.OrderContexts.First();
+                ordercontext.Value = "1";
+                transaction.Commit();
+            }     
 
         }
     }

@@ -85,6 +85,8 @@ namespace Aras.Model
 
         internal abstract IO.Item Commit();
 
+        internal abstract void UpdateStore();
+
         protected IO.Item BuildItem()
         {
             // Create IO Item

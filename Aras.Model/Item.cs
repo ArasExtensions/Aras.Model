@@ -465,7 +465,6 @@ namespace Aras.Model
             if (!this.IsNew)
             {
                 Transaction.Add("delete", this);
-                this.Transaction = Transaction;
             }
 
             this.Action = Actions.Deleted;
