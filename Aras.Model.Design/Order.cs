@@ -327,7 +327,7 @@ namespace Aras.Model.Design
 
                         foreach (PartBOM partbom in this.ConfiguredPart.Store("Part BOM").Copy())
                         {
-                            if ((partbom.Related != null) && partbom.Related.Equals(flatpart))
+                            if ((partbom.Related != null) && partbom.Related.Equals(flatpart) && (partbom.Action != Actions.Deleted))
                             {
                                 found = true;
 
