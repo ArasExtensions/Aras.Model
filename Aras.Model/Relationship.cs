@@ -88,11 +88,14 @@ namespace Aras.Model
         {
             base.UpdateProperties(DBItem);
 
-            IO.Item dbrelated = DBItem.GetPropertyItem("related_id");
-
-            if (dbrelated != null)
+            if (DBItem != null)
             {
-                this._related = this.ItemType.Session.Get(this.RelationshipType.Related, dbrelated.ID);
+                IO.Item dbrelated = DBItem.GetPropertyItem("related_id");
+
+                if (dbrelated != null)
+                {
+                    this._related = this.ItemType.Session.Get(this.RelationshipType.Related, dbrelated.ID);
+                }
             }
         }
 

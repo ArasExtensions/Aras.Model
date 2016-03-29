@@ -588,18 +588,25 @@ namespace Aras.Model
 
         internal virtual void UpdateProperties(IO.Item DBItem)
         {
-            if (this.ID == DBItem.ID)
+            if (DBItem != null)
             {
-                foreach (String propname in DBItem.PropertyNames)
+                if (this.ID == DBItem.ID)
                 {
-                    this.Property(propname).DBValue = DBItem.GetProperty(propname);
-                }
+                    foreach (String propname in DBItem.PropertyNames)
+                    {
+                        this.Property(propname).DBValue = DBItem.GetProperty(propname);
+                    }
 
-                this.IsNew = false;
+                    this.IsNew = false;
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Invalid Item ID");
+                }
             }
             else
             {
-                throw new Exceptions.ArgumentException("Invalid Item ID");
+                this.IsNew = false;
             }
         }
 

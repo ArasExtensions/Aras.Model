@@ -43,46 +43,68 @@ namespace Aras.Model.Design.Debug
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
             
             // Ensure item_number selected for Parts
-            session.ItemType("Part").AddToSelect("item_number");
+            session.ItemType("Part").AddToSelect("item_number,keyed_name");
 
-            // Query Order
-            Queries.Item orderquery = (Queries.Item)session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "DJA9th"));
-            
+  
+            Queries.Item part1query = (Queries.Item)session.Store("Part").Query(Aras.Conditions.Eq("item_number", "DX0001"));
+            Part part1 = (Part)part1query.First();
+            Queries.Item part2query = (Queries.Item)session.Store("Part").Query(Aras.Conditions.Eq("item_number", "DX0002"));
+            Part part2 = (Part)part2query.First();
+            Queries.Item part3query = (Queries.Item)session.Store("Part").Query(Aras.Conditions.Eq("item_number", "DX0003"));
+            Part part3 = (Part)part3query.First();
 
-            Order order = (Order)orderquery.First();
-
-            using (Transaction transaction = session.BeginTransaction())
+            using(Transaction trans = session.BeginTransaction())
             {
-                order.Update(transaction);
-                OrderContext ordercontext = order.OrderContexts.First();
-                ordercontext.Value = "0";
-                transaction.Commit();
+                part1.Update(trans);
+
+                foreach(PartBOM partbom in part1.Store("Part BOM"))
+                {
+                    partbom.Delete(trans);
+                }
+
+                trans.Commit();
             }
 
-            using (Transaction transaction = session.BeginTransaction())
+            int test1 = part1.Store("Part BOM").Count();
+
+            using (Transaction trans = session.BeginTransaction())
             {
-                order.Update(transaction);
-                OrderContext ordercontext = order.OrderContexts.First();
-                ordercontext.Value = "1";
-                transaction.Commit();
+                part1.Update(trans);
+
+                PartBOM partbom = (PartBOM)part1.Store("Part BOM").Create(part2, trans);
+
+                trans.Commit();
             }
 
-            using (Transaction transaction = session.BeginTransaction())
+            int test2 = part1.Store("Part BOM").Count();
+
+            using (Transaction trans = session.BeginTransaction())
             {
-                order.Update(transaction);
-                OrderContext ordercontext = order.OrderContexts.First();
-                ordercontext.Value = "0";
-                transaction.Commit();
+                part1.Update(trans);
+
+                part1.Store("Part BOM").Create(part3, trans);
+
+                trans.Commit();
             }
 
-            using (Transaction transaction = session.BeginTransaction())
-            {
-                order.Update(transaction);
-                OrderContext ordercontext = order.OrderContexts.First();
-                ordercontext.Value = "1";
-                transaction.Commit();
-            }     
+            int test3 = part1.Store("Part BOM").Count();
 
+            using (Transaction trans = session.BeginTransaction())
+            {
+                part1.Update(trans);
+
+                foreach (PartBOM partbom in part1.Store("Part BOM"))
+                {
+                    if (partbom.Related.Equals(part2))
+                    {
+                        partbom.Delete(trans);
+                    }
+                }
+
+                trans.Commit();
+            }
+
+            int test4 = part1.Store("Part BOM").Count();
         }
     }
 }

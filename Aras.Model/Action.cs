@@ -143,13 +143,26 @@ namespace Aras.Model
             this.Item.UnLock();
             this.Item.Transaction = null;
 
-            foreach(IO.Item dbrelationship in DBItem.Relationships)
+            foreach (Actions.Relationship relaction in this.RelationshipsCache.Values)
             {
-                if (this.RelationshipsCache.ContainsKey(dbrelationship.ID))
+                Boolean found = false;
+
+                foreach (IO.Item dbrelationship in DBItem.Relationships)
                 {
-                    this.RelationshipsCache[dbrelationship.ID].Item.UpdateProperties(dbrelationship);
-                    this.RelationshipsCache[dbrelationship.ID].Item.UnLock();
-                    this.RelationshipsCache[dbrelationship.ID].Item.Transaction = null;
+                    if (dbrelationship.ID.Equals(relaction.Item.ID))
+                    {
+                        relaction.Item.UpdateProperties(dbrelationship);
+                        relaction.Item.UnLock();
+                        relaction.Item.Transaction = null;
+                        found = true;
+                    }
+                }
+
+                if (!found && !relaction.Name.Equals("delete"))
+                {
+                    relaction.Item.UpdateProperties(null);
+                    relaction.Item.UnLock();
+                    relaction.Item.Transaction = null;
                 }
             }
         }
