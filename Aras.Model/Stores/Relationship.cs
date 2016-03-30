@@ -59,32 +59,35 @@ namespace Aras.Model.Stores
 
         protected override void Load()
         {
-            // Load all Relaitonships into Cache
-            IO.Item item = new IO.Item(this.ItemType.Name, "get");
-            item.Select = this.Select;
-            item.SetProperty("source_id", this.Source.ID);
-            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, item);
-            IO.SOAPResponse response = request.Execute();
-
-            if (!response.IsError)
+            if (!this.Source.IsNew)
             {
-                foreach (IO.Item dbitem in response.Items)
+                // Load all Relaitonships into Cache
+                IO.Item item = new IO.Item(this.ItemType.Name, "get");
+                item.Select = this.Select;
+                item.SetProperty("source_id", this.Source.ID);
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, item);
+                IO.SOAPResponse response = request.Execute();
+
+                if (!response.IsError)
                 {
-                    if (!this.ItemInCache(dbitem.ID))
+                    foreach (IO.Item dbitem in response.Items)
                     {
-                        this.AddItemToCache((Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, dbitem }));
-                    }
-                    else
-                    {
-                        this.GetItemFromCache(dbitem.ID).UpdateProperties(dbitem);
+                        if (!this.ItemInCache(dbitem.ID))
+                        {
+                            this.AddItemToCache((Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, dbitem }));
+                        }
+                        else
+                        {
+                            this.GetItemFromCache(dbitem.ID).UpdateProperties(dbitem);
+                        }
                     }
                 }
-            }
-            else
-            {
-                if (!response.ErrorMessage.Equals("No items of type " + this.RelationshipType.Name + " found."))
+                else
                 {
-                    throw new Exceptions.ServerException(response);
+                    if (!response.ErrorMessage.Equals("No items of type " + this.RelationshipType.Name + " found."))
+                    {
+                        throw new Exceptions.ServerException(response);
+                    }
                 }
             }
         }
