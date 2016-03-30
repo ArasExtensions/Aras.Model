@@ -369,7 +369,7 @@ namespace Aras.Model.Design
             this.Session.ItemType("Variant Context").AddToSelect("context_type");
             this.Session.ItemType("Part").AddToSelect("item_number,locked_by_id");
             this.Session.ItemType("Part Variants").AddToSelect("quantity");
-            this.Session.ItemType("Part BOM").AddToSelect("quantity");
+            this.Session.ItemType("Part BOM").AddToSelect("quantity,locked_by_id");
         }
 
         public Order(Model.ItemType ItemType)
