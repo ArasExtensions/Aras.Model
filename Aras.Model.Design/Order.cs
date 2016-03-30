@@ -79,9 +79,6 @@ namespace Aras.Model.Design
                     this._orderContextCache = new Dictionary<VariantContext, OrderContext>();
 
                     // Load Order Contexts already in database
-                    this.Session.ItemType("v_Order Context").AddToSelect("quantity,value");
-                    this.Session.ItemType("Variant Context").AddToSelect("context_type");
-
                     foreach (OrderContext ordercontext in this.Store("v_Order Context").Query())
                     {
                         if (!this._orderContextCache.ContainsKey(ordercontext.VariantContext))
@@ -365,16 +362,28 @@ namespace Aras.Model.Design
             this.Process();
         }
 
+        private void PropertySelection()
+        {
+            // Ensure Required Properties are Selected
+            this.Session.ItemType("v_Order Context").AddToSelect("quantity,value,locked_by_id");
+            this.Session.ItemType("Variant Context").AddToSelect("context_type");
+            this.Session.ItemType("Part").AddToSelect("item_number,locked_by_id");
+            this.Session.ItemType("Part Variants").AddToSelect("quantity");
+            this.Session.ItemType("Part BOM").AddToSelect("quantity");
+        }
+
         public Order(Model.ItemType ItemType)
             : base(ItemType)
         {
             this.Processing = false;
+            this.PropertySelection();
         }
 
         public Order(Model.ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
             this.Processing = false;
+            this.PropertySelection();
         }
     }
 }
