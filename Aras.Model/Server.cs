@@ -65,6 +65,36 @@ namespace Aras.Model
             }
         }
 
+        private String _proxyURL;
+        public String ProxyURL
+        {
+            get
+            {
+                return this._proxyURL;
+            }
+            set
+            {
+                if (value != null)
+                {
+                    try
+                    {
+                        this._proxyURL = value;
+                        WebRequest.DefaultWebProxy = new WebProxy(this._proxyURL);
+                    }
+                    catch (Exception e)
+                    {
+                        WebRequest.DefaultWebProxy = null;
+                        throw new Exceptions.ArgumentException("Invalid Proxy: " + value, e);
+                    }
+                }
+                else
+                {
+                    this._proxyURL = null;
+                    WebRequest.DefaultWebProxy = null;
+                }
+            }
+        }
+
         private String _serverURL;
         public String ServerURL
         {
