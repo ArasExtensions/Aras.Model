@@ -79,6 +79,9 @@ namespace Aras.Model.Design
                     this._orderContextCache = new Dictionary<VariantContext, OrderContext>();
 
                     // Load Order Contexts already in database
+                    this.Session.ItemType("v_Order Context").AddToSelect("quantity,value");
+                    this.Session.ItemType("Variant Context").AddToSelect("context_type");
+
                     foreach (OrderContext ordercontext in this.Store("v_Order Context").Query())
                     {
                         if (!this._orderContextCache.ContainsKey(ordercontext.VariantContext))
