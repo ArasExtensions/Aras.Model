@@ -100,6 +100,58 @@ namespace Aras.Model.Design
             }
         }
 
+        private void RunMethodVariantContext(VariantContext VariantContext)
+        {
+            if (VariantContext.IsMethod)
+            {
+                if (VariantContext.Method != null)
+                {
+                    Model.IO.Item dborder = new Model.IO.Item(this.ItemType.Name, VariantContext.Method);
+                    dborder.ID = this.ID;
+
+                    // Add this Order Context
+                    Model.IO.Item dbordercontext = this.OrderContextCache[VariantContext].GetIOItem();
+                    dborder.AddRelationship(dbordercontext);
+
+                    // Add all other order Context
+                    foreach (OrderContext otherordercontext in this.OrderContexts)
+                    {
+                        if (!otherordercontext.Equals(this.OrderContextCache[VariantContext]))
+                        {
+                            Model.IO.Item dbotherordercontext = otherordercontext.GetIOItem();
+                            dborder.AddRelationship(dbotherordercontext);
+                        }
+                    }
+
+                    Model.IO.SOAPRequest request = new Model.IO.SOAPRequest(Model.IO.SOAPOperation.ApplyItem, this.ItemType.Session, dborder);
+                    Model.IO.SOAPResponse response = request.Execute();
+
+                    if (!response.IsError)
+                    {
+                        if (response.Items.Count() == 1)
+                        {
+                            this.OrderContextCache[VariantContext].Value = response.Items.First().GetProperty("value");
+                            this.OrderContextCache[VariantContext].Quantity = Double.Parse(response.Items.First().GetProperty("quantity"));
+                        }
+                        else
+                        {
+                            this.OrderContextCache[VariantContext].Value = "0";
+                            this.OrderContextCache[VariantContext].Quantity = 0.0;
+                        }
+                    }
+                    else
+                    {
+                        throw new Model.Exceptions.ServerException(response);
+                    }
+                }
+                else
+                {
+                    this.OrderContextCache[VariantContext].Value = "0";
+                    this.OrderContextCache[VariantContext].Quantity = 0.0;
+                }
+            }
+        }
+
         internal OrderContext OrderContext(VariantContext VariantContext)
         {
             if (this.Transaction != null)
@@ -113,6 +165,10 @@ namespace Aras.Model.Design
 
                     // Default Quantity to 1.0
                     this.OrderContextCache[VariantContext].Quantity = 1.0;
+
+                    // Remove Previous Watch
+                    this.OrderContextCache[VariantContext].ValueList.PropertyChanged -= ValueList_PropertyChanged;
+                    this.OrderContextCache[VariantContext].Property("quantity").PropertyChanged -= Quantity_PropertyChanged;
 
                     // Watch for changes
                     this.OrderContextCache[VariantContext].ValueList.PropertyChanged += ValueList_PropertyChanged;
@@ -128,57 +184,6 @@ namespace Aras.Model.Design
                         // Default Quantity to 1.0
                         this.OrderContextCache[VariantContext].Quantity = 1.0;
                     }
-                }
-
-                if (this.OrderContextCache[VariantContext].VariantContext.IsMethod)
-                {
-                    if (this.OrderContextCache[VariantContext].VariantContext.Method != null)
-                    {
-                        Model.IO.Item dborder = new Model.IO.Item(this.ItemType.Name, this.OrderContextCache[VariantContext].VariantContext.Method);
-                        dborder.ID = this.ID;
-
-                        // Add this Order Context
-                        Model.IO.Item dbordercontext = this.OrderContextCache[VariantContext].GetIOItem();
-                        dborder.AddRelationship(dbordercontext);
-
-                        // Add all other order Context
-                        foreach (OrderContext otherordercontext in this.OrderContexts)
-                        {
-                            if (!otherordercontext.Equals(this.OrderContextCache[VariantContext]))
-                            {
-                                Model.IO.Item dbotherordercontext = otherordercontext.GetIOItem();
-                                dborder.AddRelationship(dbotherordercontext);
-                            }
-                        }
-
-                        Model.IO.SOAPRequest request = new Model.IO.SOAPRequest(Model.IO.SOAPOperation.ApplyItem, this.ItemType.Session, dborder);
-                        Model.IO.SOAPResponse response = request.Execute();
-
-                        if (!response.IsError)
-                        {
-                            if (response.Items.Count() == 1)
-                            {
-                                this.OrderContextCache[VariantContext].Value = response.Items.First().GetProperty("value");
-                                this.OrderContextCache[VariantContext].Quantity = Double.Parse(response.Items.First().GetProperty("quantity"));
-                            }
-                            else
-                            {
-                                this.OrderContextCache[VariantContext].Value = "0";
-                                this.OrderContextCache[VariantContext].Quantity = 0.0;
-                            }
-                        }
-                        else
-                        {
-                            throw new Model.Exceptions.ServerException(response);
-                        }
-                    }
-                    else
-                    {
-                        this.OrderContextCache[VariantContext].Value = "0";
-                        this.OrderContextCache[VariantContext].Quantity = 0.0;
-                    }
-
-
                 }
 
                 return this.OrderContextCache[VariantContext];
@@ -213,6 +218,10 @@ namespace Aras.Model.Design
             foreach (OrderContext ordercontext in this.OrderContextCache.Values)
             {
                 ordercontext.Update(this.Transaction, true);
+
+                // Remove Previous Watch
+                ordercontext.ValueList.PropertyChanged -= ValueList_PropertyChanged;
+                ordercontext.Property("quantity").PropertyChanged -= Quantity_PropertyChanged;
 
                 // Watch for changes
                 ordercontext.ValueList.PropertyChanged += ValueList_PropertyChanged;
@@ -284,9 +293,14 @@ namespace Aras.Model.Design
             {
                 this.Processing = true;
 
-
                 if (this.Transaction != null)
                 {
+                    // Run Method Based VariantContext
+                    foreach (OrderContext ordercontext in this.OrderContextCache.Values)
+                    {
+                        this.RunMethodVariantContext(ordercontext.VariantContext);
+                    }
+
                     // Update Properties of Configured Part
                     this.ConfiguredPart.Class = this.ConfiguredPart.ItemType.GetClassName("NoTemplate");
                     this.ConfiguredPart.Property("name").Value = this.Property("name").Value;
