@@ -186,6 +186,9 @@ namespace Aras.Model.Design
                     }
                 }
 
+                // Run Method Variant Context
+                this.RunMethodVariantContext(VariantContext);
+
                 return this.OrderContextCache[VariantContext];
             }
             else
@@ -295,12 +298,6 @@ namespace Aras.Model.Design
 
                 if (this.Transaction != null)
                 {
-                    // Run Method Based VariantContext
-                    foreach (OrderContext ordercontext in this.OrderContextCache.Values)
-                    {
-                        this.RunMethodVariantContext(ordercontext.VariantContext);
-                    }
-
                     // Update Properties of Configured Part
                     this.ConfiguredPart.Class = this.ConfiguredPart.ItemType.GetClassName("NoTemplate");
                     this.ConfiguredPart.Property("name").Value = this.Property("name").Value;
