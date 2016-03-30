@@ -42,9 +42,26 @@ namespace Aras.Model.Properties
             }
             set
             {
-                if ((value == null) || (value is Aras.Model.ListValue))
+                if (value == null)
                 {
-                    base.Value = value;
+                    if (base.Value != null)
+                    {
+                        base.Value = value;
+                    }
+                }
+                else if (value is Aras.Model.ListValue)
+                {
+                    if (base.Value == null)
+                    {
+                        base.Value = value;
+                    }
+                    else
+                    {
+                        if (!((Aras.Model.ListValue)base.Value).Equals((Aras.Model.ListValue)value))
+                        {
+                            base.Value = value;
+                        }
+                    }
                 }
                 else
                 {

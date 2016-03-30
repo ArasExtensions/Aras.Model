@@ -40,9 +40,26 @@ namespace Aras.Model.Properties
             }
             set
             {
-                if ((value == null) || (value is System.Int32))
+                if (value == null)
                 {
-                    base.Value = value;
+                    if (base.Value != null)
+                    {
+                        base.Value = value;
+                    }
+                }
+                else if (value is System.Int32)
+                {
+                    if (base.Value == null)
+                    {
+                        base.Value = value;
+                    }
+                    else
+                    {
+                        if (!((System.Int32)base.Value).Equals((System.Int32)value))
+                        {
+                            base.Value = value;
+                        }
+                    }
                 }
                 else
                 {

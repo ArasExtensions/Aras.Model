@@ -158,40 +158,16 @@ namespace Aras.Model
             }
             set
             {
-
-                if (this._value == null)
+                if (!this.ReadOnly)
                 {
-                    if (value != null)
-                    {
-                        if (!this.ReadOnly)
-                        {
-                            this._value = value;
-                            this.Modified = true;
-                            this.Loaded = true;
-                            this.OnPropertyChanged("Value");
-                        }
-                        else
-                        {
-                            throw new Exceptions.ReadOnlyException();
-                        }
-                    }
+                    this._value = value;
+                    this.Modified = true;
+                    this.Loaded = true;
+                    this.OnPropertyChanged("Value");
                 }
                 else
                 {
-                    if (!this._value.Equals(value))
-                    {
-                        if (!this.ReadOnly)
-                        {
-                            this._value = value;
-                            this.Modified = true;
-                            this.Loaded = true;
-                            this.OnPropertyChanged("Value");
-                        }
-                        else
-                        {
-                            throw new Exceptions.ReadOnlyException();
-                        }
-                    }
+                    throw new Exceptions.ReadOnlyException();
                 }
             }
         }

@@ -40,9 +40,19 @@ namespace Aras.Model.Properties
             }
             set
             {
-                if ((value == null) || (value is System.String))
+                if (value == null)
                 {
-                    base.Value = value;
+                    if (base.Value != null)
+                    {
+                        base.Value = value;
+                    }
+                }
+                else if (value is System.String)
+                {
+                    if (!((System.String)value).Equals(base.Value))
+                    {
+                        base.Value = value;
+                    }
                 }
                 else
                 {

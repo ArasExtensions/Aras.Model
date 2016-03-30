@@ -40,9 +40,26 @@ namespace Aras.Model.Properties
             }
             set
             {
-                if ((value == null) || (value is System.DateTime))
+                if (value == null)
                 {
-                    base.Value = value;
+                    if (base.Value != null)
+                    {
+                        base.Value = value;
+                    }
+                }
+                else if (value is System.DateTime)
+                {
+                    if (base.Value == null)
+                    {
+                        base.Value = value;
+                    }
+                    else
+                    {
+                        if (!((System.DateTime)base.Value).Equals((System.DateTime)value))
+                        {
+                            base.Value = value;
+                        }
+                    }
                 }
                 else
                 {

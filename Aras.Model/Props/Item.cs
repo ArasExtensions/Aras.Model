@@ -40,9 +40,26 @@ namespace Aras.Model.Properties
             }
             set
             {
-                if ((value == null) || (value is Aras.Model.Item))
+                if (value == null)
                 {
-                    base.Value = value;
+                    if (base.Value != null)
+                    {
+                        base.Value = value;
+                    }
+                }
+                else if (value is Aras.Model.Item)
+                {
+                    if (base.Value == null)
+                    {
+                        base.Value = value;
+                    }
+                    else
+                    {
+                        if (!((Aras.Model.Item)base.Value).Equals((Aras.Model.Item)value))
+                        {
+                            base.Value = value;
+                        }
+                    }
                 }
                 else
                 {

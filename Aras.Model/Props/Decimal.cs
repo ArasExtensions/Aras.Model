@@ -40,9 +40,26 @@ namespace Aras.Model.Properties
             }
             set
             {
-                if ((value == null) || (value is System.Decimal))
+                if (value == null)
                 {
-                    base.Value = value;
+                    if (base.Value != null)
+                    {
+                        base.Value = value;
+                    }
+                }
+                else if (value is System.Decimal)
+                {
+                    if (base.Value == null)
+                    {
+                        base.Value = value;
+                    }
+                    else
+                    {
+                        if (!((System.Decimal)base.Value).Equals((System.Decimal)value))
+                        {
+                            base.Value = value;
+                        }
+                    }
                 }
                 else
                 {

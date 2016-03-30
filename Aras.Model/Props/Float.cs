@@ -32,6 +32,8 @@ namespace Aras.Model.Properties
 {
     public class Float : Property
     {
+        const System.Double comparepercentage = 0.00001;
+
         public override Object Value
         {
             get
@@ -40,9 +42,31 @@ namespace Aras.Model.Properties
             }
             set
             {
-                if ((value == null) || (value is System.Double))
+                if (value == null)
                 {
-                    base.Value = value;
+                    if (base.Value != null)
+                    {
+                        base.Value = value;
+                    }
+                }
+                else if (value is System.Double)
+                {
+                    if (base.Value == null)
+                    {
+                        base.Value = value;
+                    }
+                    else
+                    {
+                        System.Double currentvalue = (System.Double)base.Value;
+                        System.Double newvalue = (System.Double)value;
+                        System.Double diff = Math.Abs(currentvalue - newvalue);
+                        System.Double compare = Math.Abs(currentvalue * comparepercentage);
+
+                        if (diff > compare)
+                        {
+                            base.Value = value;
+                        }
+                    }
                 }
                 else
                 {
