@@ -300,6 +300,8 @@ namespace Aras.Model
             return this.Store(this.ItemType(Name));
         }
 
+        private Dictionary<String, Item> SourceCache;
+
         internal Item Get(ItemType ItemType, String ID)
         {
             if (String.IsNullOrEmpty(ID))
@@ -310,23 +312,26 @@ namespace Aras.Model
             {
                 if (ItemType is RelationshipType)
                 {
-                    IO.Item dbitem = new IO.Item(ItemType.Name, "get");
-                    dbitem.ID = ID;
-                    dbitem.Select = "source_id";
-                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, dbitem);
-                    IO.SOAPResponse response = request.Execute();
-
-                    if (!response.IsError)
+                    if (!this.SourceCache.ContainsKey(ID))
                     {
-                        Item source = this.Get(((RelationshipType)ItemType).Source, response.Items.First().GetProperty("source_id"));
+                        IO.Item dbitem = new IO.Item(ItemType.Name, "get");
+                        dbitem.ID = ID;
+                        dbitem.Select = "source_id";
+                        IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, dbitem);
+                        IO.SOAPResponse response = request.Execute();
 
-                        // Return Item from Source Store
-                        return source.Store((RelationshipType)ItemType).Get(ID);
+                        if (!response.IsError)
+                        {
+                            this.SourceCache[ID] = this.Get(((RelationshipType)ItemType).Source, response.Items.First().GetProperty("source_id"));
+                        }
+                        else
+                        {
+                            throw new Exceptions.ServerException(response);
+                        }
                     }
-                    else
-                    {
-                        throw new Exceptions.ServerException(response);
-                    }
+
+                    // Return Item from Source Store
+                    return this.SourceCache[ID].Store((RelationshipType)ItemType).Get(ID);
                 }
                 else
                 {
@@ -346,6 +351,7 @@ namespace Aras.Model
             this.ItemTypeNameCache = new Dictionary<String, ItemType>();
             this.ItemTypeIDCache = new Dictionary<String, ItemType>();
             this.StoreCache = new Dictionary<ItemType, Stores.Item>();
+            this.SourceCache = new Dictionary<String, Item>();
 
             // Default Selections
             this.ItemType("Value").AddToSelect("value,label");
