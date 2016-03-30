@@ -485,10 +485,7 @@ namespace Aras.Model
             }
             else
             {
-                this.Property("locked_by_id").Refresh();
-                Item lockedby = (Item)this.Property("locked_by_id").Value;
-
-                if (lockedby == null)
+                if (this.LockedBy == null)
                 {
                     IO.Item lockitem = new IO.Item(this.ItemType.Name, "lock");
                     lockitem.ID = this.ID;
@@ -506,11 +503,11 @@ namespace Aras.Model
                         throw new Exceptions.ServerException(response);
                     }
                 }
-                else if (lockedby.ID.Equals(this.ItemType.Session.UserID))
+                else if (this.LockedBy.ID.Equals(this.ItemType.Session.UserID))
                 {
                     return true;
                 }
-                else if (!lockedby.ID.Equals(this.ItemType.Session.UserID) && UnLock)
+                else if (!this.LockedBy.ID.Equals(this.ItemType.Session.UserID) && UnLock)
                 {
                     // Force Unlock
                     IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
@@ -550,9 +547,7 @@ namespace Aras.Model
 
         internal Boolean UnLock()
         {
-            Item lockedby = (Item)this.Property("locked_by_id").Value;
-
-            if (lockedby == null)
+            if (this.LockedBy == null)
             {
                 this.Transaction = null;
                 this.Action = Actions.Read;
@@ -560,7 +555,7 @@ namespace Aras.Model
             }
             else
             {
-                if (lockedby.ID.Equals(this.ItemType.Session.UserID))
+                if (this.LockedBy.ID.Equals(this.ItemType.Session.UserID))
                 {
                     IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
                     unlockitem.ID = this.ID;
@@ -572,6 +567,8 @@ namespace Aras.Model
                         this.UpdateProperties(response.Items.First());
                         this.Action = Actions.Read;
                         this.Transaction = null;
+                        this.Property("locked_by_id").DBValue = null;
+                        
                         return true;
                     }
                     else
