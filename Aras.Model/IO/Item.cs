@@ -190,15 +190,18 @@ namespace Aras.Model.IO
             }
             set
             {
-                XmlAttribute where = this.Node.Attributes["where"];
-
-                if (where == null)
+                if (value != null)
                 {
-                    where = this.Doc.CreateAttribute("where");
-                    this.Node.Attributes.Append(where);
-                }
+                    XmlAttribute where = this.Node.Attributes["where"];
 
-                where.Value = value;
+                    if (where == null)
+                    {
+                        where = this.Doc.CreateAttribute("where");
+                        this.Node.Attributes.Append(where);
+                    }
+
+                    where.Value = value;
+                }
             }
         }
 
