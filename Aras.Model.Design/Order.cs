@@ -165,14 +165,6 @@ namespace Aras.Model.Design
 
                     // Default Quantity to 1.0
                     this.OrderContextCache[VariantContext].Quantity = 1.0;
-
-                    // Remove Previous Watch
-                    this.OrderContextCache[VariantContext].ValueList.PropertyChanged -= ValueList_PropertyChanged;
-                    this.OrderContextCache[VariantContext].Property("quantity").PropertyChanged -= Quantity_PropertyChanged;
-
-                    // Watch for changes
-                    this.OrderContextCache[VariantContext].ValueList.PropertyChanged += ValueList_PropertyChanged;
-                    this.OrderContextCache[VariantContext].Property("quantity").PropertyChanged += Quantity_PropertyChanged;
                 }
                 else
                 {
@@ -197,22 +189,6 @@ namespace Aras.Model.Design
             }
         }
 
-        void Quantity_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "Value")
-            {
-                this.Process();
-            }
-        }
-
-        void ValueList_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "Value")
-            {
-                this.Process();
-            }
-        }
-
         protected override void OnUpdate()
         {
             base.OnUpdate();
@@ -221,14 +197,6 @@ namespace Aras.Model.Design
             foreach (OrderContext ordercontext in this.OrderContextCache.Values)
             {
                 ordercontext.Update(this.Transaction, true);
-
-                // Remove Previous Watch
-                ordercontext.ValueList.PropertyChanged -= ValueList_PropertyChanged;
-                ordercontext.Property("quantity").PropertyChanged -= Quantity_PropertyChanged;
-
-                // Watch for changes
-                ordercontext.ValueList.PropertyChanged += ValueList_PropertyChanged;
-                ordercontext.Property("quantity").PropertyChanged += Quantity_PropertyChanged;
             }
 
             // Update Configured Part
@@ -289,12 +257,12 @@ namespace Aras.Model.Design
             return ret;
         }
 
-        private Boolean Processing = false;
-        private void Process()
+        private Boolean UpdatingBOM = false;
+        public void UpdateBOM()
         {
-            if (!this.Processing)
+            if (!this.UpdatingBOM)
             {
-                this.Processing = true;
+                this.UpdatingBOM = true;
 
                 if (this.Transaction != null)
                 {
@@ -321,6 +289,9 @@ namespace Aras.Model.Design
                     {
                         flatbom.Remove(part);
                     }
+
+                    // Refresh PartBOM
+                    this.ConfiguredPart.Store("Part BOM").Refresh();
 
                     // Remove any Part BOM no longer required in Configured Part
                     foreach (PartBOM partbom in this.ConfiguredPart.Store("Part BOM").Copy())
@@ -362,7 +333,7 @@ namespace Aras.Model.Design
 
                 this.OnPropertyChanged("ConfiguredPart");
 
-                this.Processing = false;
+                this.UpdatingBOM = false;
             }
 
         }
@@ -370,7 +341,6 @@ namespace Aras.Model.Design
         protected override void OnRefresh()
         {
             base.OnRefresh();
-            this.Process();
         }
 
         private void PropertySelection()
@@ -386,14 +356,14 @@ namespace Aras.Model.Design
         public Order(Model.ItemType ItemType)
             : base(ItemType)
         {
-            this.Processing = false;
+            this.UpdatingBOM = false;
             this.PropertySelection();
         }
 
         public Order(Model.ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
-            this.Processing = false;
+            this.UpdatingBOM = false;
             this.PropertySelection();
         }
     }
