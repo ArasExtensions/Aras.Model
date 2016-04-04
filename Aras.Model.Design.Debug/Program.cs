@@ -37,38 +37,20 @@ namespace Aras.Model.Design.Debug
         static void Main(string[] args)
         {
             // Connect to Server
-            Server server = new Server("http://WIN-HBC9KO4SQ6E/11SP1");
-            server.ProxyURL = "http://127.0.0.1:8888";
+            Server server = new Server("http://localhost/InnovatorServer10SP4");
             server.LoadAssembly("Aras.Model.Design");
-            Database database = server.Database("VariantsDemo11SP1");
-            Session session = database.Login("admin", Server.PasswordHash("innovator"));
+            Database database = server.Database("CMB");
+            Session session = database.Login("cavem", Server.PasswordHash("innovator"));
   
-            Queries.Item query = (Queries.Item)session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "400_1111"));
+            Queries.Item query = (Queries.Item)session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJM-Test50"));
             Order order = (Order)query.First();
             OrderContext ordercontext = order.OrderContexts.First();
-            
-            using (Transaction trans = session.BeginTransaction())
-            {
-                order.Update(trans);
-                ordercontext.Value = "0";
-
-                trans.Commit();
-            }
 
             using (Transaction trans = session.BeginTransaction())
             {
                 order.Update(trans);
                 ordercontext.Value = "1";
-                ordercontext.Quantity = 5;
-
-                trans.Commit();
-            }
-
-            using (Transaction trans = session.BeginTransaction())
-            {
-                order.Update(trans);
-                ordercontext.Quantity = 6;
-                ordercontext.Quantity = 7;
+                order.UpdateBOM();
 
                 trans.Commit();
             }

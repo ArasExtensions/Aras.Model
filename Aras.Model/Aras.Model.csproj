@@ -50,6 +50,7 @@
     <Compile Include="Conditions\And.cs" />
     <Compile Include="Conditions\Property.cs" />
     <Compile Include="Database.cs" />
+    <Compile Include="Exceptions\UnLockException.cs" />
     <Compile Include="Exceptions\ReadOnlyException.cs" />
     <Compile Include="Exceptions\ArgumentException.cs" />
     <Compile Include="Exceptions\ServerException.cs" />
