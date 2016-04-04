@@ -298,7 +298,7 @@ namespace Aras.Model.Design
                     {
                         if ((partbom.Related != null) && !flatbom.ContainsKey((Part)partbom.Related))
                         {
-                            partbom.Delete(this.Transaction);
+                            partbom.Delete(this.Transaction, true);
                         }
                     }
 
@@ -314,7 +314,7 @@ namespace Aras.Model.Design
                                 found = true;
 
                                 //Update
-                                partbom.Update(this.Transaction);
+                                partbom.Update(this.Transaction, true);
                             
                                 // Update Quantity
                                 partbom.Quantity = flatbom[flatpart];
@@ -341,6 +341,9 @@ namespace Aras.Model.Design
         protected override void OnRefresh()
         {
             base.OnRefresh();
+
+            // Clear Order Context Cache
+            this._orderContextCache = null;
         }
 
         private void PropertySelection()
