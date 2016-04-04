@@ -540,7 +540,14 @@ namespace Aras.Model
                     }
                     else
                     {
-                        throw new Exceptions.ServerException(response);
+                        if (response.ErrorMessage.Equals("Aras.Server.Core.ItemIsLockedBySomeoneElseException"))
+                        {
+                            throw new Exceptions.UnLockException(this);
+                        }
+                        else
+                        {
+                            throw new Exceptions.ServerException(response);
+                        }
                     }
                 }
                 else
