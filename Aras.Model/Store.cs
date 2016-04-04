@@ -56,6 +56,18 @@ namespace Aras.Model
 
         private Dictionary<String, T> Cache;
 
+        protected List<String> CacheIDS()
+        {
+            List<String> ret = new List<String>();
+
+            foreach (String id in this.Cache.Keys)
+            {
+                ret.Add(id);
+            }
+
+            return ret;
+        }
+
         internal Boolean ItemInCache(String ID)
         {
             return this.Cache.ContainsKey(ID);
@@ -75,6 +87,15 @@ namespace Aras.Model
             if (this.ItemInCache(Item.ID))
             {
                 this.Cache.Remove(Item.ID);
+                this.OnStoreChanged();
+            }
+        }
+
+        internal void RemoveItemFromCache(String ID)
+        {
+            if (this.ItemInCache(ID))
+            {
+                this.Cache.Remove(ID);
                 this.OnStoreChanged();
             }
         }

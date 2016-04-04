@@ -123,6 +123,8 @@ namespace Aras.Model.Stores
             IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, item);
             IO.SOAPResponse response = request.Execute();
 
+            List<String> ids = new List<String>();
+
             if (!response.IsError)
             {
                 foreach (IO.Item dbitem in response.Items)
@@ -131,6 +133,12 @@ namespace Aras.Model.Stores
                     {
                         this.AddItemToCache((Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, dbitem }));
                     }
+                    else
+                    {
+                        this.GetItemFromCache(dbitem.ID).UpdateProperties(dbitem);
+                    }
+
+                    ids.Add(dbitem.ID);
                 }
             }
             else
@@ -138,6 +146,16 @@ namespace Aras.Model.Stores
                 if (!response.ErrorMessage.Equals("No items of type " + this.ItemType.Name + " found."))
                 {
                     throw new Exceptions.ServerException(response);
+                }
+            }
+
+
+            // Remove any Relationships that are no longer in the database
+            foreach (String id in this.CacheIDS())
+            {
+                if (!ids.Contains(id))
+                {
+                    this.RemoveItemFromCache(id);
                 }
             }
         }
