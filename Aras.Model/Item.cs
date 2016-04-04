@@ -460,10 +460,15 @@ namespace Aras.Model
             }
         }
 
-        public void Delete(Transaction Transaction)
+        public void Delete(Transaction Transaction, Boolean UnLock = false)
         {
             if (!this.IsNew)
             {
+                if (UnLock)
+                {
+                    this.UnLock();
+                }
+
                 Transaction.Add("delete", this);
             }
 
