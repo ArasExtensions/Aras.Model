@@ -354,6 +354,7 @@ namespace Aras.Model.Design
             this.Session.ItemType("Part").AddToSelect("item_number,locked_by_id");
             this.Session.ItemType("Part Variants").AddToSelect("quantity");
             this.Session.ItemType("Part BOM").AddToSelect("quantity,locked_by_id");
+            this.Session.ItemType("User").AddToSelect("keyed_name");
         }
 
         public Order(Model.ItemType ItemType)
