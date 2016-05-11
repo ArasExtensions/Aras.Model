@@ -69,7 +69,7 @@ namespace Aras.Model
             }
         }
 
-        public Item Source { get; private set; }
+        public Item Source { get; internal set; }
 
         private Item _related;
         public Item Related
@@ -80,8 +80,36 @@ namespace Aras.Model
             }
             set
             {
-                this._related = value;
+                if (value != null)
+                {
+                    this._related = value;
+
+                    // Watch for Related Item Versioning
+                    this._related.Superceded += Related_Superceded;
+                }
+                else
+                {
+                    if (this._related != null)
+                    {
+                        // Stop watching current Related Item
+                        this._related.Superceded -= Related_Superceded;
+                    }
+
+                    this._related = null;
+                }
             }
+        }
+
+        void Related_Superceded(object sender, SupercededEventArgs e)
+        {
+            // Stop watching current Related Item
+            this._related.Superceded -= Related_Superceded;
+
+            // Set new Related Item
+            this._related = e.NewGeneration;
+
+            // Watch for Related Item Superceded
+            this._related.Superceded += Related_Superceded;
         }
 
         internal override void UpdateProperties(IO.Item DBItem)
@@ -95,6 +123,9 @@ namespace Aras.Model
                 if (dbrelated != null)
                 {
                     this._related = this.ItemType.Session.Get(this.RelationshipType.Related, dbrelated.ID);
+
+                    // Watch for Related Item Versioning
+                    this._related.Superceded += Related_Superceded;
                 }
             }
         }

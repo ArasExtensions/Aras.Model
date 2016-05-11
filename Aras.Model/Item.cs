@@ -31,6 +31,29 @@ using System.ComponentModel;
 
 namespace Aras.Model
 {
+    public class SupercededEventArgs : EventArgs
+    {
+        public Item NewGeneration { get; private set; }
+
+        public SupercededEventArgs(Item NewGeneration)
+            : base()
+        {
+            this.NewGeneration = NewGeneration;
+        }
+    }
+
+    public delegate void SupercededEventHandler(object sender, SupercededEventArgs e);
+
+    public class DeletedEventArgs : EventArgs
+    {
+        public DeletedEventArgs()
+            : base()
+        {
+        }
+    }
+
+    public delegate void DeletedEventHandler(object sender, DeletedEventArgs e);
+
     public class Item : INotifyPropertyChanged, IEquatable<Item>
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -43,6 +66,28 @@ namespace Aras.Model
             }
         }
 
+        public event SupercededEventHandler Superceded;
+
+        internal void OnSuperceded(Item NewGeneration)
+        {
+            if (this.Superceded != null)
+            {
+                Superceded(this, new SupercededEventArgs(NewGeneration));
+            }
+        }
+
+        public event DeletedEventHandler Deleted;
+
+        internal void OnDeleted()
+        {
+            this.DatabaseState = DatabaseStates.Deleted;
+
+            if (this.Deleted != null)
+            {
+                Deleted(this, new DeletedEventArgs());
+            }
+        }
+
         public Session Session
         {
             get
@@ -51,7 +96,7 @@ namespace Aras.Model
             }
         }
 
-        public enum Actions { Create, Read, Update, Deleted };
+        public enum Actions { Create, Read, Update, Delete };
 
         private Actions _action;
         public Actions Action 
@@ -70,41 +115,28 @@ namespace Aras.Model
             }
         }
 
-        private Boolean _isNew;
-        public Boolean IsNew
+        public enum DatabaseStates { New, Stored, Deleted, Runtime };
+
+        private DatabaseStates _databaseState;
+        public DatabaseStates DatabaseState
         {
             get
             {
-                return this._isNew;
+                return this._databaseState;
             }
             private set
             {
-                if (this._isNew != value)
+                if (this._databaseState != value)
                 {
-                    this._isNew = value;
-                    this.OnPropertyChanged("IsNew");
-                }
-            }
-        }
-
-        public Boolean Runtime
-        {
-            get
-            {
-                if ((this.Action == Actions.Create) && (this.Transaction == null))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
+                    this._databaseState = value;
+                    this.OnPropertyChanged("DatabaseState");
                 }
             }
         }
 
         public Boolean Locked(Boolean Refresh)
         {
-            if (this.Runtime || this.Action == Actions.Create)
+            if ((this.DatabaseState == DatabaseStates.Runtime) || (this.Action == Actions.Create))
             {
                 return true;
             }
@@ -443,15 +475,15 @@ namespace Aras.Model
         {
             if (this.Lock(UnLock))
             {
-                if (this.IsNew)
-                {
-                    this.Action = Actions.Create;
-                }
-                else
+                if (this.DatabaseState == DatabaseStates.Stored)
                 {
                     Transaction.Add("update", this);
                     this.Action = Actions.Update;
                     this.OnUpdate();
+                }
+                else
+                {
+                    this.Action = Actions.Create;
                 }
             }
             else
@@ -462,7 +494,7 @@ namespace Aras.Model
 
         public void Delete(Transaction Transaction, Boolean UnLock = false)
         {
-            if (!this.IsNew)
+            if (this.DatabaseState == DatabaseStates.Stored)
             {
                 if (UnLock)
                 {
@@ -471,8 +503,12 @@ namespace Aras.Model
 
                 Transaction.Add("delete", this);
             }
+            else
+            {
+                Transaction.Remove(this);
+            }
 
-            this.Action = Actions.Deleted;
+            this.Action = Actions.Delete;
         }
 
         protected virtual void OnUpdate()
@@ -480,15 +516,38 @@ namespace Aras.Model
            
         }
 
-        public Transaction Transaction { get; internal set; }
+        private Transaction _transaction;
+        public Transaction Transaction 
+        { 
+            get
+            {
+                return this._transaction;
+            }
+            internal set
+            {
+                this._transaction = value;
+
+                if (this.Action == Actions.Create)
+                {
+                    if (this._transaction != null)
+                    {
+                        this.DatabaseState = DatabaseStates.New;
+                    }
+                    else
+                    {
+                        this.DatabaseState = DatabaseStates.Runtime;
+                    }
+                }
+            }
+        }
 
         private Boolean Lock(Boolean UnLock)
         {
-            if (this.IsNew)
+            if (this.DatabaseState == DatabaseStates.New)
             {
                 return true;
             }
-            else
+            else if (this.DatabaseState == DatabaseStates.Stored)
             {
                 if (this.LockedBy == null)
                 {
@@ -555,6 +614,10 @@ namespace Aras.Model
                     return false;
                 }
             }
+            else
+            {
+                throw new Exceptions.ArgumentException("Item is Deleted");
+            }
         }
 
         internal Boolean UnLock()
@@ -606,7 +669,7 @@ namespace Aras.Model
                         this.Property(propname).DBValue = DBItem.GetProperty(propname);
                     }
 
-                    this.IsNew = false;
+                    this.DatabaseState = DatabaseStates.Stored;
                 }
                 else
                 {
@@ -615,68 +678,48 @@ namespace Aras.Model
             }
             else
             {
-                this.IsNew = false;
+                this.DatabaseState = DatabaseStates.Stored;
             }
         }
 
-        private Dictionary<RelationshipType, Stores.Relationship> StoreCache;
+        private Dictionary<RelationshipType, Caches.Relationship> Caches;
+
+        public Caches.Relationship Cache(RelationshipType RelationshipType)
+        {
+            if (!this.Caches.ContainsKey(RelationshipType))
+            {
+                this.Caches[RelationshipType] = new Caches.Relationship(RelationshipType, this);
+            }
+
+            return this.Caches[RelationshipType];
+        }
+
+        public Caches.Relationship Cache(String RelationshipType)
+        {
+            return this.Cache(this.ItemType.RelationshipType(RelationshipType));
+        }
 
         public Stores.Relationship Store(RelationshipType RelationshipType)
         {
-            if (!this.StoreCache.ContainsKey(RelationshipType))
-            {
-                this.StoreCache[RelationshipType] = new Stores.Relationship(RelationshipType, this);
-            }
-
-            return this.StoreCache[RelationshipType];
+            return (Stores.Relationship)this.Cache(RelationshipType).Store();
         }
 
-        public Stores.Relationship Store(String RelationshipType)
+        public Stores.Relationship Store(RelationshipType RelationshipType, Condition Condition)
         {
-            return this.Store(this.ItemType.RelationshipType(RelationshipType));
+            return (Stores.Relationship)this.Cache(RelationshipType).Store(Condition);
         }
 
-        public IEnumerable<Model.Item> RelatedItems(IEnumerable<RelationshipType> RelationshipTypes)
+        public Stores.Relationship Store(String Name)
         {
-            List<Item> related = new List<Item>();
-
-            foreach(RelationshipType relationshiptype in RelationshipTypes)
-            {
-                if (this.ItemType.RelationshipTypes.Contains(relationshiptype))
-                {
-                    foreach(Relationship relationship in this.Store(relationshiptype))
-                    {
-                        if ((relationship.Related != null) && !related.Contains(relationship.Related))
-                        {
-                            related.Add(relationship.Related);
-                        }
-                    }
-                }
-            }
-
-            return related;
+            return (Stores.Relationship)this.Cache(Name).Store();
         }
 
-        public IEnumerable<Model.Relationship> Relationships(IEnumerable<RelationshipType> RelationshipTypes)
+        public Stores.Relationship Store(String Name, Condition Condition)
         {
-            List<Model.Relationship> relationships = new List<Model.Relationship>();
-
-            foreach (RelationshipType relationshiptype in RelationshipTypes)
-            {
-                if (this.ItemType.RelationshipTypes.Contains(relationshiptype))
-                {
-                    foreach (Relationship relationship in this.Store(relationshiptype))
-                    {
-                        if (relationship.Action != Actions.Deleted)
-                        {
-                            relationships.Add(relationship);
-                        }
-                    }
-                }
-            }
-
-            return relationships;
+            return (Stores.Relationship)this.Cache(Name).Store(Condition);
         }
+
+
 
         public Boolean IsManager
         {
@@ -910,23 +953,23 @@ namespace Aras.Model
         public Item(ItemType ItemType)
         {
             this.PropertyCache = new Dictionary<PropertyType, Property>();
-            this.StoreCache = new Dictionary<RelationshipType, Stores.Relationship>();
+            this.Caches = new Dictionary<RelationshipType, Caches.Relationship>();
             this.ItemType = ItemType;
             this.Transaction = null;
             this.ID = Server.NewID();
             this._action = Actions.Create;
-            this._isNew = true;
+            this._databaseState = DatabaseStates.Runtime;
         }
 
         public Item(ItemType ItemType, IO.Item DBItem)
         {
             this.PropertyCache = new Dictionary<PropertyType, Property>();
-            this.StoreCache = new Dictionary<RelationshipType, Stores.Relationship>();
+            this.Caches = new Dictionary<RelationshipType, Caches.Relationship>();
             this.ItemType = ItemType;
             this.Transaction = null;
             this.ID = DBItem.ID;
             this._action = Actions.Read;
-            this._isNew = false;
+            this._databaseState = DatabaseStates.Stored;
             this.UpdateProperties(DBItem);
         }
     }

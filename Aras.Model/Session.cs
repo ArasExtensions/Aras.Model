@@ -45,24 +45,18 @@ namespace Aras.Model
             {
                 if (this._user == null)
                 {
-                    this._user = (User)this.Store("User").Get(this.UserID);
+                    this._user = (User)this.Cache("User").Get(this.UserID);
                 }
 
                 return this._user;
             }
         }
 
-        private Identity _alias;
         public Identity Alias
         {
             get
             {
-                if (this._alias == null)
-                {
-                    this._alias = (Identity)this.User.Store("Alias").First().Related;
-                }
-
-                return this._alias;
+                return this.User.Identity;
             }
         }
 
@@ -128,7 +122,7 @@ namespace Aras.Model
 
                         foreach(IO.Item dbidentity in response.Items)
                         {
-                            this.IdentityCache[dbidentity.ID] = (Identity)this.Store("Identity").GetByDBItem(dbidentity);
+                            this.IdentityCache[dbidentity.ID] = (Identity)this.Cache("Identity").Get(dbidentity);
                             this.IdentityMemberCache[this.IdentityCache[dbidentity.ID]] = new List<Identity>();
                         }
 
@@ -276,69 +270,83 @@ namespace Aras.Model
             return new Transaction(this);
         }
 
-        private Dictionary<ItemType, Stores.Item> StoreCache;
+        private Dictionary<ItemType, Caches.Item> Caches;
 
-        public Stores.Item Store(ItemType ItemType)
+        public Caches.Item Cache(ItemType ItemType)
         {
             if (!(ItemType is RelationshipType))
             {
-                if (!this.StoreCache.ContainsKey(ItemType))
+                if (!this.Caches.ContainsKey(ItemType))
                 {
-                    this.StoreCache[ItemType] = new Stores.Item(ItemType);
+                    this.Caches[ItemType] = new Caches.Item(ItemType);
                 }
 
-                return this.StoreCache[ItemType];
+                return this.Caches[ItemType];
             }
             else
             {
-                throw new ArgumentException("Can not access store for a RelationshipType");
+                throw new ArgumentException("Can not access Cache for a RelationshipType");
             }
+        }
+
+        public Caches.Item Cache(String Name)
+        {
+            return this.Cache(this.ItemType(Name));
+        }
+
+        public Stores.Item Store(ItemType ItemType, Condition Condition)
+        {
+            return (Stores.Item)this.Cache(ItemType).Store(Condition);
+        }
+
+        public Stores.Item Store(ItemType ItemType)
+        {
+            return (Stores.Item)this.Cache(ItemType).Store();
+        }
+
+        public Stores.Item Store(String Name, Condition Condition)
+        {
+            return (Stores.Item)this.Cache(Name).Store(Condition);
         }
 
         public Stores.Item Store(String Name)
         {
-            return this.Store(this.ItemType(Name));
+            return (Stores.Item)this.Cache(Name).Store();
         }
-
-        private Dictionary<String, Item> SourceCache;
 
         internal Item Get(ItemType ItemType, String ID)
         {
-            if (String.IsNullOrEmpty(ID))
-            {
-                return null;
-            }
-            else
+            Item ret = null;
+
+            if (!String.IsNullOrEmpty(ID))
             {
                 if (ItemType is RelationshipType)
                 {
-                    if (!this.SourceCache.ContainsKey(ID))
+                    // Get Source Item
+                    IO.Item dbitem = new IO.Item(ItemType.Name, "get");
+                    dbitem.ID = ID;
+                    dbitem.Select = "source_id";
+                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, dbitem);
+                    IO.SOAPResponse response = request.Execute();
+
+                    if (!response.IsError)
                     {
-                        IO.Item dbitem = new IO.Item(ItemType.Name, "get");
-                        dbitem.ID = ID;
-                        dbitem.Select = "source_id";
-                        IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, dbitem);
-                        IO.SOAPResponse response = request.Execute();
-
-                        if (!response.IsError)
-                        {
-                            this.SourceCache[ID] = this.Get(((RelationshipType)ItemType).Source, response.Items.First().GetProperty("source_id"));
-                        }
-                        else
-                        {
-                            throw new Exceptions.ServerException(response);
-                        }
+                        Item source = this.Get(((RelationshipType)ItemType).Source, response.Items.First().GetProperty("source_id"));
+                        ret = source.Cache((RelationshipType)ItemType).Get(ID);
                     }
-
-                    // Return Item from Source Store
-                    return this.SourceCache[ID].Store((RelationshipType)ItemType).Get(ID);
+                    else
+                    {
+                        throw new Exceptions.ServerException(response);
+                    }
                 }
                 else
                 {
-                    // Return Item from Store
-                    return this.Store(ItemType).Get(ID);
+                    // Get Item from Cache
+                    ret = this.Cache(ItemType).Get(ID);
                 }
             }
+
+            return ret;
         }
 
         internal Session(Database Database, String UserID, String Username, String Password)
@@ -350,8 +358,7 @@ namespace Aras.Model
             this.Password = Password;
             this.ItemTypeNameCache = new Dictionary<String, ItemType>();
             this.ItemTypeIDCache = new Dictionary<String, ItemType>();
-            this.StoreCache = new Dictionary<ItemType, Stores.Item>();
-            this.SourceCache = new Dictionary<String, Item>();
+            this.Caches = new Dictionary<ItemType, Caches.Item>();
 
             // Default Selections
             this.ItemType("Value").AddToSelect("value,label");

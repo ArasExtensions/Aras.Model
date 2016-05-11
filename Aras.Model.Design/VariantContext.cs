@@ -86,11 +86,11 @@ namespace Aras.Model.Design
                             break;
                         case "Boolean":
                         case "Method":
-                            this._values = (Model.List)this.ItemType.Session.Store("List").Create();
-                            Model.ListValue falseval = (Model.ListValue)this._values.Store("Value").Create();
+                            this._values = (Model.List)this.Session.Cache("List").Create();
+                            Model.ListValue falseval = (Model.ListValue)this._values.Cache("Value").Create();
                             falseval.Value = "0";
                             falseval.Label = "No";
-                            Model.ListValue trueval = (Model.ListValue)this._values.Store("Value").Create();
+                            Model.ListValue trueval = (Model.ListValue)this._values.Cache("Value").Create();
                             trueval.Value = "1";
                             trueval.Label = "Yes";
                             break;

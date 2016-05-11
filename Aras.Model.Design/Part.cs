@@ -45,6 +45,18 @@ namespace Aras.Model.Design
             }
         }
 
+        public String Name
+        {
+            get
+            {
+                return (String)this.Property("name").Value;
+            }
+            set
+            {
+                this.Property("name").Value = value;
+            }
+        }
+
         public Boolean IsVariant
         {
             get
@@ -69,7 +81,7 @@ namespace Aras.Model.Design
                 {
                     this._partBOMS = new List<PartBOM>();
 
-                    Queries.Relationship pbquery = (Queries.Relationship)this.Store("Part BOM").Query();
+                    Stores.Relationship pbquery = (Stores.Relationship)this.Store("Part BOM");
                     pbquery.Refresh();
 
                     foreach (PartBOM pb in pbquery)
@@ -91,7 +103,7 @@ namespace Aras.Model.Design
                 {
                     this._partVariants = new List<PartVariant>();
 
-                    Queries.Relationship pvquery = (Queries.Relationship)this.Store("Part Variants").Query();
+                    Stores.Relationship pvquery = (Stores.Relationship)this.Store("Part Variants");
                     pvquery.Refresh();
 
                     foreach(PartVariant pv in pvquery)

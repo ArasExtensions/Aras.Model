@@ -53,10 +53,19 @@ namespace Aras.Model.Actions
                     }
                 }
 
+                // Watch for Source Item Versioning
+                ((Model.Relationship)this.Item).Source.Superceded += Source_Superceded;
+
                 this.Completed = true;
             }
 
             return this.DBItem;
+        }
+
+        void Source_Superceded(object sender, SupercededEventArgs e)
+        {
+            ((Model.Relationship)this.Item).Source.Superceded -= Source_Superceded;
+            ((Model.Relationship)this.Item).Source = e.NewGeneration;
         }
 
         internal override void Rollback()
@@ -67,12 +76,13 @@ namespace Aras.Model.Actions
                 {
                     case Model.Item.Actions.Create:
 
-                        // Remove from Parent Store
-                        ((Model.Relationship)this.Item).Source.Store(((Model.Relationship)this.Item).RelationshipType).RemoveItemFromCache((Model.Relationship)this.Item);
+                        // Remove from Parent Cache
+                        ((Model.Relationship)this.Item).Source.Cache(((Model.Relationship)this.Item).RelationshipType).Delete((Model.Relationship)this.Item);
 
                         break;
          
                     case Model.Item.Actions.Update:
+                    case Model.Item.Actions.Delete:
 
                         // Unlock
                         this.Item.UnLock();
@@ -88,10 +98,10 @@ namespace Aras.Model.Actions
 
         internal override void UpdateStore()
         {
-            if (this.Item.Action == Model.Item.Actions.Deleted)
+            if (this.Item.Action == Model.Item.Actions.Delete)
             {
-                // Remove from Parent Store
-                ((Model.Relationship)this.Item).Source.Store(((Model.Relationship)this.Item).RelationshipType).RemoveItemFromCache((Model.Relationship)this.Item);
+                // Remove from Parent Cache
+                ((Model.Relationship)this.Item).Source.Cache(((Model.Relationship)this.Item).RelationshipType).Delete((Model.Relationship)this.Item);
             }
         }
 

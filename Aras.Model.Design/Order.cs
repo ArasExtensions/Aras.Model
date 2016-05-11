@@ -79,7 +79,7 @@ namespace Aras.Model.Design
                     this._orderContextCache = new Dictionary<VariantContext, OrderContext>();
 
                     // Load Order Contexts already in database
-                    foreach (OrderContext ordercontext in this.Store("v_Order Context").Query())
+                    foreach (OrderContext ordercontext in this.Store("v_Order Context"))
                     {
                         if (!this._orderContextCache.ContainsKey(ordercontext.VariantContext))
                         {
@@ -202,17 +202,17 @@ namespace Aras.Model.Design
             // Update Configured Part
             if (this.ConfiguredPart == null)
             {
-                IEnumerable<Model.Item> parts = this.ItemType.Session.Store("Part").Query(Aras.Conditions.Eq("item_number", this.ItemNumber));
+                Stores.Item partsstore = this.ItemType.Session.Store("Part", Aras.Conditions.Eq("item_number", this.ItemNumber));
 
-                if (parts.Count() == 0)
+                if (partsstore.Count() == 0)
                 {
                     // Create Part
-                    this.ConfiguredPart = (Part)this.ItemType.Session.Store("Part").Create(this.Transaction);
+                    this.ConfiguredPart = (Part)partsstore.Create(this.Transaction);
                     this.ConfiguredPart.ItemNumber = this.ItemNumber;
                 }
                 else
                 {
-                    this.ConfiguredPart = (Part)parts.First();
+                    this.ConfiguredPart = (Part)partsstore.First();
                 }
             }
             else
@@ -258,6 +258,21 @@ namespace Aras.Model.Design
         }
 
         private Boolean UpdatingBOM = false;
+
+        private Stores.Relationship _configuredPartBOM;
+        private Stores.Relationship ConfiguredPartBOM
+        {
+            get
+            {
+                if (this._configuredPartBOM == null)
+                {
+                    this._configuredPartBOM = (Stores.Relationship)this.ConfiguredPart.Store("Part BOM");
+                }
+
+                return this._configuredPartBOM;
+            }
+        }
+
         public void UpdateBOM()
         {
             if (!this.UpdatingBOM)
@@ -291,10 +306,10 @@ namespace Aras.Model.Design
                     }
 
                     // Refresh PartBOM
-                    this.ConfiguredPart.Store("Part BOM").Refresh();
+                    this.ConfiguredPartBOM.Refresh();
 
                     // Remove any Part BOM no longer required in Configured Part
-                    foreach (PartBOM partbom in this.ConfiguredPart.Store("Part BOM").Copy())
+                    foreach (PartBOM partbom in this.ConfiguredPartBOM.Copy())
                     {
                         if ((partbom.Related != null) && !flatbom.ContainsKey((Part)partbom.Related))
                         {
@@ -307,9 +322,9 @@ namespace Aras.Model.Design
                     {
                         Boolean found = false;
 
-                        foreach (PartBOM partbom in this.ConfiguredPart.Store("Part BOM").Copy())
+                        foreach (PartBOM partbom in this.ConfiguredPartBOM.Copy())
                         {
-                            if ((partbom.Related != null) && partbom.Related.Equals(flatpart) && (partbom.Action != Actions.Deleted))
+                            if ((partbom.Related != null) && partbom.Related.Equals(flatpart) && (partbom.Action != Actions.Delete))
                             {
                                 found = true;
 
@@ -325,7 +340,7 @@ namespace Aras.Model.Design
 
                         if (!found)
                         {
-                            PartBOM newpartbom = (PartBOM)this.ConfiguredPart.Store("Part BOM").Create(flatpart, this.Transaction);
+                            PartBOM newpartbom = (PartBOM)this.ConfiguredPartBOM.Create(flatpart, this.Transaction);
                             newpartbom.Quantity = flatbom[flatpart];
                         }
                     }

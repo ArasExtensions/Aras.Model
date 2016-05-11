@@ -60,7 +60,7 @@ namespace Aras.Model
             }
         }
 
-        private Boolean Loaded { get; set; }
+        protected Boolean Loaded { get; private set; }
 
         public Item Item { get; private set; }
 
@@ -74,7 +74,7 @@ namespace Aras.Model
                 {
                     case Model.Item.Actions.Read:
                     case Model.Item.Actions.Update:
-                    case Model.Item.Actions.Deleted:
+                    case Model.Item.Actions.Delete:
                         IO.Item prop = new IO.Item(this.Item.ItemType.Name, "get");
                         prop.Select = this.Type.Name;
                         prop.SetProperty("id", this.Item.ID);
@@ -122,7 +122,7 @@ namespace Aras.Model
 
         private void SetReadOnly()
         {
-            if (this.Type.ReadOnly || this.Item.Action == Model.Item.Actions.Read || this.Item.Action == Model.Item.Actions.Deleted)
+            if (this.Type.ReadOnly || this.Item.Action == Model.Item.Actions.Read || this.Item.Action == Model.Item.Actions.Delete)
             {
                 this.ReadOnly = true;
             }

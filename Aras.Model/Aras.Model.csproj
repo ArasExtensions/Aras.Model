@@ -83,9 +83,9 @@
     <Compile Include="Props\Float.cs" />
     <Compile Include="Props\VariableList.cs" />
     <Compile Include="ConditionCreation.cs" />
-    <Compile Include="Store.cs" />
-    <Compile Include="Stores\Item.cs" />
-    <Compile Include="Stores\Relationship.cs" />
+    <Compile Include="Cache.cs" />
+    <Compile Include="Caches\Item.cs" />
+    <Compile Include="Caches\Relationship.cs" />
     <Compile Include="Team.cs" />
     <Compile Include="Permission.cs" />
     <Compile Include="IO\Item.cs" />
@@ -119,9 +119,9 @@
     <Compile Include="Props\String.cs" />
     <Compile Include="RelationshipType.cs" />
     <Compile Include="ItemType.cs" />
-    <Compile Include="Queries\Item.cs" />
-    <Compile Include="Queries\Relationship.cs" />
-    <Compile Include="Query.cs" />
+    <Compile Include="Stores\Item.cs" />
+    <Compile Include="Stores\Relationship.cs" />
+    <Compile Include="Store.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="Relationship.cs" />
     <Compile Include="Server.cs" />

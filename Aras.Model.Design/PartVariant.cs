@@ -63,7 +63,7 @@ namespace Aras.Model.Design
                 {
                     this._partVariantRules = new List<PartVariantRule>();
 
-                    Queries.Relationship pvrquery = (Queries.Relationship)this.Store("Part Variant Rule").Query();
+                    Stores.Relationship pvrquery = (Stores.Relationship)this.Store("Part Variant Rule");
                     pvrquery.Refresh();
 
                     foreach(PartVariantRule pvr in pvrquery)

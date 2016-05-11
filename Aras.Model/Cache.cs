@@ -30,56 +30,65 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    [Attributes.ItemType("User")]
-    public class User : Item
+    public abstract class Cache<T> where T : Model.Item
     {
-        private Stores.Relationship _aliasQuery;
-        private Stores.Relationship AliasQuery
+        public ItemType ItemType { get; private set; }
+
+        public Session Session
         {
             get
             {
-                if (this._aliasQuery == null)
-                {
-                    this._aliasQuery = (Stores.Relationship)this.Cache("Alias").Store();
-                    this._aliasQuery.Refresh();
-                }
-
-                return this._aliasQuery;
+                return this.ItemType.Session;
             }
         }
 
-        public Alias Alias
+        private Dictionary<String, T> Items;
+
+        protected T GetFromCache(String ID)
         {
-            get
+            return this.Items[ID];
+        }
+
+        protected void AddToCache(T Item)
+        {
+            this.Items[Item.ID] = Item;
+        }
+
+        protected Boolean IsInCache(String ID)
+        {
+            return this.Items.ContainsKey(ID);
+        }
+
+        protected void RemoveFromCache(String ID)
+        {
+            if (this.IsInCache(ID))
             {
-                return (Alias)this.AliasQuery.First();
+                this.Items.Remove(ID);
             }
         }
 
-        public Identity Identity
+        public abstract T Get(String ID);
+
+        internal abstract T Get(IO.Item DBItem);
+
+        public abstract T Create(Transaction Transaction);
+
+        public abstract T Create();
+
+        internal void Delete(T Item)
         {
-            get
+            if (this.IsInCache(Item.ID))
             {
-                return (Identity)this.Alias.Related;
+                this.RemoveFromCache(Item.ID);
             }
         }
 
-        protected override void OnRefresh()
-        {
-            base.OnRefresh();
-            this.AliasQuery.Refresh();
-        }
+        internal abstract String Select { get; }
 
-        public User(ItemType ItemType)
-            : base(ItemType)
+        internal Cache(ItemType ItemType)
         {
-          
-        }
-
-        public User(ItemType ItemType, IO.Item DBItem)
-            : base(ItemType, DBItem)
-        {
-          
+            this.ItemType = ItemType;
+            this.Items = new Dictionary<String, T>();
         }
     }
 }

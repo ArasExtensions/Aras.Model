@@ -36,6 +36,33 @@ namespace Aras.Model
 
         private Dictionary<String, Action> ActionsCache;
 
+        internal void Remove(Model.Item Item)
+        {
+            if (Item is Relationship)
+            {
+                Model.Relationship relationship = (Model.Relationship)Item;
+
+                if (this.ActionsCache.ContainsKey(relationship.Source.ID))
+                {
+                    Action sourceaction = this.ActionsCache[relationship.Source.ID];
+                    sourceaction.RemoveRelationship(relationship.ID);
+
+                    if (this.ActionsCache.ContainsKey(relationship.ID))
+                    {
+                        this.ActionsCache.Remove(relationship.ID);
+                    }
+                }
+
+            }
+            else
+            {
+                if (this.ActionsCache.ContainsKey(Item.ID))
+                {
+                    this.ActionsCache.Remove(Item.ID);
+                }
+            }
+        }
+
         internal void Add(String Name, Model.Item Item)
         {
             if (Item is Relationship)

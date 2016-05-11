@@ -52,12 +52,18 @@ namespace Aras.Model.Properties
                     if (base.Value == null)
                     {
                         base.Value = value;
+
+                        // Watch for Item Versioning
+                        ((Aras.Model.Item)value).Superceded += Item_Superceded;
                     }
                     else
                     {
                         if (!((Aras.Model.Item)base.Value).Equals((Aras.Model.Item)value))
                         {
                             base.Value = value;
+
+                            // Watch for Item Versioning
+                            ((Aras.Model.Item)value).Superceded += Item_Superceded;
                         }
                     }
                 }
@@ -66,6 +72,20 @@ namespace Aras.Model.Properties
                     throw new Exceptions.ArgumentException("Value must be a Aras.Model.Item");
                 }
             }
+        }
+
+        void Item_Superceded(object sender, SupercededEventArgs e)
+        {
+            Model.Item CurrentGeneration = (Model.Item)sender;
+
+            // Stop watching current Related Item
+            CurrentGeneration.Superceded -= Item_Superceded;
+
+            // Set new Item
+            base.Value = e.NewGeneration;
+
+            // Watch for Related Item Versioning
+            e.NewGeneration.Superceded += Item_Superceded;
         }
 
         internal override string DBValue
@@ -85,6 +105,14 @@ namespace Aras.Model.Properties
             {
                 if (value == null)
                 {
+                    if (this.Loaded)
+                    {
+                        if (this.Value != null)
+                        {
+                            ((Model.Item)this.Value).Superceded -= Item_Superceded;
+                        }
+                    }
+
                     this.SetValue(null);
                 }
                 else
@@ -95,7 +123,17 @@ namespace Aras.Model.Properties
                     }
                     else
                     {
-                        this.SetValue(this.Item.ItemType.Session.Get(((PropertyTypes.Item)this.Type).ValueType, value));
+                        if (this.Loaded)
+                        {
+                            if (this.Value != null)
+                            {
+                                ((Model.Item)this.Value).Superceded -= Item_Superceded;
+                            }
+                        }
+
+                        Model.Item thisitem = this.Item.ItemType.Session.Get(((PropertyTypes.Item)this.Type).ValueType, value);
+                        this.SetValue(thisitem);
+                        thisitem.Superceded += Item_Superceded;
                     }
                 }
             }

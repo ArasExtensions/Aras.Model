@@ -61,7 +61,10 @@ namespace Aras.Model
                 {
                     this._values = new List<ListValue>();
 
-                    foreach (ListValue listvalue in this.Store("Value"))
+                    Stores.Relationship query = (Stores.Relationship)this.Cache("Value").Store();
+                    query.Refresh();
+
+                    foreach (ListValue listvalue in query)
                     {
                         // Ignore ListValues with blank Value
 

@@ -37,23 +37,39 @@ namespace Aras.Model.Design.Debug
         static void Main(string[] args)
         {
             // Connect to Server
-            Server server = new Server("http://localhost/InnovatorServer10SP4");
+            Server server = new Server("http://localhost/11SP1");
             server.LoadAssembly("Aras.Model.Design");
-            Database database = server.Database("CMB");
-            Session session = database.Login("cavem", Server.PasswordHash("innovator"));
-  
-            Queries.Item query = (Queries.Item)session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJM-Test50"));
-            Order order = (Order)query.First();
-            OrderContext ordercontext = order.OrderContexts.First();
+            Database database = server.Database("Development11SP1");
+            Session session = database.Login("admin", Server.PasswordHash("innovator"));
+            session.ItemType("Part").AddToSelect("item_number,name");
+
+
+            Relationship newpartbom = null;
+
+            Stores.Item query = (Stores.Item)session.Store("Part", Aras.Conditions.Eq("item_number", "G10011"));
+            Part block = (Part)query.First();
+
+            Stores.Relationship partbomquery = (Stores.Relationship)block.Store("Part BOM");
+            int test34 = partbomquery.Count();
+
+            Stores.Item query2 = (Stores.Item)session.Store("Part", Aras.Conditions.Eq("item_number", "G10015"));
+            Part crank = (Part)query2.First();
 
             using (Transaction trans = session.BeginTransaction())
             {
-                order.Update(trans);
-                ordercontext.Value = "1";
-                order.UpdateBOM();
+                block.Update(trans);
+                newpartbom = partbomquery.Create(crank, trans);
+                test34 = partbomquery.Count();
+
+                //newpartbom.Source.Update(trans);
+                //newpartbom.Delete(trans);
+                //partbomquery.Refresh();
+
+                test34 = partbomquery.Count();
 
                 trans.Commit();
             }
+
         }
     }
 }

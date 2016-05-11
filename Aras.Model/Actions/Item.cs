@@ -46,7 +46,28 @@ namespace Aras.Model.Actions
                     if (response.Items.Count() == 1)
                     {
                         this.Result = response.Items.First();
-                        this.UpdateItem(this.Result);
+
+                        if (this.Result.ConfigID.Equals(this.Item.ConfigID))
+                        {
+                            if (!this.Result.ID.Equals(this.Item.ID))
+                            {
+                                // New Version of Item
+                                Model.Item newversion = this.Item.Session.Cache(this.Item.ItemType).Get(this.Result);
+                                Model.Item oldversion = this.Item;
+                                this.Item = newversion;
+                                this.UpdateItem(this.Result);
+                                oldversion.OnSuperceded(newversion);
+                            }
+                            else
+                            {
+                                this.UpdateItem(this.Result);
+                            }
+                        }
+                        else
+                        {
+                            // Result does not match Item
+                            throw new Exceptions.ServerException("Server response does not match original Item");
+                        }
                     }
 
                     this.Completed = true;
@@ -74,8 +95,8 @@ namespace Aras.Model.Actions
                 {
                     case Model.Item.Actions.Create:
 
-                        // Remove from Store
-                        this.Item.Session.Store(this.Item.ItemType).RemoveItemFromCache(this.Item);
+                        // Remove from Cache
+                        this.Item.Session.Cache(this.Item.ItemType).Delete(this.Item);
 
                         break;
                     
@@ -96,9 +117,13 @@ namespace Aras.Model.Actions
 
         internal override void UpdateStore()
         {
-            if (this.Item.Action == Model.Item.Actions.Deleted)
+            if (this.Item.Action == Model.Item.Actions.Delete)
             {
-                this.Item.Session.Store(this.Item.ItemType).RemoveItemFromCache(this.Item);
+                // Trigger Deleted Event
+                this.Item.OnDeleted();
+
+                // Remove from Cache
+                this.Item.Session.Cache(this.Item.ItemType).Delete(this.Item);
             }
         }
 

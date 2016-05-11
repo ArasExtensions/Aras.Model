@@ -62,13 +62,18 @@ namespace Aras.Model
             }
         }
 
-        internal Item Item { get; private set; }
+        protected Item Item { get; set; }
 
         private Dictionary<String, Actions.Relationship> RelationshipsCache;
 
         internal void AddRelationship(Actions.Relationship Relationship)
         {
             this.RelationshipsCache[Relationship.Item.ID] = Relationship;
+        }
+
+        internal void RemoveRelationship(String ID)
+        {
+            this.RelationshipsCache.Remove(ID);
         }
 
         protected IEnumerable<Actions.Relationship> Relationships
@@ -136,33 +141,31 @@ namespace Aras.Model
         }
 
         protected void UpdateItem(IO.Item DBItem)
-        {
-            this.Item.UpdateProperties(DBItem);
-            
+        {            
             // Unlock
             this.Item.UnLock();
             this.Item.Transaction = null;
 
-            foreach (Actions.Relationship relaction in this.RelationshipsCache.Values)
+            foreach (Actions.Relationship relation in this.RelationshipsCache.Values)
             {
                 Boolean found = false;
 
                 foreach (IO.Item dbrelationship in DBItem.Relationships)
                 {
-                    if (dbrelationship.ID.Equals(relaction.Item.ID))
+                    if (dbrelationship.ID.Equals(relation.Item.ID))
                     {
-                        relaction.Item.UpdateProperties(dbrelationship);
-                        relaction.Item.UnLock();
-                        relaction.Item.Transaction = null;
+                        relation.Item.UpdateProperties(dbrelationship);
+                        relation.Item.UnLock();
+                        relation.Item.Transaction = null;
                         found = true;
                     }
                 }
 
-                if (!found && !relaction.Name.Equals("delete"))
+                if (!found && !relation.Name.Equals("delete"))
                 {
-                    relaction.Item.UpdateProperties(null);
-                    relaction.Item.UnLock();
-                    relaction.Item.Transaction = null;
+                    relation.Item.UpdateProperties(null);
+                    relation.Item.UnLock();
+                    relation.Item.Transaction = null;
                 }
             }
         }

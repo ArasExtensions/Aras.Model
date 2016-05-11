@@ -27,93 +27,153 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace Aras.Model
 {
-    public abstract class Store<T> : System.Collections.Generic.IEnumerable<T> where T : Model.Item
+    public abstract class Store<T> : System.Collections.Generic.IEnumerable<T> where T : Model.Item, INotifyPropertyChanged
     {
-        public delegate void StoreChangedEventHandler(object sender, EventArgs e);
+        public const Int32 MinPageSize = 5;
+        public const Int32 DefaultPageSize = 25;
+        public const Int32 MaxPageSize = 100;
 
-        public event StoreChangedEventHandler StoreChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnStoreChanged()
+        protected void OnPropertyChanged(String Name)
         {
-            if (this.StoreChanged != null)
+            if (this.PropertyChanged != null)
             {
-                StoreChanged(this, new EventArgs());
+                PropertyChanged(this, new PropertyChangedEventArgs(Name));
             }
         }
 
-        public Session Session
+        public Cache<T> Cache { get; private set; }
+
+        private Int32 _pageSize;
+        public Int32 PageSize
         {
             get
             {
-                return this.ItemType.Session;
+                return this._pageSize;
             }
-        }
-
-        public ItemType ItemType { get; private set; }
-
-        private Dictionary<String, T> Cache;
-
-        protected List<String> CacheIDS()
-        {
-            List<String> ret = new List<String>();
-
-            foreach (String id in this.Cache.Keys)
+            set
             {
-                ret.Add(id);
+                if (this._pageSize != value)
+                {
+                    if (value >= MinPageSize && value <= MaxPageSize)
+                    {
+                        this._pageSize = value;
+                        this.OnPropertyChanged("PageSize");
+                    }
+                }
             }
-
-            return ret;
         }
 
-        internal Boolean ItemInCache(String ID)
+        private Int32 _page;
+        public Int32 Page
         {
-            return this.Cache.ContainsKey(ID);
-        }
-
-        internal void AddItemToCache(T Item)
-        {
-            if (!this.ItemInCache(Item.ID))
+            get
             {
-                this.Cache[Item.ID] = Item;
-                this.OnStoreChanged();
+                return this._page;
             }
-        }
-
-        internal void RemoveItemFromCache(T Item)
-        {
-            if (this.ItemInCache(Item.ID))
+            set
             {
-                this.Cache.Remove(Item.ID);
-                this.OnStoreChanged();
+                if (this._page != value)
+                {
+                    if (value >= 1)
+                    {
+                        this._page = value;
+                        this.OnPropertyChanged("Page");
+                    }
+                }
             }
         }
 
-        internal void RemoveItemFromCache(String ID)
+        private Int32 _noPages;
+        public Int32 NoPages
         {
-            if (this.ItemInCache(ID))
+            get
             {
-                this.Cache.Remove(ID);
-                this.OnStoreChanged();
+                return this._noPages;
+            }
+            protected set
+            {
+                if (this._noPages != value)
+                {
+                    this._noPages = value;
+                    this.OnPropertyChanged("NoPages");
+                }
             }
         }
 
-        internal T GetItemFromCache(String ID)
+        private Boolean _paging;
+        public Boolean Paging
         {
-            return this.Cache[ID];
+            get
+            {
+                return this._paging;
+            }
+            set
+            {
+                if (value != this._paging)
+                {
+                    this._paging = value;
+                    this.OnPropertyChanged("Paging");
+                }
+            }
+        }
+
+        protected void SetPaging(IO.Item Item)
+        {
+            if (this.Paging)
+            {
+                Item.PageSize = this.PageSize;
+                Item.Page = this.Page;
+            }
+        }
+
+        protected void UpdateNoPages(IO.SOAPResponse Response)
+        {
+            if (this.Paging)
+            {
+                if (Response.Items.Count() > 0)
+                {
+                    this.NoPages = Response.Items.First().PageMax;
+                }
+                else
+                {
+                    this.NoPages = 0;
+                }
+            }
+        }
+
+        protected List<T> NewItems;
+
+        protected List<T> Items;
+
+        public T this[int Index]
+        {
+            get
+            {
+                if (!this.Executed)
+                {
+                    this.Execute();
+                    this.Executed = true;
+                }
+
+                return this.Items[Index];
+            }
         }
 
         public System.Collections.Generic.IEnumerator<T> GetEnumerator()
         {
-            if (!this.Loaded)
+            if (!this.Executed)
             {
-                this.Load();
-                this.Loaded = true;
+                this.Execute();
+                this.Executed = true;
             }
 
-            return this.Cache.Values.GetEnumerator();
+            return this.Items.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -121,56 +181,115 @@ namespace Aras.Model
             return this.GetEnumerator();
         }
 
-        public List<T> Copy()
+        public IEnumerable<T> Copy()
         {
-            List<T> ret = new List<T>();
-
-            foreach (T item in this)
-            {
-                ret.Add(item);
-            }
-
-            return ret;
+            return this.ToList();
         }
 
-        public T this[int Index]
+        public ItemType ItemType
         {
             get
             {
-                return this.ElementAt(Index);
+                return this.Cache.ItemType;
             }
         }
 
-        public abstract T Get(String ID);
+        private Condition _condition;
+        public Condition Condition 
+        { 
+            get
+            {
+                return this._condition;
+            }
+            set
+            {
+                if (this._condition == null)
+                {
+                    if (value != null)
+                    {
+                        this._condition = value;
+                        this.Executed = false;
+                    }
+                }
+                else
+                {
+                    if (!this._condition.Equals(value))
+                    {
+                        this._condition = value;
+                        this.Executed = false;
+                    }
+                }
+            }
+        }
 
-        public abstract T Create(Transaction Transaction);
+        protected System.String Where
+        {
+            get
+            {
+                if (this.Condition == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return this.Condition.Where(this.ItemType);
+                }
+            }
+        }
 
-        public abstract T Create();
+        private Boolean Executed;
 
-        private Boolean Loaded;
+        private void Execute()
+        {
+            // Clear current Items
+            this.Items.Clear();
 
-        protected abstract void Load();
+            // Run Query and add Items that are not marked for Deletion
+            foreach (T item in this.Run())
+            {
+                if (item.Action != Item.Actions.Delete)
+                {
+                    this.Items.Add(item);
+                }
+            }
+
+            // Refresh New Items
+            foreach(T item in this.NewItems.ToList())
+            {
+                if (item.Action != Item.Actions.Create)
+                {
+                    this.NewItems.Remove(item);
+                }
+            }
+
+            // Add New Items to End of Results
+            foreach(T item in this.NewItems)
+            {
+                this.Items.Add(item);
+            }
+        }
+
+        protected abstract List<T> Run();
 
         public void Refresh()
         {
-            this.Load();
-            this.Loaded = true;
+            this.Execute();
+            this.Executed = true;
         }
 
-        public abstract Query<T> Query(Condition Condition);
-
-        public Query<T> Query()
+        internal Store(Cache<T> Cache, Condition Condition)
         {
-            return this.Query(null);
+            this.Items = new List<T>();
+            this.NewItems = new List<T>();
+            this.Cache = Cache;
+            this._condition = Condition;
+            this.Executed = false;
+            this._pageSize = DefaultPageSize;
+            this._paging = false;
+            this._noPages = 0;
+            this._page = 1;
         }
 
-        internal abstract String Select { get; }
 
-        internal Store(ItemType ItemType)
-        {
-            this.ItemType = ItemType;
-            this.Cache = new Dictionary<String, T>();
-            this.Loaded = false;
-        }
     }
 }
