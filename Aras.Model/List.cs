@@ -59,7 +59,7 @@ namespace Aras.Model
             {
                 if (this._values == null)
                 {
-                    this._values = new Stores.Relationship<ListValue>(this, "Value");
+                    this._values = new Stores.Relationship<ListValue>(this, "Value", Aras.Conditions.Ne("value", ""));
                 }
 
                 return this._values;
