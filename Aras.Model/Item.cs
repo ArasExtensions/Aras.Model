@@ -699,28 +699,6 @@ namespace Aras.Model
             return this.Cache(this.ItemType.RelationshipType(RelationshipType));
         }
 
-        public Stores.Relationship Store(RelationshipType RelationshipType)
-        {
-            return (Stores.Relationship)this.Cache(RelationshipType).Store();
-        }
-
-        public Stores.Relationship Store(RelationshipType RelationshipType, Condition Condition)
-        {
-            return (Stores.Relationship)this.Cache(RelationshipType).Store(Condition);
-        }
-
-        public Stores.Relationship Store(String Name)
-        {
-            return (Stores.Relationship)this.Cache(Name).Store();
-        }
-
-        public Stores.Relationship Store(String Name, Condition Condition)
-        {
-            return (Stores.Relationship)this.Cache(Name).Store(Condition);
-        }
-
-
-
         public Boolean IsManager
         {
             get

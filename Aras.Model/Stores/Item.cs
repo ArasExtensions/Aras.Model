@@ -30,9 +30,19 @@ using System.Threading.Tasks;
 
 namespace Aras.Model.Stores
 {
-    public class Item : Store<Model.Item>
+    public class Item<T> : Store<T> where T : Model.Item
     {
-        protected override List<Model.Item> Run()
+        public Caches.Item Cache { get; private set; }
+
+        public override ItemType ItemType
+        {
+            get
+            {
+                return this.Cache.ItemType;
+            }
+        }
+
+        protected override List<T> Run()
         {
             IO.Item item = new IO.Item(this.ItemType.Name, "get");
             item.Select = this.Cache.Select;
@@ -42,13 +52,13 @@ namespace Aras.Model.Stores
             IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Cache.Session, item);
             IO.SOAPResponse response = request.Execute();
 
-            List<Model.Item> ret = new List<Model.Item>();
+            List<T> ret = new List<T>();
 
             if (!response.IsError)
             {
                 foreach (IO.Item dbitem in response.Items)
                 {
-                    Model.Item thisitem = this.Cache.Get(dbitem);
+                    T thisitem = (T)this.Cache.Get(dbitem);
                     ret.Add(thisitem);
                 }
 
@@ -65,30 +75,61 @@ namespace Aras.Model.Stores
             return ret;
         }
 
-        public Model.Item Create(Transaction Transaction)
+        public T Create(Transaction Transaction)
         {
-            Model.Item item = this.Cache.Create(Transaction);
+            T item = (T)this.Cache.Create(Transaction);
             this.NewItems.Add(item);
             this.Items.Add(item);
+            this.OnStoreChanged();
             return item;
         }
 
-        public Model.Item Create()
+        public T Create()
         {
-            Model.Item item = this.Create(null);
+            T item = (T)this.Create(null);
             this.NewItems.Add(item);
             this.Items.Add(item);
+            this.OnStoreChanged();
             return item;
         }
 
-        internal Item(Cache<Model.Item> Store, Condition Condition)
-            : base(Store, Condition)
+        protected override void OnRefresh()
+        {
+           
+        }
+
+        internal Item(Caches.Item Cache, Condition Condition)
+            : base(Condition)
+        {
+            this.Cache = Cache;
+        }
+
+        internal Item(Caches.Item Cache)
+            :this(Cache, null)
         {
 
         }
 
-        internal Item(Cache<Model.Item> Store)
-            :this(Store, null)
+        public Item(ItemType ItemType, Condition Condition)
+            :base(Condition)
+        {
+            this.Cache = ItemType.Session.Cache(ItemType);
+        }
+
+        public Item(ItemType ItemType)
+            :this(ItemType, null)
+        {
+
+        }
+
+        public Item(Session Session, String Name, Condition Condition)
+            :base(Condition)
+        {
+            this.Cache = Session.Cache(Name);
+        }
+
+        public Item(Session Session, String Name)
+            :this(Session, Name, null)
         {
 
         }

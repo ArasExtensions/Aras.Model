@@ -69,34 +69,17 @@ namespace Aras.Model.Design
             }
         }
 
-        private Dictionary<VariantContext, OrderContext> _orderContextCache;
-        private Dictionary<VariantContext, OrderContext> OrderContextCache
+        private Stores.Relationship<OrderContext> _orderContexts;
+        public Stores.Relationship<OrderContext> OrderContexts
         {
             get
             {
-                if (this._orderContextCache == null)
+                if (this._orderContexts == null)
                 {
-                    this._orderContextCache = new Dictionary<VariantContext, OrderContext>();
-
-                    // Load Order Contexts already in database
-                    foreach (OrderContext ordercontext in this.Store("v_Order Context"))
-                    {
-                        if (!this._orderContextCache.ContainsKey(ordercontext.VariantContext))
-                        {
-                            this._orderContextCache[ordercontext.VariantContext] = ordercontext;
-                        }
-                    }
+                    this._orderContexts = new Stores.Relationship<OrderContext>(this, "v_Order Context");
                 }
 
-                return this._orderContextCache;
-            }
-        }
-
-        public IEnumerable<OrderContext> OrderContexts
-        {
-            get
-            {
-                return this.OrderContextCache.Values;
+                return this._orderContexts;
             }
         }
 
@@ -110,13 +93,13 @@ namespace Aras.Model.Design
                     dborder.ID = this.ID;
 
                     // Add this Order Context
-                    Model.IO.Item dbordercontext = this.OrderContextCache[VariantContext].GetIOItem();
+                    Model.IO.Item dbordercontext = this.OrderContexts.FirstByRelated(VariantContext).GetIOItem();
                     dborder.AddRelationship(dbordercontext);
 
                     // Add all other order Context
                     foreach (OrderContext otherordercontext in this.OrderContexts)
                     {
-                        if (!otherordercontext.Equals(this.OrderContextCache[VariantContext]))
+                        if (!otherordercontext.Equals(this.OrderContexts.FirstByRelated(VariantContext)))
                         {
                             Model.IO.Item dbotherordercontext = otherordercontext.GetIOItem();
                             dborder.AddRelationship(dbotherordercontext);
@@ -130,13 +113,13 @@ namespace Aras.Model.Design
                     {
                         if (response.Items.Count() == 1)
                         {
-                            this.OrderContextCache[VariantContext].Value = response.Items.First().GetProperty("value");
-                            this.OrderContextCache[VariantContext].Quantity = Double.Parse(response.Items.First().GetProperty("quantity"));
+                            this.OrderContexts.FirstByRelated(VariantContext).Value = response.Items.First().GetProperty("value");
+                            this.OrderContexts.FirstByRelated(VariantContext).Quantity = Double.Parse(response.Items.First().GetProperty("quantity"));
                         }
                         else
                         {
-                            this.OrderContextCache[VariantContext].Value = "0";
-                            this.OrderContextCache[VariantContext].Quantity = 0.0;
+                            this.OrderContexts.FirstByRelated(VariantContext).Value = "0";
+                            this.OrderContexts.FirstByRelated(VariantContext).Quantity = 0.0;
                         }
                     }
                     else
@@ -146,8 +129,8 @@ namespace Aras.Model.Design
                 }
                 else
                 {
-                    this.OrderContextCache[VariantContext].Value = "0";
-                    this.OrderContextCache[VariantContext].Quantity = 0.0;
+                    this.OrderContexts.FirstByRelated(VariantContext).Value = "0";
+                    this.OrderContexts.FirstByRelated(VariantContext).Quantity = 0.0;
                 }
             }
         }
@@ -156,32 +139,35 @@ namespace Aras.Model.Design
         {
             if (this.Transaction != null)
             {
-                if (!this.OrderContextCache.ContainsKey(VariantContext))
+                OrderContext ordercontext = this.OrderContexts.FirstByRelated(VariantContext);
+
+                if (ordercontext == null)
                 {
-                    this.OrderContextCache[VariantContext] = (OrderContext)this.Store("v_Order Context").Create(VariantContext, this.Transaction);
+                    // Create new Variant Context
+                    ordercontext = this.OrderContexts.Create(VariantContext, this.Transaction);
 
                     // Default Value to first value in List
-                    this.OrderContextCache[VariantContext].Value = this.OrderContextCache[VariantContext].ValueList.Values.Values.First().Value;
+                    ordercontext.Value = ordercontext.ValueList.Values.Values.First().Value;
 
                     // Default Quantity to 1.0
-                    this.OrderContextCache[VariantContext].Quantity = 1.0;
+                    ordercontext.Quantity = 1.0;
                 }
                 else
                 {
-                    if (this.OrderContextCache[VariantContext].Value == null)
+                    if (ordercontext.Value == null)
                     {
                         // Default Value to first value in List
-                        this.OrderContextCache[VariantContext].Value = this.OrderContextCache[VariantContext].ValueList.Values.Values.First().Value;
+                        ordercontext.Value = ordercontext.ValueList.Values.Values.First().Value;
 
                         // Default Quantity to 1.0
-                        this.OrderContextCache[VariantContext].Quantity = 1.0;
+                        ordercontext.Quantity = 1.0;
                     }
                 }
 
                 // Run Method Variant Context
                 this.RunMethodVariantContext(VariantContext);
 
-                return this.OrderContextCache[VariantContext];
+                return ordercontext;
             }
             else
             {
@@ -194,7 +180,7 @@ namespace Aras.Model.Design
             base.OnUpdate();
             
             // Update Order Contexts
-            foreach (OrderContext ordercontext in this.OrderContextCache.Values)
+            foreach (OrderContext ordercontext in this.OrderContexts)
             {
                 ordercontext.Update(this.Transaction, true);
             }
@@ -202,7 +188,7 @@ namespace Aras.Model.Design
             // Update Configured Part
             if (this.ConfiguredPart == null)
             {
-                Stores.Item partsstore = this.ItemType.Session.Store("Part", Aras.Conditions.Eq("item_number", this.ItemNumber));
+                Stores.Item<Part> partsstore = new Stores.Item<Part>(this.Session, "Part", Aras.Conditions.Eq("item_number", this.ItemNumber));
 
                 if (partsstore.Count() == 0)
                 {
@@ -259,14 +245,14 @@ namespace Aras.Model.Design
 
         private Boolean UpdatingBOM = false;
 
-        private Stores.Relationship _configuredPartBOM;
-        private Stores.Relationship ConfiguredPartBOM
+        private Stores.Relationship<PartBOM> _configuredPartBOM;
+        private Stores.Relationship<PartBOM> ConfiguredPartBOM
         {
             get
             {
                 if (this._configuredPartBOM == null)
                 {
-                    this._configuredPartBOM = (Stores.Relationship)this.ConfiguredPart.Store("Part BOM");
+                    this._configuredPartBOM = new Stores.Relationship<PartBOM>(this.ConfiguredPart, "Part BOM");
                 }
 
                 return this._configuredPartBOM;
@@ -357,12 +343,17 @@ namespace Aras.Model.Design
         {
             base.OnRefresh();
 
-            // Clear Order Context Cache
-            this._orderContextCache = null;
+            // Refresh Order Contexts
+            if (this._orderContexts != null)
+            {
+                this._orderContexts.Refresh();
+            }
         }
 
-        private void PropertySelection()
+        private void Initialiase()
         {
+            this.UpdatingBOM = false;
+
             // Ensure Required Properties are Selected
             this.Session.ItemType("v_Order Context").AddToSelect("quantity,value,locked_by_id");
             this.Session.ItemType("Variant Context").AddToSelect("context_type");
@@ -375,15 +366,13 @@ namespace Aras.Model.Design
         public Order(Model.ItemType ItemType)
             : base(ItemType)
         {
-            this.UpdatingBOM = false;
-            this.PropertySelection();
+            this.Initialiase();
         }
 
         public Order(Model.ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
-            this.UpdatingBOM = false;
-            this.PropertySelection();
+            this.Initialiase();
         }
     }
 }

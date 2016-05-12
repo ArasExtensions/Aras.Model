@@ -72,44 +72,28 @@ namespace Aras.Model.Design
             }
         }
 
-        private List<PartBOM> _partBOMS;
-        public IEnumerable<PartBOM> PartBOMS
+        private Model.Stores.Relationship<PartBOM> _partBOMS;
+        public Model.Stores.Relationship<PartBOM> PartBOMS
         {
             get
             {
                 if (this._partBOMS == null)
                 {
-                    this._partBOMS = new List<PartBOM>();
-
-                    Stores.Relationship pbquery = (Stores.Relationship)this.Store("Part BOM");
-                    pbquery.Refresh();
-
-                    foreach (PartBOM pb in pbquery)
-                    {
-                        this._partBOMS.Add(pb);
-                    }
+                    this._partBOMS = new Stores.Relationship<PartBOM>(this, "Part BOM");
                 }
 
                 return this._partBOMS;
             }
         }
 
-        private List<PartVariant> _partVariants;
-        public IEnumerable<PartVariant> PartVariants
+        private Model.Stores.Relationship<PartVariant> _partVariants;
+        public Model.Stores.Relationship<PartVariant> PartVariants
         {
             get
             {
                 if (this._partVariants == null)
                 {
-                    this._partVariants = new List<PartVariant>();
-
-                    Stores.Relationship pvquery = (Stores.Relationship)this.Store("Part Variants");
-                    pvquery.Refresh();
-
-                    foreach(PartVariant pv in pvquery)
-                    {
-                        this._partVariants.Add(pv);
-                    }
+                    this._partVariants = new Stores.Relationship<PartVariant>(this, "Part Variants");
                 }
 
                 return this._partVariants;
@@ -154,7 +138,6 @@ namespace Aras.Model.Design
             // Add PartBOM
             foreach (PartBOM partbom in this.PartBOMS)
             {
-
                 Part related = (Part)partbom.Related;
 
                 if (related != null)
@@ -182,11 +165,17 @@ namespace Aras.Model.Design
         {
             base.OnRefresh();
 
-            // Reset PartBOMS
-            this._partBOMS = null;
+            // Refresh PartBOMS
+            if (this._partBOMS != null)
+            {
+                this._partBOMS.Refresh();
+            }
 
-            // Reset PartVariants
-            this._partVariants = null;
+            // Refresh PartVariants
+            if (this._partVariants != null)
+            {
+                this._partVariants.Refresh();
+            }
         }
 
         public Part(Model.ItemType ItemType)

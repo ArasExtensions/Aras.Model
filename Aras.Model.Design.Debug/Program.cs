@@ -39,33 +39,28 @@ namespace Aras.Model.Design.Debug
             // Connect to Server
             Server server = new Server("http://localhost/11SP1");
             server.LoadAssembly("Aras.Model.Design");
-            Database database = server.Database("Development11SP1");
+            Database database = server.Database("VariantsDemo11SP1");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
-            session.ItemType("Part").AddToSelect("item_number,name");
 
+            Stores.Item<Order> store = new Stores.Item<Order>(session,  "v_Order", Aras.Conditions.Eq("item_number", "400_1111"));
 
-            Relationship newpartbom = null;
-
-            Stores.Item query = (Stores.Item)session.Store("Part", Aras.Conditions.Eq("item_number", "G10011"));
-            Part block = (Part)query.First();
-
-            Stores.Relationship partbomquery = (Stores.Relationship)block.Store("Part BOM");
-            int test34 = partbomquery.Count();
-
-            Stores.Item query2 = (Stores.Item)session.Store("Part", Aras.Conditions.Eq("item_number", "G10015"));
-            Part crank = (Part)query2.First();
+            Order order = store.First();
 
             using (Transaction trans = session.BeginTransaction())
             {
-                block.Update(trans);
-                newpartbom = partbomquery.Create(crank, trans);
-                test34 = partbomquery.Count();
+                order.Update(trans);
+                order.OrderContexts.First().Value = "1";
+                order.OrderContexts.First().Quantity = 11;
+                order.UpdateBOM();
+                int noboms = order.ConfiguredPart.PartBOMS.Count();
 
-                //newpartbom.Source.Update(trans);
-                //newpartbom.Delete(trans);
-                //partbomquery.Refresh();
+                order.OrderContexts.First().Value = "0";
+                order.UpdateBOM();
+                noboms = order.ConfiguredPart.PartBOMS.Count();
 
-                test34 = partbomquery.Count();
+                order.OrderContexts.First().Value = "1";
+                order.UpdateBOM();
+                noboms = order.ConfiguredPart.PartBOMS.Count();
 
                 trans.Commit();
             }

@@ -33,18 +33,17 @@ namespace Aras.Model
     [Attributes.ItemType("User")]
     public class User : Item
     {
-        private Stores.Relationship _aliasQuery;
-        private Stores.Relationship AliasQuery
+        private Stores.Relationship<Alias> _aliasStore;
+        private Stores.Relationship<Alias> AliasStore
         {
             get
             {
-                if (this._aliasQuery == null)
+                if (this._aliasStore == null)
                 {
-                    this._aliasQuery = (Stores.Relationship)this.Cache("Alias").Store();
-                    this._aliasQuery.Refresh();
+                    this._aliasStore = new Stores.Relationship<Alias>(this, "Alias");
                 }
 
-                return this._aliasQuery;
+                return this._aliasStore;
             }
         }
 
@@ -52,7 +51,7 @@ namespace Aras.Model
         {
             get
             {
-                return (Alias)this.AliasQuery.First();
+                return (Alias)this.AliasStore.First();
             }
         }
 
@@ -67,7 +66,7 @@ namespace Aras.Model
         protected override void OnRefresh()
         {
             base.OnRefresh();
-            this.AliasQuery.Refresh();
+            this.AliasStore.Refresh();
         }
 
         public User(ItemType ItemType)

@@ -294,26 +294,6 @@ namespace Aras.Model
             return this.Cache(this.ItemType(Name));
         }
 
-        public Stores.Item Store(ItemType ItemType, Condition Condition)
-        {
-            return (Stores.Item)this.Cache(ItemType).Store(Condition);
-        }
-
-        public Stores.Item Store(ItemType ItemType)
-        {
-            return (Stores.Item)this.Cache(ItemType).Store();
-        }
-
-        public Stores.Item Store(String Name, Condition Condition)
-        {
-            return (Stores.Item)this.Cache(Name).Store(Condition);
-        }
-
-        public Stores.Item Store(String Name)
-        {
-            return (Stores.Item)this.Cache(Name).Store();
-        }
-
         internal Item Get(ItemType ItemType, String ID)
         {
             Item ret = null;

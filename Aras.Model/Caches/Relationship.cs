@@ -150,16 +150,6 @@ namespace Aras.Model.Caches
             return relationship;
         }
 
-        public Stores.Relationship Store(Condition Condition)
-        {
-            return new Stores.Relationship(this, Condition);
-        }
-
-        public Stores.Relationship Store()
-        {
-            return new Stores.Relationship(this);
-        }
-
         internal Relationship(RelationshipType Type, Model.Item Source)
             :base(Type)
         {

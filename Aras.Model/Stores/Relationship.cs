@@ -30,8 +30,18 @@ using System.Threading.Tasks;
 
 namespace Aras.Model.Stores
 {
-    public class Relationship : Store<Model.Relationship>
+    public class Relationship<T> : Store<T> where T : Model.Relationship
     {
+        public Caches.Relationship Cache { get; private set; }
+
+        public override ItemType ItemType
+        {
+            get
+            {
+                return this.Cache.ItemType;
+            }
+        }
+
         public Model.Item Source
         {
             get
@@ -48,7 +58,35 @@ namespace Aras.Model.Stores
             }
         }
 
-        protected override List<Model.Relationship> Run()
+        private Dictionary<Model.Item, T> FirstByRelatedCache;
+        public T FirstByRelated(Model.Item Related)
+        {
+            if (!this.FirstByRelatedCache.ContainsKey(Related))
+            {
+                foreach (T relationship in this.Items)
+                {
+                    if (relationship.Related.Equals(Related))
+                    {
+                        this.FirstByRelatedCache[Related] = relationship;
+                        return relationship;
+                    }
+                }
+
+                this.FirstByRelatedCache[Related] = null;
+                return null;
+            }
+            else
+            {
+                return this.FirstByRelatedCache[Related];
+            }
+        }
+
+        protected override void OnRefresh()
+        {
+            this.FirstByRelatedCache.Clear();
+        }
+
+        protected override List<T> Run()
         {
             IO.Item item = new IO.Item(this.ItemType.Name, "get");
             item.Select = this.Cache.Select;
@@ -59,13 +97,13 @@ namespace Aras.Model.Stores
             IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Cache.Session, item);
             IO.SOAPResponse response = request.Execute();
 
-            List<Model.Relationship> ret = new List<Model.Relationship>();
+            List<T> ret = new List<T>();
 
             if (!response.IsError)
             {
                 foreach (IO.Item dbitem in response.Items)
                 {
-                    Model.Relationship relationship = this.Cache.Get(dbitem);
+                    T relationship = (T)this.Cache.Get(dbitem);
                     ret.Add(relationship);
                 }
 
@@ -82,27 +120,55 @@ namespace Aras.Model.Stores
             return ret;
         }
 
-        public Model.Relationship Create(Model.Item Related, Transaction Transaction)
+        public T Create(Model.Item Related, Transaction Transaction)
         {
-            Model.Relationship relationship = ((Caches.Relationship)this.Cache).Create(Related, Transaction);
+            T relationship = (T)((Caches.Relationship)this.Cache).Create(Related, Transaction);
             this.NewItems.Add(relationship);
             this.Items.Add(relationship);
+            this.OnStoreChanged();
             return relationship;
         }
 
-        public Model.Relationship Create(Model.Item Related)
+        public T Create(Model.Item Related)
         {
-            return ((Caches.Relationship)this.Cache).Create(Related, null);
+            return this.Create(Related, null);
         }
 
-        internal Relationship(Cache<Model.Relationship> Store, Condition Condition)
-            : base(Store, Condition)
+        internal Relationship(Caches.Relationship Cache, Condition Condition)
+            : base(Condition)
+        {
+            this.Cache = Cache;
+            this.FirstByRelatedCache = new Dictionary<Item, T>();
+        }
+
+        internal Relationship(Caches.Relationship Cache)
+            :this(Cache, null)
         {
 
         }
 
-        internal Relationship(Cache<Model.Relationship> Store)
-            :this(Store, null)
+        public Relationship(Model.Item Source, RelationshipType RelationshipType, Condition Condition)
+            :base(Condition)
+        {
+            this.Cache = Source.Cache(RelationshipType);
+            this.FirstByRelatedCache = new Dictionary<Item, T>();
+        }
+
+        public Relationship(Model.Item Source, RelationshipType RelationshipType)
+            :this(Source, RelationshipType, null)
+        {
+
+        }
+
+        public Relationship(Model.Item Source, String Name, Condition Condition)
+            :base(Condition)
+        {
+            this.Cache = Source.Cache(Name);
+            this.FirstByRelatedCache = new Dictionary<Item, T>();
+        }
+
+        public Relationship(Model.Item Source, String Name)
+            :this(Source, Name, null)
         {
 
         }

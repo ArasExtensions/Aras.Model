@@ -54,22 +54,14 @@ namespace Aras.Model.Design
             }
         }
 
-        private List<PartVariantRule> _partVariantRules;
-        public IEnumerable<PartVariantRule> PartVariantRules
+        private Model.Stores.Relationship<PartVariantRule> _partVariantRules;
+        public Model.Stores.Relationship<PartVariantRule> PartVariantRules
         {
             get
             {
                 if (this._partVariantRules == null)
                 {
-                    this._partVariantRules = new List<PartVariantRule>();
-
-                    Stores.Relationship pvrquery = (Stores.Relationship)this.Store("Part Variant Rule");
-                    pvrquery.Refresh();
-
-                    foreach(PartVariantRule pvr in pvrquery)
-                    {
-                        this._partVariantRules.Add(pvr);
-                    }
+                    this._partVariantRules = new Stores.Relationship<PartVariantRule>(this, "Part Variant Rule");
                 }
 
                 return this._partVariantRules;
@@ -95,7 +87,7 @@ namespace Aras.Model.Design
             {
                 if (!this._configuredPartBOM.ContainsKey(Order))
                 {
-                    this._configuredPartBOM[Order] = (PartBOM)Source.Store("Part BOM").Create(this.Related);
+                    this._configuredPartBOM[Order] = new Stores.Relationship<PartBOM>(Source, "Part BOM").Create(this.Related);
                 }
 
                 // Update Properties
@@ -114,7 +106,10 @@ namespace Aras.Model.Design
             base.OnRefresh();
         
             // Reset PartVariantRules
-            this._partVariantRules = null;
+            if (this._partVariantRules != null)
+            {
+                this._partVariantRules.Refresh();
+            }
         }
 
         public PartVariant(Model.RelationshipType RelationshipType, Model.Item Source, Model.Item Related)

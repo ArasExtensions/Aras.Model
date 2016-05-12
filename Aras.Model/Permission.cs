@@ -43,8 +43,7 @@ namespace Aras.Model
                 {
                     this._access = new List<Access>();
 
-
-                    Stores.Relationship accessquery = (Stores.Relationship)this.Permission.Cache("Access").Store();
+                    Stores.Relationship<Access> accessquery = new Stores.Relationship<Access>(this.Cache("Access"));
                     accessquery.Paging = false;
                     accessquery.Refresh();
 

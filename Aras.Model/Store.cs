@@ -31,11 +31,32 @@ using System.ComponentModel;
 
 namespace Aras.Model
 {
+    public class StoreChangedEventArgs : EventArgs
+    {
+        public StoreChangedEventArgs()
+            : base()
+        {
+
+        }
+    }
+
+    public delegate void StoreChangedEventHandler(object sender, StoreChangedEventArgs e);
+
     public abstract class Store<T> : System.Collections.Generic.IEnumerable<T> where T : Model.Item, INotifyPropertyChanged
     {
         public const Int32 MinPageSize = 5;
         public const Int32 DefaultPageSize = 25;
         public const Int32 MaxPageSize = 100;
+
+        public event StoreChangedEventHandler StoreChanged;
+
+        protected void OnStoreChanged()
+        {
+            if (this.StoreChanged != null)
+            {
+                StoreChanged(this, new StoreChangedEventArgs());
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -46,8 +67,6 @@ namespace Aras.Model
                 PropertyChanged(this, new PropertyChangedEventArgs(Name));
             }
         }
-
-        public Cache<T> Cache { get; private set; }
 
         private Int32 _pageSize;
         public Int32 PageSize
@@ -186,13 +205,7 @@ namespace Aras.Model
             return this.ToList();
         }
 
-        public ItemType ItemType
-        {
-            get
-            {
-                return this.Cache.ItemType;
-            }
-        }
+        public abstract ItemType ItemType { get; }
 
         private Condition _condition;
         public Condition Condition 
@@ -267,21 +280,25 @@ namespace Aras.Model
             {
                 this.Items.Add(item);
             }
+
+            this.OnStoreChanged();
         }
 
         protected abstract List<T> Run();
 
+        protected abstract void OnRefresh();
+
         public void Refresh()
         {
+            this.OnRefresh();
             this.Execute();
             this.Executed = true;
         }
 
-        internal Store(Cache<T> Cache, Condition Condition)
+        internal Store(Condition Condition)
         {
             this.Items = new List<T>();
             this.NewItems = new List<T>();
-            this.Cache = Cache;
             this._condition = Condition;
             this.Executed = false;
             this._pageSize = DefaultPageSize;

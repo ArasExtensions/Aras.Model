@@ -133,16 +133,6 @@ namespace Aras.Model.Caches
             return item;
         }
 
-        public Stores.Item Store(Condition Condition)
-        {
-            return new Stores.Item(this, Condition);
-        }
-
-        public Stores.Item Store()
-        {
-            return new Stores.Item(this);
-        }
-
         internal Item(ItemType Type)
             :base(Type)
         {
