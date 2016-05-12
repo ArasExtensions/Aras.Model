@@ -257,14 +257,8 @@ namespace Aras.Model
             // Clear current Items
             this.Items.Clear();
 
-            // Run Query and add Items that are not marked for Deletion
-            foreach (T item in this.Run())
-            {
-                if (item.Action != Item.Actions.Delete)
-                {
-                    this.Items.Add(item);
-                }
-            }
+            // Run Query and set Items
+            this.Items = this.Run();
 
             // Refresh New Items
             foreach(T item in this.NewItems.ToList())
@@ -288,9 +282,32 @@ namespace Aras.Model
 
         protected abstract void OnRefresh();
 
+        private List<T> _currentItems;
+        public IEnumerable<T> CurrentItems
+        {
+            get
+            {
+                if (this._currentItems == null)
+                {
+                    this._currentItems = new List<T>();
+
+                    foreach(T item in this)
+                    {
+                        if (item.Action != Item.Actions.Delete)
+                        {
+                            this._currentItems.Add(item);
+                        }
+                    }
+                }
+
+                return this._currentItems;
+            }
+        }
+
         public void Refresh()
         {
             this.OnRefresh();
+            this._currentItems = null;
             this.Execute();
             this.Executed = true;
         }

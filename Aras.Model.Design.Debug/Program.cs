@@ -52,16 +52,24 @@ namespace Aras.Model.Design.Debug
                 order.OrderContexts.First().Value = "1";
                 order.OrderContexts.First().Quantity = 11;
                 order.UpdateBOM();
-                int noboms = order.ConfiguredPart.PartBOMS.Count();
+                trans.Commit();
+            }
 
+            using (Transaction trans = session.BeginTransaction())
+            {
+                order.Update(trans);
                 order.OrderContexts.First().Value = "0";
+                order.OrderContexts.First().Quantity = 11;
                 order.UpdateBOM();
-                noboms = order.ConfiguredPart.PartBOMS.Count();
+                trans.Commit();
+            }
 
+            using (Transaction trans = session.BeginTransaction())
+            {
+                order.Update(trans);
                 order.OrderContexts.First().Value = "1";
+                order.OrderContexts.First().Quantity = 10;
                 order.UpdateBOM();
-                noboms = order.ConfiguredPart.PartBOMS.Count();
-
                 trans.Commit();
             }
 
