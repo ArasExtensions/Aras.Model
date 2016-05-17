@@ -359,6 +359,9 @@ namespace Aras.Model
                     case "String":
                         this.PropertyCache[PropertyType] = new Properties.String(this, (PropertyTypes.String)PropertyType);
                         break;
+                    case "Federated":
+                        this.PropertyCache[PropertyType] = new Properties.Federated(this, (PropertyTypes.Federated)PropertyType);
+                        break;
                     case "MultilingualString":
                         this.PropertyCache[PropertyType] = new Properties.MultilingualString(this, (PropertyTypes.MultilingualString)PropertyType);
                         break;

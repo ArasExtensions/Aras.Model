@@ -28,50 +28,56 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Design
 {
-    [Attributes.ItemType("User")]
-    public class User : Item
+    [Model.Attributes.ItemType("CAD")]
+    public class CAD : Model.Item
     {
-        private Stores.Relationship<Alias> _aliases;
-        private Stores.Relationship<Alias> Aliases
+        public String ItemNumber
         {
             get
             {
-                if (this._aliases == null)
-                {
-                    this._aliases = new Stores.Relationship<Alias>(this, "Alias");
-                }
-
-                return this._aliases;
-            }
-        }
-
-        public Alias Alias
-        {
-            get
-            {
-                return (Alias)this.Aliases.First();
-            }
-        }
-
-        public Identity Identity
-        {
-            get
-            {
-                return (Identity)this.Alias.Related;
-            }
-        }
-
-        public Vault Vault
-        {
-            get
-            {
-                return (Vault)this.Property("default_vault").Value;
+                return (String)this.Property("item_number").Value;
             }
             set
             {
-                this.Property("default_vault").Value = value;
+                this.Property("item_number").Value = value;
+            }
+        }
+
+        public String Name
+        {
+            get
+            {
+                return (String)this.Property("name").Value;
+            }
+            set
+            {
+                this.Property("name").Value = value;
+            }
+        }
+
+        public File NativeFile
+        {
+            get
+            {
+                return (File)this.Property("native_file").Value;
+            }
+            set
+            {
+                this.Property("native_file").Value = value;
+            }
+        }
+
+        public File ViewableFile
+        {
+            get
+            {
+                return (File)this.Property("viewable_file").Value;
+            }
+            set
+            {
+                this.Property("viewable_file").Value = value;
             }
         }
 
@@ -79,22 +85,19 @@ namespace Aras.Model
         {
             base.OnRefresh();
 
-            if (this._aliases != null)
-            {
-                this._aliases.Refresh();
-            }
+
         }
 
-        public User(ItemType ItemType)
+        public CAD(Model.ItemType ItemType)
             : base(ItemType)
         {
-          
+ 
         }
 
-        public User(ItemType ItemType, IO.Item DBItem)
+        public CAD(Model.ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
-          
+
         }
     }
 }

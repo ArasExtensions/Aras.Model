@@ -329,6 +329,12 @@ namespace Aras.Model
             return ret;
         }
 
+        private Random Random;
+        internal Double DownloadRandom()
+        {
+            return this.Random.NextDouble();
+        }
+
         internal Session(Database Database, String UserID, String Username, String Password)
         {
             this.ID = Server.NewID();
@@ -339,10 +345,14 @@ namespace Aras.Model
             this.ItemTypeNameCache = new Dictionary<String, ItemType>();
             this.ItemTypeIDCache = new Dictionary<String, ItemType>();
             this.Caches = new Dictionary<ItemType, Caches.Item>();
+            this.Random = new Random();
 
             // Default Selections
             this.ItemType("Value").AddToSelect("value,label");
             this.ItemType("Access").AddToSelect("can_get,can_update,can_delete,can_discover,can_change_access");
+            this.ItemType("User").AddToSelect("default_vault");
+            this.ItemType("File").AddToSelect("filename");
+            this.ItemType("Vault").AddToSelect("vault_url");
         }
     }
 }

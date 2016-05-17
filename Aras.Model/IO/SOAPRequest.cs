@@ -39,6 +39,8 @@ namespace Aras.Model.IO
     {
         public SOAPOperation Operation { get; private set; }
 
+        public Server Server { get; private set; }
+
         public Database Database { get; private set; }
 
         public String Username { get; private set; }
@@ -55,6 +57,7 @@ namespace Aras.Model.IO
                 if (this._request == null)
                 {
                     this._request = (HttpWebRequest)WebRequest.Create(this.Database.Server.ApiURL);
+                    this._request.CookieContainer = this.Server.Cookies;
                     this._request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                     this._request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
                     this._request.Headers.Add("Cache-Control", "no-cache");
@@ -125,8 +128,11 @@ namespace Aras.Model.IO
         {
             try
             {
-                using (WebResponse webresponse = this.Request.GetResponse())
+                using (HttpWebResponse webresponse = (HttpWebResponse)this.Request.GetResponse())
                 {
+                    // Store Cookies
+                    this.Server.Cookies.Add(webresponse.Cookies);
+                    
                     using (Stream result = webresponse.GetResponseStream())
                     {
                         XmlDocument doc = new XmlDocument();
@@ -166,6 +172,7 @@ namespace Aras.Model.IO
         public SOAPRequest(SOAPOperation Operation, Session Session, Item Item)
         {
             this.Operation = Operation;
+            this.Server = Session.Database.Server;
             this.Database = Session.Database;
             this.Username = Session.Username;
             this.Password = Session.Password;
@@ -175,6 +182,7 @@ namespace Aras.Model.IO
         public SOAPRequest(SOAPOperation Operation, Session Session, IEnumerable<Item> Items)
         {
             this.Operation = Operation;
+            this.Server = Session.Database.Server;
             this.Database = Session.Database;
             this.Username = Session.Username;
             this.Password = Session.Password;
@@ -184,6 +192,7 @@ namespace Aras.Model.IO
         public SOAPRequest(SOAPOperation Operation, Database Database, String Username, String Password)
         {
             this.Operation = Operation;
+            this.Server = Database.Server;
             this.Database = Database;
             this.Username = Username;
             this.Password = Password;

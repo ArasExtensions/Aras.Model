@@ -30,36 +30,14 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    [Attributes.ItemType("User")]
-    public class User : Item
+    [Attributes.ItemType("Located")]
+    public class Located : Relationship
     {
-        private Stores.Relationship<Alias> _aliases;
-        private Stores.Relationship<Alias> Aliases
+        public File File
         {
             get
             {
-                if (this._aliases == null)
-                {
-                    this._aliases = new Stores.Relationship<Alias>(this, "Alias");
-                }
-
-                return this._aliases;
-            }
-        }
-
-        public Alias Alias
-        {
-            get
-            {
-                return (Alias)this.Aliases.First();
-            }
-        }
-
-        public Identity Identity
-        {
-            get
-            {
-                return (Identity)this.Alias.Related;
+                return (File)this.Source;
             }
         }
 
@@ -67,34 +45,20 @@ namespace Aras.Model
         {
             get
             {
-                return (Vault)this.Property("default_vault").Value;
-            }
-            set
-            {
-                this.Property("default_vault").Value = value;
+                return (Vault)this.Related;
             }
         }
 
-        protected override void OnRefresh()
+        public Located(RelationshipType RelationshipType, Item Source, Item Related)
+            :base(RelationshipType, Source, Related)
         {
-            base.OnRefresh();
-
-            if (this._aliases != null)
-            {
-                this._aliases.Refresh();
-            }
+      
         }
 
-        public User(ItemType ItemType)
-            : base(ItemType)
+        public Located(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
+            : base(RelationshipType, Source, DBItem)
         {
-          
-        }
 
-        public User(ItemType ItemType, IO.Item DBItem)
-            : base(ItemType, DBItem)
-        {
-          
         }
     }
 }

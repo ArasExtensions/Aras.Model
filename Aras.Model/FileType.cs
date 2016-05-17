@@ -30,48 +30,42 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    [Attributes.ItemType("User")]
-    public class User : Item
+    [Attributes.ItemType("FileType")]
+    public class FileType : Item
     {
-        private Stores.Relationship<Alias> _aliases;
-        private Stores.Relationship<Alias> Aliases
+        public String Name
         {
             get
             {
-                if (this._aliases == null)
-                {
-                    this._aliases = new Stores.Relationship<Alias>(this, "Alias");
-                }
-
-                return this._aliases;
-            }
-        }
-
-        public Alias Alias
-        {
-            get
-            {
-                return (Alias)this.Aliases.First();
-            }
-        }
-
-        public Identity Identity
-        {
-            get
-            {
-                return (Identity)this.Alias.Related;
-            }
-        }
-
-        public Vault Vault
-        {
-            get
-            {
-                return (Vault)this.Property("default_vault").Value;
+                return (String)this.Property("name").Value;
             }
             set
             {
-                this.Property("default_vault").Value = value;
+                this.Property("name").Value = value;
+            }
+        }
+
+        public String Description
+        {
+            get
+            {
+                return (String)this.Property("description").Value;
+            }
+            set
+            {
+                this.Property("description").Value = value;
+            }
+        }
+
+        public String Extension
+        {
+            get
+            {
+                return (String)this.Property("extension").Value;
+            }
+            set
+            {
+                this.Property("extension").Value = value;
             }
         }
 
@@ -79,22 +73,19 @@ namespace Aras.Model
         {
             base.OnRefresh();
 
-            if (this._aliases != null)
-            {
-                this._aliases.Refresh();
-            }
+
         }
 
-        public User(ItemType ItemType)
+        public FileType(ItemType ItemType)
             : base(ItemType)
         {
-          
+
         }
 
-        public User(ItemType ItemType, IO.Item DBItem)
+        public FileType(ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
-          
+
         }
     }
 }

@@ -27,51 +27,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Aras.Model
 {
-    [Attributes.ItemType("User")]
-    public class User : Item
+    [Attributes.ItemType("Vault")]
+    public class Vault : Item
     {
-        private Stores.Relationship<Alias> _aliases;
-        private Stores.Relationship<Alias> Aliases
+
+        public String Name
         {
             get
             {
-                if (this._aliases == null)
-                {
-                    this._aliases = new Stores.Relationship<Alias>(this, "Alias");
-                }
-
-                return this._aliases;
-            }
-        }
-
-        public Alias Alias
-        {
-            get
-            {
-                return (Alias)this.Aliases.First();
-            }
-        }
-
-        public Identity Identity
-        {
-            get
-            {
-                return (Identity)this.Alias.Related;
-            }
-        }
-
-        public Vault Vault
-        {
-            get
-            {
-                return (Vault)this.Property("default_vault").Value;
+                return (String)this.Property("name").Value;
             }
             set
             {
-                this.Property("default_vault").Value = value;
+                this.Property("name").Value = value;
+            }
+        }
+
+        public String URL
+        {
+            get
+            {
+                return (String)this.Property("vault_url").Value;
+            }
+            set
+            {
+                this.Property("vault_url").Value = value;
             }
         }
 
@@ -79,22 +63,19 @@ namespace Aras.Model
         {
             base.OnRefresh();
 
-            if (this._aliases != null)
-            {
-                this._aliases.Refresh();
-            }
+
         }
 
-        public User(ItemType ItemType)
+        public Vault(ItemType ItemType)
             : base(ItemType)
         {
-          
+
         }
 
-        public User(ItemType ItemType, IO.Item DBItem)
+        public Vault(ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
-          
+
         }
     }
 }

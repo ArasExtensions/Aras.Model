@@ -50,6 +50,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -61,6 +62,7 @@
     <Compile Include="Actions\Item.cs" />
     <Compile Include="Actions\Relationship.cs" />
     <Compile Include="Access.cs" />
+    <Compile Include="Located.cs" />
     <Compile Include="Attributes\ItemType.cs" />
     <Compile Include="Class.cs" />
     <Compile Include="Condition.cs" />
@@ -72,10 +74,15 @@
     <Compile Include="Exceptions\ReadOnlyException.cs" />
     <Compile Include="Exceptions\ArgumentException.cs" />
     <Compile Include="Exceptions\ServerException.cs" />
+    <Compile Include="PropertyTypes\Federated.cs" />
+    <Compile Include="Props\Federated.cs" />
+    <Compile Include="Vault.cs" />
+    <Compile Include="FileType.cs" />
     <Compile Include="Icon.cs" />
     <Compile Include="LifeCycleMap.cs" />
     <Compile Include="LifeCycleState.cs" />
     <Compile Include="ObservableList.cs" />
+    <Compile Include="File.cs" />
     <Compile Include="PropertyTypes\Float.cs" />
     <Compile Include="PropertyTypes\Foreign.cs" />
     <Compile Include="PropertyTypes\FilterList.cs" />

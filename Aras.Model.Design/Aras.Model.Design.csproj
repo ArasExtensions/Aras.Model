@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CAD.cs" />
     <Compile Include="PartVariantRule.cs" />
     <Compile Include="PartVariant.cs" />
     <Compile Include="VariantContext.cs" />

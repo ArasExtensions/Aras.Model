@@ -28,73 +28,62 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Properties
 {
-    [Attributes.ItemType("User")]
-    public class User : Item
+    public class Federated : Property
     {
-        private Stores.Relationship<Alias> _aliases;
-        private Stores.Relationship<Alias> Aliases
+        public override Object Value
         {
             get
             {
-                if (this._aliases == null)
-                {
-                    this._aliases = new Stores.Relationship<Alias>(this, "Alias");
-                }
-
-                return this._aliases;
-            }
-        }
-
-        public Alias Alias
-        {
-            get
-            {
-                return (Alias)this.Aliases.First();
-            }
-        }
-
-        public Identity Identity
-        {
-            get
-            {
-                return (Identity)this.Alias.Related;
-            }
-        }
-
-        public Vault Vault
-        {
-            get
-            {
-                return (Vault)this.Property("default_vault").Value;
+                return base.Value;
             }
             set
             {
-                this.Property("default_vault").Value = value;
+                if (value == null)
+                {
+                    if (base.Value != null)
+                    {
+                        base.Value = value;
+                    }
+                }
+                else if (value is System.String)
+                {
+                    if (!((System.String)value).Equals(base.Value))
+                    {
+                        base.Value = value;
+                    }
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Value must be a System.String");
+                }
             }
         }
 
-        protected override void OnRefresh()
+        internal override string DBValue
         {
-            base.OnRefresh();
-
-            if (this._aliases != null)
+            get
             {
-                this._aliases.Refresh();
+                if (this.Value == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return this.Value.ToString();
+                }
+            }
+            set
+            {
+                this.SetValue(value);
             }
         }
 
-        public User(ItemType ItemType)
-            : base(ItemType)
+        internal Federated(Model.Item Item, PropertyTypes.Federated Type)
+            :base(Item, Type)
         {
-          
-        }
 
-        public User(ItemType ItemType, IO.Item DBItem)
-            : base(ItemType, DBItem)
-        {
-          
         }
     }
 }
