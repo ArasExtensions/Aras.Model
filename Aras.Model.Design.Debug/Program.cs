@@ -37,7 +37,7 @@ namespace Aras.Model.Design.Debug
         static void Main(string[] args)
         {
             // Connect to Server
-            Model.Server server = new Model.Server("http://192.168.1.23/11SP1");
+            Model.Server server = new Model.Server("http://172.16.247.130/11SP1");
             server.ProxyURL = "http://127.0.0.1:8888";
             server.LoadAssembly("Aras.Model.Design");
             server.LoadAssembly("Aras.ViewModel.Design");
@@ -62,7 +62,7 @@ namespace Aras.Model.Design.Debug
 
                 using (FileStream infile = new FileStream("c:\\work\\sample2.pdf", FileMode.Open))
                 {
-                    newviewable.Write(infile);
+                    newviewable.Write(infile, "sample3.pdf");
                 }
 
                 cad.ViewableFile = newviewable;

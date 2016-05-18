@@ -44,6 +44,11 @@ namespace Aras.Model.IO
             return System.Text.Encoding.ASCII.GetBytes(this.Doc.OuterXml);
         }
 
+        internal String GetString()
+        {
+            return this.Doc.OuterXml;
+        }
+
         public String ID
         {
             get

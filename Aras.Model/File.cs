@@ -56,10 +56,6 @@ namespace Aras.Model
             {
                 return (String)this.Property("checksum").Value;
             }
-            set
-            {
-                this.Property("checksum").Value = value;
-            }
         }
 
         public String Filename
@@ -68,10 +64,6 @@ namespace Aras.Model
             {
                 return (String)this.Property("filename").Value;
             }
-            set
-            {
-                this.Property("filename").Value = value;
-            }
         }
 
         public Int32 FileSize
@@ -79,10 +71,6 @@ namespace Aras.Model
             get
             {
                 return (Int32)this.Property("file_size").Value;
-            }
-            set
-            {
-                this.Property("file_size").Value = value;
             }
         }
 
@@ -235,9 +223,56 @@ namespace Aras.Model
             }
         }
 
-        public void Write(Stream Stream)
+        private FileInfo _cacheFilename;
+        private FileInfo CacheFilename
         {
+            get
+            {
+                if (this._cacheFilename == null)
+                {
+                    this._cacheFilename = new FileInfo(this.Session.CacheDirectory.FullName + "\\" + this.ID + ".dat");
+                }
 
+                return this._cacheFilename;
+            }
+        }
+
+        internal byte[] GetCacheBytes()
+        {
+            if (this.CacheFilename.Exists)
+            {
+                byte[] buffer = new byte[this.CacheFilename.Length];
+
+                using(FileStream cachefile = new FileStream(this.CacheFilename.FullName, FileMode.Open))
+                {
+                    cachefile.Read(buffer, 0, buffer.Length);
+                }
+
+                return buffer;
+            }
+            else
+            {
+                return new byte[0];
+            }
+        }
+
+        internal String VaultFilename { get; private set; }
+
+        public void Write(Stream Input, String Filename)
+        {
+            byte[] buffer = new byte[bufferlength];
+            int read = 0;
+
+            using (FileStream cache = new FileStream(this.CacheFilename.FullName, FileMode.Create))
+            {
+                while ((read = Input.Read(buffer, 0, bufferlength)) > 0)
+                {
+                    cache.Write(buffer, 0, read);
+                }
+            }
+
+            // Store Filename
+            this.VaultFilename = Path.GetFileName(Filename);
         }
 
         protected override void OnRefresh()
@@ -253,7 +288,7 @@ namespace Aras.Model
         public File(ItemType ItemType)
             : base(ItemType)
         {
-
+           
         }
 
         public File(ItemType ItemType, IO.Item DBItem)

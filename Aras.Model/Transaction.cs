@@ -89,6 +89,17 @@ namespace Aras.Model
                     throw new Exceptions.ArgumentException("Source Item not present in Transaction");
                 }
             }
+            else if (Item is File)
+            {
+                if (this.ActionsCache.ContainsKey(Item.ID))
+                {
+                    this.ActionsCache[Item.ID].Name = Name;
+                }
+                else
+                {
+                    this.ActionsCache[Item.ID] = new Actions.File(this, Name, Item);
+                }  
+            }
             else
             {
                 if (this.ActionsCache.ContainsKey(Item.ID))

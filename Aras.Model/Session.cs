@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Aras.Model
 {
@@ -37,6 +38,25 @@ namespace Aras.Model
         public Database Database { get; private set; }
 
         public String UserID { get; private set; }
+
+        private DirectoryInfo _cacheDirectory;
+        internal DirectoryInfo CacheDirectory
+        {
+            get
+            {
+                if (this._cacheDirectory == null)
+                {
+                    this._cacheDirectory = new DirectoryInfo(Path.GetTempPath() + "\\Aras\\Session\\Cache\\" + this.ID);
+
+                    if (!this._cacheDirectory.Exists)
+                    {
+                        this._cacheDirectory.Create();
+                    }
+                }
+
+                return this._cacheDirectory;
+            }
+        }
 
         private User _user;
         public User User
