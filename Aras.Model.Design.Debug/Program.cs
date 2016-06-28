@@ -54,6 +54,11 @@ namespace Aras.Model.Design.Debug
                 VariantContext variantcontext = ordercontext.VariantContext;
                 String question = variantcontext.Question;
                 String value = ordercontext.Value;
+                Properties.VariableList valuelist = ordercontext.ValueList;
+                List list = valuelist.Values;
+                IEnumerable<ListValue> values = list.Values;
+                ListValue test = values.First();
+
 
             }
 
