@@ -37,38 +37,36 @@ namespace Aras.Model.Design.Debug
         static void Main(string[] args)
         {
             // Connect to Server
-            Model.Server server = new Model.Server("http://172.16.247.130/11SP1");
-            server.ProxyURL = "http://127.0.0.1:8888";
+            Model.Server server = new Model.Server("http://localhost/InnovatorServer100SP4/");
+            //server.ProxyURL = "http://127.0.0.1:8888";
             server.LoadAssembly("Aras.Model.Design");
             server.LoadAssembly("Aras.ViewModel.Design");
-            Model.Database database = server.Database("Development11SP1");
+            Model.Database database = server.Database("CMB");
             Model.Session session = database.Login("admin", Model.Server.PasswordHash("innovator"));
             session.ItemType("CAD").AddToSelect("native_file,viewable_file");
 
 
-            Model.Stores.Item<Model.Design.CAD> store = new Model.Stores.Item<Model.Design.CAD>(session, "CAD", Aras.Conditions.Eq("item_number", "123456"));
-            Model.Design.CAD cad = store.First();
-            Model.File viewable = cad.ViewableFile;
+            Model.Stores.Item<Model.Design.Order> store = new Model.Stores.Item<Model.Design.Order>(session, "v_Order", Aras.Conditions.Eq("item_number", "dja0504v1"));
+            Model.Design.Order order = store.First();
 
-            using (FileStream outfile = new FileStream("c:\\temp\\sample1.pdf", FileMode.Create))
+            foreach(Model.Design.OrderContext ordercontext in order.OrderContexts)
             {
-                viewable.Read(outfile);
+                VariantContext variantcontext = ordercontext.VariantContext;
+                String question = variantcontext.Question;
+                String value = ordercontext.Value;
+
             }
 
-            using (Transaction trans = session.BeginTransaction())
+            using (Model.Transaction transaction = session.BeginTransaction())
             {
-                cad.Update(trans);
-                File newviewable = (File)session.Cache("File").Create(trans);
+                order.Update(transaction);
+ 
+                order.UpdateBOM();
 
-                using (FileStream infile = new FileStream("c:\\work\\sample2.pdf", FileMode.Open))
-                {
-                    newviewable.Write(infile, "sample3.pdf");
-                }
-
-                cad.ViewableFile = newviewable;
-
-                trans.Commit();
+                transaction.Commit();
             }
+
+
         }
     }
 }

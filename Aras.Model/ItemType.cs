@@ -331,6 +331,9 @@ namespace Aras.Model
                                         case "federated":
                                             this._propertyTypeCache[name] = new PropertyTypes.Federated(this, name, label, ReadOnly, false, DefaultString);
                                             break;
+                                        case "sequence":
+                                            this._propertyTypeCache[name] = new PropertyTypes.Sequence(this, name, label, ReadOnly, false, DefaultString);
+                                            break;
                                         case "filter list":
                                             List valuefilterlist = (List)this.Session.Cache("List").Get(thisprop.GetProperty("data_source"));
                                             this._propertyTypeCache[name] = new PropertyTypes.FilterList(this, name, label, ReadOnly, false, valuefilterlist);
