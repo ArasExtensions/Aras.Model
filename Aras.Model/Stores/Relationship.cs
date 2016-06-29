@@ -63,22 +63,23 @@ namespace Aras.Model.Stores
         {
             if (!this.FirstByRelatedCache.ContainsKey(Related))
             {
+                this.FirstByRelatedCache[Related] = null;
+            }
+
+            if (this.FirstByRelatedCache[Related] == null)
+            {
                 foreach (T relationship in this.Items)
                 {
                     if (relationship.Related.Equals(Related))
                     {
                         this.FirstByRelatedCache[Related] = relationship;
-                        return relationship;
+                        break;
                     }
                 }
+            }
 
-                this.FirstByRelatedCache[Related] = null;
-                return null;
-            }
-            else
-            {
-                return this.FirstByRelatedCache[Related];
-            }
+            return this.FirstByRelatedCache[Related];
+
         }
 
         protected override void OnRefresh()
