@@ -46,7 +46,7 @@ namespace Aras.Model.Design.Debug
             session.ItemType("CAD").AddToSelect("native_file,viewable_file");
 
 
-            Model.Stores.Item<Model.Design.Order> store = new Model.Stores.Item<Model.Design.Order>(session, "v_Order", Aras.Conditions.Eq("item_number", "dja0504v1"));
+            Model.Stores.Item<Model.Design.Order> store = new Model.Stores.Item<Model.Design.Order>(session, "v_Order", Aras.Conditions.Eq("item_number", "2465M_Test001"));
             Model.Design.Order order = store.First();
 
             foreach(Model.Design.OrderContext ordercontext in order.OrderContexts)

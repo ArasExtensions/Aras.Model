@@ -199,6 +199,7 @@ namespace Aras.Model.Design
                 else
                 {
                     this.ConfiguredPart = (Part)partsstore.First();
+                    this.ConfiguredPart.Update(this.Transaction);
                 }
             }
             else
