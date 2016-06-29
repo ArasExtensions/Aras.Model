@@ -180,6 +180,8 @@ namespace Aras.Model.Design
             base.OnUpdate();
             
             // Update Order Contexts
+            this.OrderContexts.Refresh();
+
             foreach (OrderContext ordercontext in this.OrderContexts)
             {
                 ordercontext.Update(this.Transaction, true);
