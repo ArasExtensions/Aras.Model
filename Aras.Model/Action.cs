@@ -144,7 +144,6 @@ namespace Aras.Model
         {            
             // Unlock
             this.Item.UnLock();
-            this.Item.Transaction = null;
 
             foreach (Actions.Relationship relation in this.RelationshipsCache.Values)
             {

@@ -284,9 +284,6 @@ namespace Aras.Model.Design
                             flatbom.Remove(part);
                         }
 
-                        // Refresh PartBOM
-                        this.ConfiguredPart.PartBOMS.Refresh();
-
                         // Remove any Part BOM no longer required in Configured Part
                         foreach (PartBOM partbom in this.ConfiguredPart.PartBOMS)
                         {

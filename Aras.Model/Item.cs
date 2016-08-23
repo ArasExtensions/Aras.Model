@@ -628,6 +628,7 @@ namespace Aras.Model
             if (this.LockedBy == null)
             {
                 this.Action = Actions.Read;
+                this.DatabaseState = DatabaseStates.Stored;
                 this.Transaction = null;
                 return true;
             }
@@ -644,6 +645,7 @@ namespace Aras.Model
                     {
                         this.UpdateProperties(response.Items.First());
                         this.Action = Actions.Read;
+                        this.DatabaseState = DatabaseStates.Stored;
                         this.Transaction = null;
                         this.Property("locked_by_id").DBValue = null;
                         
