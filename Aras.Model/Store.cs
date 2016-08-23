@@ -282,32 +282,24 @@ namespace Aras.Model
 
         protected abstract void OnRefresh();
 
-        private List<T> _currentItems;
-        public IEnumerable<T> CurrentItems
+        public IEnumerable<T> CurrentItems()
         {
-            get
+            List<T> currentitems = new List<T>();
+
+            foreach (T item in this)
             {
-                if (this._currentItems == null)
+                if (item.Action != Item.Actions.Delete)
                 {
-                    this._currentItems = new List<T>();
-
-                    foreach(T item in this)
-                    {
-                        if (item.Action != Item.Actions.Delete)
-                        {
-                            this._currentItems.Add(item);
-                        }
-                    }
+                    currentitems.Add(item);
                 }
-
-                return this._currentItems;
             }
+
+            return currentitems;
         }
 
         public void Refresh()
         {
             this.OnRefresh();
-            this._currentItems = null;
             this.Execute();
             this.Executed = true;
         }
