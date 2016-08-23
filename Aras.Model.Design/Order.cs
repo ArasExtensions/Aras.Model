@@ -256,67 +256,72 @@ namespace Aras.Model.Design
 
                 if (this.Transaction != null)
                 {
-                    // Update Properties of Configured Part
-                    this.ConfiguredPart.Class = this.ConfiguredPart.ItemType.GetClassName("NoTemplate");
-                    this.ConfiguredPart.Property("name").Value = this.Property("name").Value;
-                    this.ConfiguredPart.Property("description").Value = this.Property("description").Value;
+                    this.Refresh();
 
-                    // Build Flat BOM
-                    Dictionary<Part, Double> flatbom = this.AllConfiguredParts(this.Part, 1.0);
-
-                    // Remove any Parts that are not class BOM
-                    List<Part> partstoremove = new List<Part>();
-
-                    foreach (Part part in flatbom.Keys)
+                    if (this.Part != null)
                     {
-                        if ((part.Class == null) || (part.Class.Name != "BOM"))
+                        // Update Properties of Configured Part
+                        this.ConfiguredPart.Class = this.ConfiguredPart.ItemType.GetClassName("NoTemplate");
+                        this.ConfiguredPart.Property("name").Value = this.Property("name").Value;
+                        this.ConfiguredPart.Property("description").Value = this.Property("description").Value;
+
+                        // Build Flat BOM
+                        Dictionary<Part, Double> flatbom = this.AllConfiguredParts(this.Part, 1.0);
+
+                        // Remove any Parts that are not class BOM
+                        List<Part> partstoremove = new List<Part>();
+
+                        foreach (Part part in flatbom.Keys)
                         {
-                            partstoremove.Add(part);
-                        }
-                    }
-
-                    foreach (Part part in partstoremove)
-                    {
-                        flatbom.Remove(part);
-                    }
-
-                    // Refresh PartBOM
-                    this.ConfiguredPart.PartBOMS.Refresh();
-
-                    // Remove any Part BOM no longer required in Configured Part
-                    foreach (PartBOM partbom in this.ConfiguredPart.PartBOMS)
-                    {
-                        if ((partbom.Related != null) && !flatbom.ContainsKey((Part)partbom.Related))
-                        {
-                            partbom.Delete(this.Transaction, true);
-                        }
-                    }
-
-                    // Add any Part BOM that not current in Configured Part
-                    foreach (Part flatpart in flatbom.Keys)
-                    {
-                        Boolean found = false;
-
-                        foreach (PartBOM partbom in this.ConfiguredPart.PartBOMS)
-                        {
-                            if ((partbom.Related != null) && partbom.Related.Equals(flatpart))
+                            if ((part.Class == null) || (part.Class.Name != "BOM"))
                             {
-                                found = true;
-
-                                //Update
-                                partbom.Update(this.Transaction, true);
-                            
-                                // Update Quantity
-                                partbom.Quantity = flatbom[flatpart];
-
-                                break;
+                                partstoremove.Add(part);
                             }
                         }
 
-                        if (!found)
+                        foreach (Part part in partstoremove)
                         {
-                            PartBOM newpartbom = this.ConfiguredPart.PartBOMS.Create(flatpart, this.Transaction);
-                            newpartbom.Quantity = flatbom[flatpart];
+                            flatbom.Remove(part);
+                        }
+
+                        // Refresh PartBOM
+                        this.ConfiguredPart.PartBOMS.Refresh();
+
+                        // Remove any Part BOM no longer required in Configured Part
+                        foreach (PartBOM partbom in this.ConfiguredPart.PartBOMS)
+                        {
+                            if ((partbom.Related != null) && !flatbom.ContainsKey((Part)partbom.Related))
+                            {
+                                partbom.Delete(this.Transaction, true);
+                            }
+                        }
+
+                        // Add any Part BOM that not current in Configured Part
+                        foreach (Part flatpart in flatbom.Keys)
+                        {
+                            Boolean found = false;
+
+                            foreach (PartBOM partbom in this.ConfiguredPart.PartBOMS)
+                            {
+                                if ((partbom.Related != null) && partbom.Related.Equals(flatpart))
+                                {
+                                    found = true;
+
+                                    //Update
+                                    partbom.Update(this.Transaction, true);
+
+                                    // Update Quantity
+                                    partbom.Quantity = flatbom[flatpart];
+
+                                    break;
+                                }
+                            }
+
+                            if (!found)
+                            {
+                                PartBOM newpartbom = this.ConfiguredPart.PartBOMS.Create(flatpart, this.Transaction);
+                                newpartbom.Quantity = flatbom[flatpart];
+                            }
                         }
                     }
                 }

@@ -627,8 +627,8 @@ namespace Aras.Model
         {
             if (this.LockedBy == null)
             {
-                this.Transaction = null;
                 this.Action = Actions.Read;
+                this.Transaction = null;
                 return true;
             }
             else
@@ -667,12 +667,12 @@ namespace Aras.Model
             {
                 if (this.ID == DBItem.ID)
                 {
+                    this.DatabaseState = DatabaseStates.Stored;
+
                     foreach (String propname in DBItem.PropertyNames)
                     {
                         this.Property(propname).DBValue = DBItem.GetProperty(propname);
                     }
-
-                    this.DatabaseState = DatabaseStates.Stored;
                 }
                 else
                 {
@@ -936,8 +936,8 @@ namespace Aras.Model
             this.PropertyCache = new Dictionary<PropertyType, Property>();
             this.Caches = new Dictionary<RelationshipType, Caches.Relationship>();
             this.ItemType = ItemType;
-            this.Transaction = null;
             this.ID = Server.NewID();
+            this._transaction = null;
             this._action = Actions.Create;
             this._databaseState = DatabaseStates.Runtime;
         }
@@ -947,8 +947,8 @@ namespace Aras.Model
             this.PropertyCache = new Dictionary<PropertyType, Property>();
             this.Caches = new Dictionary<RelationshipType, Caches.Relationship>();
             this.ItemType = ItemType;
-            this.Transaction = null;
             this.ID = DBItem.ID;
+            this._transaction = null;
             this._action = Actions.Read;
             this._databaseState = DatabaseStates.Stored;
             this.UpdateProperties(DBItem);
