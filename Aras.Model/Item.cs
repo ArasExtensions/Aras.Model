@@ -135,6 +135,16 @@ namespace Aras.Model
             }
         }
 
+        public ItemType ItemType { get; private set; }
+
+        public String ID { get; private set; }
+
+        public String ConfigID { get; private set; }
+
+        public Int32 Generation { get; private set; }
+
+        public Boolean IsCurrent { get; private set; }
+
         public Boolean Locked(Boolean Refresh)
         {
             if ((this.DatabaseState == DatabaseStates.Runtime) || (this.Action == Actions.Create))
@@ -158,18 +168,6 @@ namespace Aras.Model
                 }
             }
         }
-
-        public String ID { get; private set; }
-
-        public String ConfigID
-        {
-            get
-            {
-                return (String)this.Property("config_id").Value;
-            }
-        }
-
-        public ItemType ItemType { get; private set; }
 
         public Class Class
         {
@@ -226,22 +224,6 @@ namespace Aras.Model
             get
             {
                 return (LifeCycleState)this.Property("current_state").Value;
-            }
-        }
-
-        public Int32 Generation
-        {
-            get
-            {
-                return (Int32)this.Property("generation").Value;
-            }
-        }
-
-        public Boolean IsCurrent
-        {
-            get
-            {
-                return (Boolean)this.Property("is_current").Value;
             }
         }
 
@@ -440,8 +422,12 @@ namespace Aras.Model
             if (this.DatabaseState == DatabaseStates.Stored)
             {
                 List<String> propertynames = new List<String>();
-                propertynames.Add("id");
 
+                foreach(String sysprop in ItemType.SystemProperties)
+                {
+                    propertynames.Add(sysprop);
+                }
+           
                 foreach (Property property in this.Properties)
                 {
                     propertynames.Add(property.Type.Name);
@@ -694,9 +680,14 @@ namespace Aras.Model
             {
                 if (this.ID == DBItem.ID)
                 {
+                    this.IsCurrent = DBItem.GetProperty("is_current", "0").Equals("1");
+
                     foreach (String propname in DBItem.PropertyNames)
                     {
-                        this.Property(propname).DBValue = DBItem.GetProperty(propname);
+                        if (this.ItemType.HasPropertyType(propname))
+                        {
+                            this.Property(propname).DBValue = DBItem.GetProperty(propname);
+                        }
                     }
                 }
                 else
@@ -965,7 +956,10 @@ namespace Aras.Model
         public Item(ItemType ItemType)
         {
             this.Initialise(ItemType);
-            this.ID = Server.NewID();  
+            this.ID = Server.NewID();
+            this.ConfigID = this.ID;
+            this.Generation = 1;
+            this.IsCurrent = true;
             this._action = Actions.Create;
             this._databaseState = DatabaseStates.Runtime;
         }
@@ -974,6 +968,9 @@ namespace Aras.Model
         {
             this.Initialise(ItemType);
             this.ID = DBItem.ID;
+            this.ConfigID = DBItem.ConfigID;
+            this.Generation = DBItem.Generation;
+            this.IsCurrent = DBItem.IsCurrent;
             this._action = Actions.Read;
             this._databaseState = DatabaseStates.Stored;
             this.UpdateProperties(DBItem);

@@ -114,7 +114,7 @@ namespace Aras.Model.Actions
                             {
                                 this.Result = response.Items.First();
 
-                                if ((this.Item.ConfigID == null) || this.Result.ConfigID.Equals(this.Item.ConfigID))
+                                if (this.Result.ConfigID.Equals(this.Item.ConfigID))
                                 {
                                     if (!this.Result.ID.Equals(this.Item.ID))
                                     {

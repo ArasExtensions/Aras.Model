@@ -90,6 +90,22 @@ namespace Aras.Model.IO
             }
         }
 
+        public Int32 Generation
+        {
+            get
+            {
+                return Int32.Parse(this.GetProperty("generation"));
+            }
+        }
+
+        public Boolean IsCurrent
+        {
+            get
+            {
+                return this.GetProperty("is_current", "0").Equals("1");
+            }
+        }
+
         public String ItemType
         {
             get

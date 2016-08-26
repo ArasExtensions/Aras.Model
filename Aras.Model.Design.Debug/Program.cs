@@ -44,7 +44,6 @@ namespace Aras.Model.Design.Debug
             Model.Session session = database.Login("admin", Model.Server.PasswordHash("innovator"));
             session.ItemType("CAD").AddToSelect("native_file,viewable_file");
 
-            /*
             Model.Stores.Item<Model.Design.Order> store = new Model.Stores.Item<Model.Design.Order>(session, "v_Order", Aras.Conditions.Eq("item_number", "RJMTest10"));
             Model.Design.Order order = store.First();
 
@@ -66,8 +65,7 @@ namespace Aras.Model.Design.Debug
                 transaction.Commit();
             }
 
-            */
-
+            /*
             Model.Stores.Item<Model.Design.Part> store = new Model.Stores.Item<Model.Design.Part>(session, "Part");
             Model.Design.Part part1 = null;
 
@@ -95,6 +93,7 @@ namespace Aras.Model.Design.Debug
                 part2.Delete(transaction);
                 transaction.Commit();
             }
+            */
         }
     }
 }

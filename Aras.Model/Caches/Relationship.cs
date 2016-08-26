@@ -48,11 +48,11 @@ namespace Aras.Model.Caches
             {
                 if (System.String.IsNullOrEmpty(this.ItemType.Select))
                 {
-                    return "id,related_id,source_id";
+                    return String.Join(",", this.RelationshipType.SystemProperties);
                 }
                 else
                 {
-                    return "id,related_id,source_id," + this.ItemType.Select;
+                    return String.Join(",", this.RelationshipType.SystemProperties) + "," + this.ItemType.Select;
                 }
             }
         }

@@ -43,8 +43,11 @@ namespace Aras.Model
         public override void Refresh()
         {
             List<String> propertynames = new List<String>();
-            propertynames.Add("id");
-            propertynames.Add("related_id");
+
+            foreach(String sysprop in RelationshipType.SystemProperties)
+            {
+                propertynames.Add(sysprop);
+            }
 
             foreach (Property property in this.Properties)
             {

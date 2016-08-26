@@ -38,11 +38,11 @@ namespace Aras.Model.Caches
             {
                 if (System.String.IsNullOrEmpty(this.ItemType.Select))
                 {
-                    return "id";
+                    return String.Join(",", ItemType.SystemProperties);
                 }
                 else
                 {
-                    return "id," + this.ItemType.Select;
+                    return String.Join(",", ItemType.SystemProperties) + "," + this.ItemType.Select;
                 }
             }
         }

@@ -32,6 +32,15 @@ namespace Aras.Model
 {
     public class RelationshipType : ItemType
     {
+        private static String[] _relationshipTypeSystemProperties = { "id", "config_id", "is_current", "generation", "source_id", "related_id" };
+        internal override IEnumerable<String> SystemProperties
+        {
+            get
+            {
+                return _relationshipTypeSystemProperties;
+            }
+        }
+
         internal override Type Class
         {
             get
