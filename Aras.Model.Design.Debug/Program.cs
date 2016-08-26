@@ -40,13 +40,12 @@ namespace Aras.Model.Design.Debug
             Model.Server server = new Model.Server("http://localhost/InnovatorServer100SP4/");
             //server.ProxyURL = "http://127.0.0.1:8888";
             server.LoadAssembly("Aras.Model.Design");
-            server.LoadAssembly("Aras.ViewModel.Design");
             Model.Database database = server.Database("CMB");
             Model.Session session = database.Login("admin", Model.Server.PasswordHash("innovator"));
             session.ItemType("CAD").AddToSelect("native_file,viewable_file");
 
-
-            Model.Stores.Item<Model.Design.Order> store = new Model.Stores.Item<Model.Design.Order>(session, "v_Order", Aras.Conditions.Eq("item_number", "2465M_Test001"));
+            /*
+            Model.Stores.Item<Model.Design.Order> store = new Model.Stores.Item<Model.Design.Order>(session, "v_Order", Aras.Conditions.Eq("item_number", "RJMTest10"));
             Model.Design.Order order = store.First();
 
             foreach(Model.Design.OrderContext ordercontext in order.OrderContexts)
@@ -58,20 +57,44 @@ namespace Aras.Model.Design.Debug
                 List list = valuelist.Values;
                 IEnumerable<ListValue> values = list.Values;
                 ListValue test = values.First();
-
-
             }
 
             using (Model.Transaction transaction = session.BeginTransaction())
             {
                 order.Update(transaction);
- 
                 order.UpdateBOM();
-
                 transaction.Commit();
             }
 
+            */
 
+            Model.Stores.Item<Model.Design.Part> store = new Model.Stores.Item<Model.Design.Part>(session, "Part");
+            Model.Design.Part part1 = null;
+
+ 
+            using (Model.Transaction transaction = session.BeginTransaction())
+            {
+                part1 = store.Create(transaction);
+                part1.ItemNumber = "1234-RJM";
+                transaction.Commit();
+            }
+     
+
+            Model.Stores.Item<Model.Design.Part> store2 = new Model.Stores.Item<Model.Design.Part>(session, "Part", Aras.Conditions.Eq("item_number", "1234-RJM"));
+            Model.Design.Part part2 = store2.First();
+
+            using (Model.Transaction transaction = session.BeginTransaction())
+            {
+                part2.Update(transaction);
+                part2.Property("cmb_name").Value = "Testing 999";
+                transaction.Commit();
+            }
+
+            using (Model.Transaction transaction = session.BeginTransaction())
+            {
+                part2.Delete(transaction);
+                transaction.Commit();
+            }
         }
     }
 }

@@ -155,7 +155,6 @@ namespace Aras.Model
                     {
                         relation.Item.UpdateProperties(dbrelationship);
                         relation.Item.UnLock();
-                        relation.Item.Transaction = null;
                         found = true;
                     }
                 }
@@ -164,7 +163,6 @@ namespace Aras.Model
                 {
                     relation.Item.UpdateProperties(null);
                     relation.Item.UnLock();
-                    relation.Item.Transaction = null;
                 }
             }
         }
@@ -180,7 +178,6 @@ namespace Aras.Model
             this.Transaction = Transaction;
             this.Name = Name;
             this.Item = Item;
-            this.Item.Transaction = Transaction;
             this.Completed = false;
         }
     }

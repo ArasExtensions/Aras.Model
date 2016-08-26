@@ -125,7 +125,7 @@ namespace Aras.Model.Caches
 
             if (Transaction != null)
             {
-                Transaction.Add("add", item);
+                item.Update(Transaction, false);
             }
                 
             this.AddToCache(item);

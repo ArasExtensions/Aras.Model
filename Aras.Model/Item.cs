@@ -81,6 +81,7 @@ namespace Aras.Model
         internal void OnDeleted()
         {
             this.DatabaseState = DatabaseStates.Deleted;
+            this.Transaction = null;
 
             if (this.Deleted != null)
             {
@@ -436,28 +437,31 @@ namespace Aras.Model
 
         public virtual void Refresh()
         {
-            List<String> propertynames = new List<String>();
-            propertynames.Add("id");
-
-            foreach(Property property in this.Properties)
+            if (this.DatabaseState == DatabaseStates.Stored)
             {
-                propertynames.Add(property.Type.Name);
-            }
+                List<String> propertynames = new List<String>();
+                propertynames.Add("id");
 
-            IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
-            dbitem.Select = String.Join(",", propertynames);
-            dbitem.ID = this.ID;
-            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, dbitem);
-            IO.SOAPResponse response = request.Execute();
+                foreach (Property property in this.Properties)
+                {
+                    propertynames.Add(property.Type.Name);
+                }
 
-            if (!response.IsError)
-            {
-                this.UpdateProperties(response.Items.First());
-                this.OnRefresh();
-            }
-            else
-            {
-                throw new Exceptions.ServerException(response);
+                IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
+                dbitem.Select = String.Join(",", propertynames);
+                dbitem.ID = this.ID;
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, dbitem);
+                IO.SOAPResponse response = request.Execute();
+
+                if (!response.IsError)
+                {
+                    this.UpdateProperties(response.Items.First());
+                    this.OnRefresh();
+                }
+                else
+                {
+                    throw new Exceptions.ServerException(response);
+                }
             }
         }
 
@@ -476,41 +480,64 @@ namespace Aras.Model
 
         public void Update(Transaction Transaction, Boolean UnLock = false)
         {
-            if (this.Lock(UnLock))
+            if (Transaction != null)
             {
-                if (this.DatabaseState == DatabaseStates.Stored)
+                switch (this.Action)
                 {
-                    Transaction.Add("update", this);
-                    this.Action = Actions.Update;
-                    this.OnUpdate();
-                }
-                else
-                {
-                    this.Action = Actions.Create;
+                    case Actions.Create:
+                        Transaction.Add("add", this);
+                        this.Transaction = Transaction;
+                        this.DatabaseState = DatabaseStates.New;
+                        break;
+
+                    case Actions.Read:
+                    case Actions.Update:
+
+                        if (this.Lock(UnLock))
+                        {
+                            Transaction.Add("update", this);
+                            this.Transaction = Transaction;
+                            this.Action = Actions.Update;
+                            this.OnUpdate();
+                        }
+                        else
+                        {
+                            throw new Exceptions.ServerException("Failed to lock Item");
+                        }
+
+                        break;
+
+                    default:
+
+                        break;
                 }
             }
             else
             {
-                throw new Exceptions.ServerException("Failed to lock Item");
+                throw new Exceptions.ArgumentException("Transaction must not be null");
             }
         }
 
         public void Delete(Transaction Transaction, Boolean UnLock = false)
         {
-            if (this.DatabaseState == DatabaseStates.Stored)
+            if (Transaction != null)
             {
-                if (UnLock)
+                if (this.DatabaseState == DatabaseStates.Stored)
                 {
-                    this.UnLock();
+                    if (UnLock)
+                    {
+                        this.UnLock();
+                    }
+
+                    Transaction.Add("delete", this);
                 }
-
-                Transaction.Add("delete", this);
-            }
-            else
-            {
-                Transaction.Remove(this);
+                else
+                {
+                    Transaction.Remove(this);
+                }
             }
 
+            this.Transaction = Transaction;
             this.Action = Actions.Delete;
         }
 
@@ -526,101 +553,99 @@ namespace Aras.Model
             {
                 return this._transaction;
             }
-            internal set
+            private set
             {
                 this._transaction = value;
-
-                if (this.Action == Actions.Create)
-                {
-                    if (this._transaction != null)
-                    {
-                        this.DatabaseState = DatabaseStates.New;
-                    }
-                    else
-                    {
-                        this.DatabaseState = DatabaseStates.Runtime;
-                    }
-                }
             }
         }
 
         private Boolean Lock(Boolean UnLock)
         {
-            if (this.DatabaseState == DatabaseStates.New)
-            {
-                return true;
-            }
-            else if (this.DatabaseState == DatabaseStates.Stored)
-            {
-                if (this.LockedBy == null)
-                {
-                    IO.Item lockitem = new IO.Item(this.ItemType.Name, "lock");
-                    lockitem.ID = this.ID;
-                    lockitem.Select = "locked_by_id";
-                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, lockitem);
-                    IO.SOAPResponse response = request.Execute();
+            Boolean ret = false;
 
-                    if (!response.IsError)
-                    {
-                        this.UpdateProperties(response.Items.First());
-                        return true;
-                    }
-                    else
-                    {
-                        throw new Exceptions.ServerException(response);
-                    }
-                }
-                else if (this.LockedBy.ID.Equals(this.ItemType.Session.UserID))
-                {
-                    return true;
-                }
-                else if (!this.LockedBy.ID.Equals(this.ItemType.Session.UserID) && UnLock)
-                {
-                    // Force Unlock
-                    IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
-                    unlockitem.ID = this.ID;
-                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, unlockitem);
-                    IO.SOAPResponse response = request.Execute();
+            switch(this.DatabaseState)
+            {
+                case DatabaseStates.Stored:
 
-                    if (!response.IsError)
+                    if (this.LockedBy == null)
                     {
                         IO.Item lockitem = new IO.Item(this.ItemType.Name, "lock");
                         lockitem.ID = this.ID;
                         lockitem.Select = "locked_by_id";
-                        request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, lockitem);
-                        response = request.Execute();
+                        IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, lockitem);
+                        IO.SOAPResponse response = request.Execute();
 
                         if (!response.IsError)
                         {
                             this.UpdateProperties(response.Items.First());
-                            return true;
+                            ret = true;
                         }
                         else
                         {
                             throw new Exceptions.ServerException(response);
+                        }
+                    }
+                    else if (this.LockedBy.ID.Equals(this.ItemType.Session.UserID))
+                    {
+                        ret = true;
+                    }
+                    else if (!this.LockedBy.ID.Equals(this.ItemType.Session.UserID) && UnLock)
+                    {
+                        // Force Unlock
+                        IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
+                        unlockitem.ID = this.ID;
+                        IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, unlockitem);
+                        IO.SOAPResponse response = request.Execute();
+
+                        if (!response.IsError)
+                        {
+                            IO.Item lockitem = new IO.Item(this.ItemType.Name, "lock");
+                            lockitem.ID = this.ID;
+                            lockitem.Select = "locked_by_id";
+                            request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, lockitem);
+                            response = request.Execute();
+
+                            if (!response.IsError)
+                            {
+                                this.UpdateProperties(response.Items.First());
+                                ret = true;
+                            }
+                            else
+                            {
+                                throw new Exceptions.ServerException(response);
+                            }
+                        }
+                        else
+                        {
+                            if (response.ErrorMessage.Equals("Aras.Server.Core.ItemIsLockedBySomeoneElseException"))
+                            {
+                                throw new Exceptions.UnLockException(this);
+                            }
+                            else
+                            {
+                                throw new Exceptions.ServerException(response);
+                            }
                         }
                     }
                     else
                     {
-                        if (response.ErrorMessage.Equals("Aras.Server.Core.ItemIsLockedBySomeoneElseException"))
-                        {
-                            throw new Exceptions.UnLockException(this);
-                        }
-                        else
-                        {
-                            throw new Exceptions.ServerException(response);
-                        }
+                        ret = false;
                     }
-                }
-                else
-                {
-                    return false;
-                }
+
+                    break;
+
+                case DatabaseStates.Deleted:
+
+                    throw new Exceptions.ArgumentException("Item is Deleted");
+
+                default:
+
+                    ret = true;
+
+                    break;
             }
-            else
-            {
-                throw new Exceptions.ArgumentException("Item is Deleted");
-            }
+
+            return ret;
         }
 
         internal Boolean UnLock()
@@ -669,8 +694,6 @@ namespace Aras.Model
             {
                 if (this.ID == DBItem.ID)
                 {
-                    this.DatabaseState = DatabaseStates.Stored;
-
                     foreach (String propname in DBItem.PropertyNames)
                     {
                         this.Property(propname).DBValue = DBItem.GetProperty(propname);
@@ -681,10 +704,8 @@ namespace Aras.Model
                     throw new Exceptions.ArgumentException("Invalid Item ID");
                 }
             }
-            else
-            {
-                this.DatabaseState = DatabaseStates.Stored;
-            }
+   
+            this.DatabaseState = DatabaseStates.Stored;  
         }
 
         private Dictionary<RelationshipType, Caches.Relationship> Caches;
@@ -933,24 +954,26 @@ namespace Aras.Model
             return this.ID.GetHashCode();
         }
 
-        public Item(ItemType ItemType)
+        private void Initialise(ItemType ItemType)
         {
             this.PropertyCache = new Dictionary<PropertyType, Property>();
             this.Caches = new Dictionary<RelationshipType, Caches.Relationship>();
             this.ItemType = ItemType;
-            this.ID = Server.NewID();
-            this._transaction = null;
+            this.Transaction = null;
+        }
+
+        public Item(ItemType ItemType)
+        {
+            this.Initialise(ItemType);
+            this.ID = Server.NewID();  
             this._action = Actions.Create;
             this._databaseState = DatabaseStates.Runtime;
         }
 
         public Item(ItemType ItemType, IO.Item DBItem)
         {
-            this.PropertyCache = new Dictionary<PropertyType, Property>();
-            this.Caches = new Dictionary<RelationshipType, Caches.Relationship>();
-            this.ItemType = ItemType;
+            this.Initialise(ItemType);
             this.ID = DBItem.ID;
-            this._transaction = null;
             this._action = Actions.Read;
             this._databaseState = DatabaseStates.Stored;
             this.UpdateProperties(DBItem);

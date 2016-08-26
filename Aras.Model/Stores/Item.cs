@@ -86,11 +86,7 @@ namespace Aras.Model.Stores
 
         public T Create()
         {
-            T item = (T)this.Create(null);
-            this.NewItems.Add(item);
-            this.Items.Add(item);
-            this.OnStoreChanged();
-            return item;
+            return this.Create(null);
         }
 
         protected override void OnRefresh()
