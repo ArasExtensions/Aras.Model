@@ -32,8 +32,8 @@ namespace Aras.Model.PropertyTypes
 {
     public class Float : PropertyType
     {
-        internal Float(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Runtime, System.Double? Default)
-            :base(Type, Name, Label, ReadOnly, Runtime, Default)
+        internal Float(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Runtime, System.Boolean Required, System.Double? Default)
+            :base(Type, Name, Label, ReadOnly, Runtime, Required, Default)
         {
   
         }

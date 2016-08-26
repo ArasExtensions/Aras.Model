@@ -32,8 +32,8 @@ namespace Aras.Model.PropertyTypes
 {
     public class VariableList : PropertyType
     {
-        internal VariableList(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly)
-            :base(Type, Name, Label, ReadOnly, true, null)
+        internal VariableList(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required)
+            :base(Type, Name, Label, ReadOnly, true, Required, null)
         {
            
         }

@@ -56,6 +56,8 @@ namespace Aras.Model
 
         public System.Boolean Runtime { get; private set; }
 
+        public System.Boolean Required { get; private set; }
+
         public Object Default { get; private set; }
 
         public override System.String ToString()
@@ -63,13 +65,14 @@ namespace Aras.Model
             return this.Name;
         }
 
-        internal PropertyType(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Runtime, Object Default)
+        internal PropertyType(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Runtime, System.Boolean Required, Object Default)
         {
             this.Type = Type;
             this.Name = Name;
             this.Label = Label;
             this.ReadOnly = ReadOnly;
             this.Runtime = Runtime;
+            this.Required = Required;
             this.Default = Default;
         }
     }

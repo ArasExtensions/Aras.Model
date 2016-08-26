@@ -32,8 +32,8 @@ namespace Aras.Model.PropertyTypes
 {
     public class Sequence : PropertyType
     {
-        internal Sequence(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Runtime, System.String Default)
-            :base(Type, Name, Label, ReadOnly, Runtime, Default)
+        internal Sequence(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Runtime, System.Boolean Required, System.String Default)
+            :base(Type, Name, Label, ReadOnly, Runtime, Required, Default)
         {
       
         }

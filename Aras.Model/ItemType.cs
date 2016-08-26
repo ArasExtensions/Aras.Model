@@ -211,7 +211,7 @@ namespace Aras.Model
                     this._propertyTypeCache = new Dictionary<String, PropertyType>();
 
                     IO.Item props = new IO.Item("Property", "get");
-                    props.Select = "name,label,data_type,stored_length,readonly,default_value,data_source";
+                    props.Select = "name,label,data_type,stored_length,readonly,default_value,data_source,is_required";
                     props.SetProperty("source_id", this.ID);
                     IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, props);
                     IO.SOAPResponse response = request.Execute();
@@ -223,6 +223,7 @@ namespace Aras.Model
                             String name = thisprop.GetProperty("name");
                             String label = thisprop.GetProperty("label");
                             Boolean ReadOnly = "1".Equals(thisprop.GetProperty("readonly"));
+                            Boolean Required = "1".Equals(thisprop.GetProperty("is_required"));
                             String DefaultString = thisprop.GetProperty("default_value");
 
                             if (!SystemProperties.Contains(name))
@@ -232,21 +233,21 @@ namespace Aras.Model
                                     case "string":
                                         Int32 length = 32;
                                         Int32.TryParse(thisprop.GetProperty("stored_length"), out length);
-                                        this._propertyTypeCache[name] = new PropertyTypes.String(this, name, label, ReadOnly, false, DefaultString, length);
+                                        this._propertyTypeCache[name] = new PropertyTypes.String(this, name, label, ReadOnly, false, Required, DefaultString, length);
                                         break;
                                     case "ml_string":
                                         Int32 ml_length = 32;
                                         Int32.TryParse(thisprop.GetProperty("stored_length"), out ml_length);
-                                        this._propertyTypeCache[name] = new PropertyTypes.MultilingualString(this, name, label, ReadOnly, false, DefaultString, ml_length);
+                                        this._propertyTypeCache[name] = new PropertyTypes.MultilingualString(this, name, label, ReadOnly, false, Required, DefaultString, ml_length);
                                         break;
                                     case "text":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Text(this, name, label, ReadOnly, false, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Text(this, name, label, ReadOnly, false, Required, DefaultString);
                                         break;
                                     case "md5":
-                                        this._propertyTypeCache[name] = new PropertyTypes.MD5(this, name, label, ReadOnly, false, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.MD5(this, name, label, ReadOnly, false, Required, DefaultString);
                                         break;
                                     case "image":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Image(this, name, label, ReadOnly, false, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Image(this, name, label, ReadOnly, false, Required, DefaultString);
                                         break;
                                     case "integer":
 
@@ -254,17 +255,17 @@ namespace Aras.Model
                                         {
                                             Int32 DefaultInteger = 0;
                                             Int32.TryParse(DefaultString, out DefaultInteger);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, false, DefaultInteger);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, false, Required, DefaultInteger);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, false, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, false, Required, null);
                                         }
 
                                         break;
                                     case "item":
                                         ItemType valueitemtype = this.Session.ItemTypeByID(thisprop.GetProperty("data_source"));
-                                        this._propertyTypeCache[name] = new PropertyTypes.Item(this, name, label, ReadOnly, false, valueitemtype);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Item(this, name, label, ReadOnly, false, Required, valueitemtype);
 
                                         break;
                                     case "date":
@@ -273,17 +274,17 @@ namespace Aras.Model
                                         {
                                             DateTime DefaultDate;
                                             DateTime.TryParse(DefaultString, out DefaultDate);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, false, DefaultDate);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, false, Required, DefaultDate);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, false, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, false, Required, null);
                                         }
 
                                         break;
                                     case "list":
                                         List valuelist = (List)this.Session.Cache("List").Get(thisprop.GetProperty("data_source"));
-                                        this._propertyTypeCache[name] = new PropertyTypes.List(this, name, label, ReadOnly, false, valuelist);
+                                        this._propertyTypeCache[name] = new PropertyTypes.List(this, name, label, ReadOnly, false, Required, valuelist);
                                         break;
                                     case "decimal":
 
@@ -291,11 +292,11 @@ namespace Aras.Model
                                         {
                                             Decimal DefaultDecimal = 0;
                                             Decimal.TryParse(DefaultString, out DefaultDecimal);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, false, DefaultDecimal);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, false, Required, DefaultDecimal);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, false, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, false, Required, null);
                                         }
 
                                         break;
@@ -305,11 +306,11 @@ namespace Aras.Model
                                         {
                                             Double DefaultDouble = 0;
                                             Double.TryParse(DefaultString, out DefaultDouble);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Float(this, name, label, ReadOnly, false, DefaultDouble);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Float(this, name, label, ReadOnly, false, Required, DefaultDouble);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, false, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, false, Required, null);
                                         }
 
                                         break;
@@ -318,26 +319,26 @@ namespace Aras.Model
                                         if (DefaultString != null)
                                         {
                                             Boolean DefaultBoolean = "1".Equals(DefaultString);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, false, DefaultBoolean);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, false, Required, DefaultBoolean);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, false, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, false, Required, null);
                                         }
 
                                         break;
                                     case "foreign":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Foreign(this, name, label, ReadOnly, false, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Foreign(this, name, label, ReadOnly, false, Required, DefaultString);
                                         break;
                                     case "federated":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Federated(this, name, label, ReadOnly, false, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Federated(this, name, label, ReadOnly, false, Required, DefaultString);
                                         break;
                                     case "sequence":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Sequence(this, name, label, ReadOnly, false, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Sequence(this, name, label, ReadOnly, false, Required, DefaultString);
                                         break;
                                     case "filter list":
                                         List valuefilterlist = (List)this.Session.Cache("List").Get(thisprop.GetProperty("data_source"));
-                                        this._propertyTypeCache[name] = new PropertyTypes.FilterList(this, name, label, ReadOnly, false, valuefilterlist);
+                                        this._propertyTypeCache[name] = new PropertyTypes.FilterList(this, name, label, ReadOnly, false, Required, valuefilterlist);
                                         break;
                                     default:
                                         throw new NotImplementedException("Property Type not implmented: " + thisprop.GetProperty("data_type"));
@@ -355,11 +356,11 @@ namespace Aras.Model
             }
         }
 
-        public void AddBooleanRuntime(String Name, String Label, System.Boolean ReadOnly, System.Boolean? Default)
+        public void AddBooleanRuntime(String Name, String Label, System.Boolean ReadOnly, System.Boolean Required, System.Boolean? Default)
         {
             if (!this.PropertyTypeCache.ContainsKey(Name))
             {
-                this.PropertyTypeCache[Name] = new PropertyTypes.Boolean(this, Name, Label, ReadOnly, true, Default);
+                this.PropertyTypeCache[Name] = new PropertyTypes.Boolean(this, Name, Label, ReadOnly, true, Required, Default);
             }
             else
             {
@@ -367,11 +368,11 @@ namespace Aras.Model
             }
         }
 
-        public void AddDateRuntime(String Name, String Label, System.Boolean ReadOnly, System.DateTime? Default)
+        public void AddDateRuntime(String Name, String Label, System.Boolean ReadOnly, System.Boolean Required, System.DateTime? Default)
         {
             if (!this.PropertyTypeCache.ContainsKey(Name))
             {
-                this.PropertyTypeCache[Name] = new PropertyTypes.Date(this, Name, Label, ReadOnly, true, Default);
+                this.PropertyTypeCache[Name] = new PropertyTypes.Date(this, Name, Label, ReadOnly, true, Required, Default);
             }
             else
             {
@@ -379,11 +380,11 @@ namespace Aras.Model
             }
         }
 
-        public void AddDecimalRuntime(String Name, String Label, System.Boolean ReadOnly, System.Decimal? Default)
+        public void AddDecimalRuntime(String Name, String Label, System.Boolean ReadOnly, System.Boolean Required, System.Decimal? Default)
         {
             if (!this.PropertyTypeCache.ContainsKey(Name))
             {
-                this.PropertyTypeCache[Name] = new PropertyTypes.Decimal(this, Name, Label, ReadOnly, true, Default);
+                this.PropertyTypeCache[Name] = new PropertyTypes.Decimal(this, Name, Label, ReadOnly, true, Required, Default);
             }
             else
             {
@@ -391,11 +392,11 @@ namespace Aras.Model
             }
         }
 
-        public void AddFloatRuntime(String Name, String Label, System.Boolean ReadOnly, System.Double? Default)
+        public void AddFloatRuntime(String Name, String Label, System.Boolean ReadOnly, System.Boolean Required, System.Double? Default)
         {
             if (!this.PropertyTypeCache.ContainsKey(Name))
             {
-                this.PropertyTypeCache[Name] = new PropertyTypes.Float(this, Name, Label, ReadOnly, true, Default);
+                this.PropertyTypeCache[Name] = new PropertyTypes.Float(this, Name, Label, ReadOnly, true, Required, Default);
             }
             else
             {
@@ -403,11 +404,11 @@ namespace Aras.Model
             }
         }
 
-        public void AddImageRuntime(String Name, String Label, System.Boolean ReadOnly)
+        public void AddImageRuntime(String Name, String Label, System.Boolean ReadOnly, System.Boolean Required)
         {
             if (!this.PropertyTypeCache.ContainsKey(Name))
             {
-                this.PropertyTypeCache[Name] = new PropertyTypes.Image(this, Name, Label, ReadOnly, true, null);
+                this.PropertyTypeCache[Name] = new PropertyTypes.Image(this, Name, Label, ReadOnly, true, Required, null);
             }
             else
             {
@@ -415,11 +416,11 @@ namespace Aras.Model
             }
         }
 
-        public void AddIntegerRuntime(String Name, String Label, System.Boolean ReadOnly, System.Int32? Default)
+        public void AddIntegerRuntime(String Name, String Label, System.Boolean ReadOnly, System.Boolean Required, System.Int32? Default)
         {
             if (!this.PropertyTypeCache.ContainsKey(Name))
             {
-                this.PropertyTypeCache[Name] = new PropertyTypes.Integer(this, Name, Label, ReadOnly, true, Default);
+                this.PropertyTypeCache[Name] = new PropertyTypes.Integer(this, Name, Label, ReadOnly, true, Required, Default);
             }
             else
             {
@@ -427,11 +428,11 @@ namespace Aras.Model
             }
         }
 
-        public void AddItemRuntime(String Name, String Label, System.Boolean ReadOnly, ItemType ValueType)
+        public void AddItemRuntime(String Name, String Label, System.Boolean ReadOnly, System.Boolean Required, ItemType ValueType)
         {
             if (!this.PropertyTypeCache.ContainsKey(Name))
             {
-                this.PropertyTypeCache[Name] = new PropertyTypes.Item(this, Name, Label, ReadOnly, true, ValueType);
+                this.PropertyTypeCache[Name] = new PropertyTypes.Item(this, Name, Label, ReadOnly, true, Required, ValueType);
             }
             else
             {
@@ -439,11 +440,11 @@ namespace Aras.Model
             }
         }
 
-        public void AddListRuntime(String Name, String Label, System.Boolean ReadOnly, List ValueList)
+        public void AddListRuntime(String Name, String Label, System.Boolean ReadOnly, System.Boolean Required, List ValueList)
         {
             if (!this.PropertyTypeCache.ContainsKey(Name))
             {
-                this.PropertyTypeCache[Name] = new PropertyTypes.List(this, Name, Label, ReadOnly, true, ValueList);
+                this.PropertyTypeCache[Name] = new PropertyTypes.List(this, Name, Label, ReadOnly, true, Required, ValueList);
             }
             else
             {
@@ -451,11 +452,11 @@ namespace Aras.Model
             }
         }
 
-        public void AddMD5Runtime(String Name, String Label, System.Boolean ReadOnly, System.String Default)
+        public void AddMD5Runtime(String Name, String Label, System.Boolean ReadOnly, System.Boolean Required, System.String Default)
         {
             if (!this.PropertyTypeCache.ContainsKey(Name))
             {
-                this.PropertyTypeCache[Name] = new PropertyTypes.MD5(this, Name, Label, ReadOnly, true, Default);
+                this.PropertyTypeCache[Name] = new PropertyTypes.MD5(this, Name, Label, ReadOnly, true, Required, Default);
             }
             else
             {
@@ -463,11 +464,11 @@ namespace Aras.Model
             }
         }
 
-        public void AddMultilingualStringRuntime(String Name, String Label, System.Boolean ReadOnly, System.String Default, System.Int32 Length)
+        public void AddMultilingualStringRuntime(String Name, String Label, System.Boolean ReadOnly, System.Boolean Required, System.String Default, System.Int32 Length)
         {
             if (!this.PropertyTypeCache.ContainsKey(Name))
             {
-                this.PropertyTypeCache[Name] = new PropertyTypes.MultilingualString(this, Name, Label, ReadOnly, true, Default, Length);
+                this.PropertyTypeCache[Name] = new PropertyTypes.MultilingualString(this, Name, Label, ReadOnly, true, Required, Default, Length);
             }
             else
             {
@@ -475,11 +476,11 @@ namespace Aras.Model
             }
         }
 
-        public void AddStringRuntime(String Name, String Label, System.Boolean ReadOnly, System.String Default, System.Int32 Length)
+        public void AddStringRuntime(String Name, String Label, System.Boolean ReadOnly, System.String Default, System.Boolean Required, System.Int32 Length)
         {
             if (!this.PropertyTypeCache.ContainsKey(Name))
             {
-                this.PropertyTypeCache[Name] = new PropertyTypes.String(this, Name, Label, ReadOnly, true, Default, Length);
+                this.PropertyTypeCache[Name] = new PropertyTypes.String(this, Name, Label, ReadOnly, true, Required, Default, Length);
             }
             else
             {
@@ -487,11 +488,11 @@ namespace Aras.Model
             }
         }
 
-        public void AddTextRuntime(String Name, String Label, System.Boolean ReadOnly, System.String Default)
+        public void AddTextRuntime(String Name, String Label, System.Boolean ReadOnly, System.Boolean Required, System.String Default)
         {
             if (!this.PropertyTypeCache.ContainsKey(Name))
             {
-                this.PropertyTypeCache[Name] = new PropertyTypes.Text(this, Name, Label, ReadOnly, true, Default);
+                this.PropertyTypeCache[Name] = new PropertyTypes.Text(this, Name, Label, ReadOnly, true, Required, Default);
             }
             else
             {
@@ -499,11 +500,11 @@ namespace Aras.Model
             }
         }
 
-        internal PropertyTypes.VariableList AddVariableListRuntime(String Name, String Label, System.Boolean ReadOnly)
+        internal PropertyTypes.VariableList AddVariableListRuntime(String Name, String Label, System.Boolean ReadOnly, System.Boolean Required)
         {
             if (!this.PropertyTypeCache.ContainsKey(Name))
             {
-                this.PropertyTypeCache[Name] = new PropertyTypes.VariableList(this, Name, Label, ReadOnly);
+                this.PropertyTypeCache[Name] = new PropertyTypes.VariableList(this, Name, Label, ReadOnly, Required);
             }
             else
             {
