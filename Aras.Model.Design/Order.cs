@@ -261,7 +261,7 @@ namespace Aras.Model.Design
                     if (this.Part != null)
                     {
                         // Update Properties of Configured Part
-                        this.ConfiguredPart.Class = this.ConfiguredPart.ItemType.GetClassName("NoTemplate");
+                        this.ConfiguredPart.Class = this.ConfiguredPart.ItemType.GetClassName("TopLevel");
                         this.ConfiguredPart.Property("name").Value = this.Property("name").Value;
                         this.ConfiguredPart.Property("description").Value = this.Property("description").Value;
 
