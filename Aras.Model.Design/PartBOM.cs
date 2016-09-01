@@ -54,6 +54,27 @@ namespace Aras.Model.Design
             }
         }
 
+        public Int32 SortOrder
+        {
+            get
+            {
+                Int32? sortorder = (Int32?)this.Property("sort_order").Value;
+
+                if (sortorder == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return (Int32)sortorder;
+                }
+            }
+            set
+            {
+                this.Property("sort_order").Value = value;
+            }
+        }
+
         public PartBOM(Model.RelationshipType Type, Model.Item Source, Model.Item Related)
             :base(Type, Source, Related)
         {

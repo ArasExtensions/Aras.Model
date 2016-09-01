@@ -263,7 +263,7 @@ namespace Aras.Model.Design
                         // Update Properties of Configured Part
                         this.ConfiguredPart.Class = this.ConfiguredPart.ItemType.GetClassName("TopLevel");
                         this.ConfiguredPart.Property("name").Value = this.Property("name").Value;
-                        this.ConfiguredPart.Property("description").Value = this.Property("description").Value;
+                        this.ConfiguredPart.Property("cmb_name").Value = this.Property("name").Value;
 
                         // Build Flat BOM
                         Dictionary<Part, Double> flatbom = this.AllConfiguredParts(this.Part, 1.0);
@@ -282,6 +282,16 @@ namespace Aras.Model.Design
                         foreach (Part part in partstoremove)
                         {
                             flatbom.Remove(part);
+                        }
+
+                        // Build Sequence for Flat BOM
+                        Dictionary<Part, Int32> flatbomsequence = new Dictionary<Design.Part, Int32>();
+                        int cnt = 10;
+
+                        foreach (Part part in flatbom.Keys)
+                        {
+                            flatbomsequence[part] = cnt;
+                            cnt += 10;
                         }
 
                         // Remove any Part BOM no longer required in Configured Part
@@ -304,11 +314,14 @@ namespace Aras.Model.Design
                                 {
                                     found = true;
 
-                                    //Update
+                                    // Update
                                     partbom.Update(this.Transaction, true);
 
                                     // Update Quantity
                                     partbom.Quantity = flatbom[flatpart];
+
+                                    // Update Sequence
+                                    partbom.SortOrder = flatbomsequence[flatpart];
 
                                     break;
                                 }
@@ -318,6 +331,7 @@ namespace Aras.Model.Design
                             {
                                 PartBOM newpartbom = this.ConfiguredPart.PartBOMS.Create(flatpart, this.Transaction);
                                 newpartbom.Quantity = flatbom[flatpart];
+                                newpartbom.SortOrder = flatbomsequence[flatpart];
                             }
                         }
                     }
@@ -350,7 +364,7 @@ namespace Aras.Model.Design
             this.Session.ItemType("Variant Context").AddToSelect("context_type,min_quantity,max_quantity,sort_order");
             this.Session.ItemType("Part").AddToSelect("item_number,locked_by_id");
             this.Session.ItemType("Part Variants").AddToSelect("quantity");
-            this.Session.ItemType("Part BOM").AddToSelect("quantity,locked_by_id");
+            this.Session.ItemType("Part BOM").AddToSelect("quantity,locked_by_id,sort_order");
             this.Session.ItemType("User").AddToSelect("keyed_name");
         }
 
