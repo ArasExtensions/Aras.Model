@@ -347,7 +347,7 @@ namespace Aras.Model.Design
 
             // Ensure Required Properties are Selected
             this.Session.ItemType("v_Order Context").AddToSelect("quantity,value,locked_by_id");
-            this.Session.ItemType("Variant Context").AddToSelect("context_type");
+            this.Session.ItemType("Variant Context").AddToSelect("context_type,min_quantity,max_quantity");
             this.Session.ItemType("Part").AddToSelect("item_number,locked_by_id");
             this.Session.ItemType("Part Variants").AddToSelect("quantity");
             this.Session.ItemType("Part BOM").AddToSelect("quantity,locked_by_id");

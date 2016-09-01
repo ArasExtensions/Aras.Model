@@ -33,6 +33,9 @@ namespace Aras.Model.Design
     [Model.Attributes.ItemType("Variant Context")]
     public class VariantContext : Model.Item
     {
+        const System.Int32 DefaultMinQuantity = 0;
+        const System.Int32 DefaultMaxQuantity = 10000;
+
         public Boolean IsMethod
         {
             get
@@ -69,6 +72,40 @@ namespace Aras.Model.Design
             get
             {
                 return (System.String)this.Property("question").Value;
+            }
+        }
+
+        public System.Int32 MinQuantity
+        {
+            get
+            {
+                System.Int32? value = (System.Int32?)this.Property("min_quantity").Value;
+
+                if (value == null)
+                {
+                    return DefaultMinQuantity;
+                }
+                else
+                {
+                    return (System.Int32)value;
+                }
+            }
+        }
+
+        public System.Int32 MaxQuantity
+        {
+            get
+            {
+                System.Int32? value = (System.Int32?)this.Property("max_quantity").Value;
+
+                if (value == null)
+                {
+                    return DefaultMaxQuantity;
+                }
+                else
+                {
+                    return (System.Int32)value;
+                }
             }
         }
 
