@@ -35,6 +35,7 @@ namespace Aras.Model.Design
     {
         const System.Int32 DefaultMinQuantity = 0;
         const System.Int32 DefaultMaxQuantity = 10000;
+        const System.Int32 DefaultSortOrder = 10000;
 
         public Boolean IsMethod
         {
@@ -101,6 +102,23 @@ namespace Aras.Model.Design
                 if (value == null)
                 {
                     return DefaultMaxQuantity;
+                }
+                else
+                {
+                    return (System.Int32)value;
+                }
+            }
+        }
+
+        public System.Int32 SortOrder
+        {
+            get
+            {
+                System.Int32? value = (System.Int32?)this.Property("sort_order").Value;
+
+                if (value == null)
+                {
+                    return DefaultSortOrder;
                 }
                 else
                 {
