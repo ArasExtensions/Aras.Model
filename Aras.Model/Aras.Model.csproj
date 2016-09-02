@@ -81,7 +81,6 @@
     <Compile Include="Props\Federated.cs" />
     <Compile Include="Vault.cs" />
     <Compile Include="FileType.cs" />
-    <Compile Include="Icon.cs" />
     <Compile Include="LifeCycleMap.cs" />
     <Compile Include="LifeCycleState.cs" />
     <Compile Include="ObservableList.cs" />

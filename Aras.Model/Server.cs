@@ -181,60 +181,6 @@ namespace Aras.Model
             }
         }
 
-        private Dictionary<String, Icon> IconCache;
-
-        internal Icon GetIconByURL(String URL)
-        {
-            if (!this.IconCache.ContainsKey(URL))
-            {
-                const int buffersize = 1024;
-                byte[] buffer = new byte[buffersize];
-                int length = 0;
-
-                String iconurl = this.JavascriptClientURL + "/" + URL;
-
-                HttpWebRequest webrequest = (HttpWebRequest)WebRequest.Create(iconurl);
-                webrequest.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-                webrequest.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
-                webrequest.Headers.Add("Cache-Control", "no-cache");
-
-                using (WebResponse webresponse = webrequest.GetResponse())
-                {
-                    using (Stream result = webresponse.GetResponseStream())
-                    {
-                        MemoryStream ret = new MemoryStream();
-
-                        while ((length = result.Read(buffer, 0, buffersize)) > 0)
-                        {
-                            ret.Write(buffer, 0, length);
-                        }
-
-                        this.IconCache[URL] = new Icon(URL, ret.ToArray());
-                    }
-                }
-            }
-
-            return this.IconCache[URL];
-        }
-
-        public Icon GetIconByName(String Name)
-        {
-            return this.GetIconByURL("../images/" + Name);
-        }
-
-        public Icon GetIconByID(String ID)
-        {
-           foreach(Icon icon in this.IconCache.Values)
-           {
-               if (icon.ID.Equals(ID))
-               {
-                   return icon;
-               }
-           }
-
-           throw new Exceptions.ArgumentException("Invalid Icon ID: " + ID);
-        }
-
         public DirectoryInfo AssemblyDirectory { get; set; }
 
         public void LoadAssembly(String AssemblyFile)
@@ -390,8 +336,6 @@ namespace Aras.Model
 
             // Load this assembly
             this.LoadAssembly(new FileInfo(System.Reflection.Assembly.GetExecutingAssembly().Location));
-
-            this.IconCache = new Dictionary<String, Icon>();
         }
     }
 }

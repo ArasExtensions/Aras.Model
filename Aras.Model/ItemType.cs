@@ -141,66 +141,6 @@ namespace Aras.Model
             }
         }
 
-        private Icon ReadIcon(String PropertyName)
-        {
-            IO.Item itemtype = new IO.Item("ItemType", "get");
-            itemtype.Select = PropertyName;
-            itemtype.ID = this.ID;
-            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, itemtype);
-            IO.SOAPResponse response = request.Execute();
-
-            if (!response.IsError)
-            {
-                return this.Session.Database.Server.GetIconByURL(response.Items.First().GetProperty(PropertyName));
-            }
-            else
-            {
-                throw new Exceptions.ServerException(response);
-            }
-        }
-
-        private Icon _icon;
-        public Icon Icon
-        {
-            get
-            {
-                if (this._icon == null)
-                {
-                    this._icon = this.ReadIcon("large_icon");
-                }
-
-                return this._icon;
-            }
-        }
-
-        private Icon _openIcon;
-        public Icon OpenIcon
-        {
-            get
-            {
-                if (this._openIcon == null)
-                {
-                    this._openIcon = this.ReadIcon("open_icon");
-                }
-
-                return this._openIcon;
-            }
-        }
-
-        private Icon _closedIcon;
-        public Icon ClosedIcon
-        {
-            get
-            {
-                if (this._closedIcon == null)
-                {
-                    this._closedIcon = this.ReadIcon("closed_icon");
-                }
-
-                return this._closedIcon;
-            }
-        }
-
         private Dictionary<String, PropertyType> _propertyTypeCache;
         private Dictionary<String, PropertyType> PropertyTypeCache
         {
