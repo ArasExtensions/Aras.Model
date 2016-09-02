@@ -38,8 +38,9 @@ namespace Aras.Model.Debug
             Database database = server.Database("VariantsDemo11SP1");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-            IEnumerable<Item> test = session.Store("Part").Query(Aras.Conditions.Eq("item_number", "400_1111"));
-            int cnt = test.Count();
+            Stores.Item<Item> partstore = new Stores.Item<Item>(session, "Part", Aras.Conditions.Eq("item_number", "400_1111"));
+            Item part = partstore.First();
+        
 
 
         }
