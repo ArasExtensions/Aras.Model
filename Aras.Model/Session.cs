@@ -331,7 +331,7 @@ namespace Aras.Model
 
                     if (!response.IsError)
                     {
-                        Item source = this.Get(((RelationshipType)ItemType).Source, response.Items.First().GetProperty("source_id"));
+                        Item source = this.Get(((RelationshipType)ItemType).SourceItemType, response.Items.First().GetProperty("source_id"));
                         ret = source.Cache((RelationshipType)ItemType).Get(ID);
                     }
                     else

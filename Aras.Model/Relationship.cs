@@ -125,7 +125,7 @@ namespace Aras.Model
 
                 if (dbrelated != null)
                 {
-                    this._related = this.ItemType.Session.Get(this.RelationshipType.Related, dbrelated.ID);
+                    this._related = this.ItemType.Session.Get(this.RelationshipType.RelatedItemType, dbrelated.ID);
 
                     // Watch for Related Item Versioning
                     this._related.Superceded += Related_Superceded;
@@ -133,14 +133,17 @@ namespace Aras.Model
             }
         }
 
-        public Relationship(RelationshipType RelationshipType, Item Source, Item Related)
-            : base(RelationshipType)
+        internal Relationship(RelationshipType RelationshipType, Transaction Transaction, Item Source, Item Related)
+            : base(RelationshipType, Transaction)
         {
             this.Source = Source;
             this._related = Related;
+
+            // Add to Transaction
+            Transaction.Add("add", this);
         }
 
-        public Relationship(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
+        internal Relationship(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
             : base(RelationshipType, DBItem)
         {
             this.Source = Source;

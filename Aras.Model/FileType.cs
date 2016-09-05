@@ -76,13 +76,13 @@ namespace Aras.Model
 
         }
 
-        public FileType(ItemType ItemType)
-            : base(ItemType)
+        internal FileType(ItemType ItemType, Transaction Transaction)
+            : base(ItemType, Transaction)
         {
 
         }
 
-        public FileType(ItemType ItemType, IO.Item DBItem)
+        internal FileType(ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
 

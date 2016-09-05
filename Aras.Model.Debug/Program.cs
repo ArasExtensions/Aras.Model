@@ -34,13 +34,42 @@ namespace Aras.Model.Debug
     {
         static void Main(string[] args)
         {
-            Server server = new Server("http://localhost/11SP1");
-            Database database = server.Database("VariantsDemo11SP1");
+            Server server = new Server("http://localhost/InnovatorServer100SP4");
+            Database database = server.Database("CMB");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-            Stores.Item<Item> partstore = new Stores.Item<Item>(session, "Part", Aras.Conditions.Eq("item_number", "400_1111"));
+            Stores.Item<Item> partstore = new Stores.Item<Item>(session, "Part", Aras.Conditions.Eq("item_number", "RJMTest12"));
             Item part = partstore.First();
-        
+
+            Stores.Relationship<Relationship> partbomstore = new Stores.Relationship<Relationship>(part, "Part BOM");
+
+            List<Item> deletedrelated = new List<Item>();
+
+            using (Transaction trans = session.BeginTransaction())
+            {
+                part.Update(trans);
+
+                foreach (Relationship rel in partbomstore)
+                {
+                    deletedrelated.Add(rel.Related);
+                    rel.Delete(trans);
+    
+                }
+
+                trans.Commit();
+            }
+
+            using(Transaction trans = session.BeginTransaction())
+            {
+                part.Update(trans);
+
+                foreach(Item related in deletedrelated)
+                {
+                    partbomstore.Create(related, trans);
+                }
+
+                trans.Commit();
+            }
 
 
         }

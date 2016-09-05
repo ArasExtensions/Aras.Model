@@ -81,7 +81,6 @@ namespace Aras.Model
         internal void OnDeleted()
         {
             this.DatabaseState = DatabaseStates.Deleted;
-            this.Transaction = null;
 
             if (this.Deleted != null)
             {
@@ -116,7 +115,7 @@ namespace Aras.Model
             }
         }
 
-        public enum DatabaseStates { New, Stored, Deleted, Runtime };
+        public enum DatabaseStates { New, Stored, Deleted };
 
         private DatabaseStates _databaseState;
         public DatabaseStates DatabaseState
@@ -147,7 +146,7 @@ namespace Aras.Model
 
         public Boolean Locked(Boolean Refresh)
         {
-            if ((this.DatabaseState == DatabaseStates.Runtime) || (this.Action == Actions.Create))
+            if (this.Action == Actions.Create)
             {
                 return true;
             }
@@ -471,9 +470,7 @@ namespace Aras.Model
                 switch (this.Action)
                 {
                     case Actions.Create:
-                        Transaction.Add("add", this);
-                        this.Transaction = Transaction;
-                        this.DatabaseState = DatabaseStates.New;
+
                         break;
 
                     case Actions.Read:
@@ -482,7 +479,6 @@ namespace Aras.Model
                         if (this.Lock(UnLock))
                         {
                             Transaction.Add("update", this);
-                            this.Transaction = Transaction;
                             this.Action = Actions.Update;
                             this.OnUpdate();
                         }
@@ -523,26 +519,12 @@ namespace Aras.Model
                 }
             }
 
-            this.Transaction = Transaction;
             this.Action = Actions.Delete;
         }
 
         protected virtual void OnUpdate()
         {
            
-        }
-
-        private Transaction _transaction;
-        public Transaction Transaction 
-        { 
-            get
-            {
-                return this._transaction;
-            }
-            private set
-            {
-                this._transaction = value;
-            }
         }
 
         private Boolean Lock(Boolean UnLock)
@@ -640,7 +622,6 @@ namespace Aras.Model
             {
                 this.Action = Actions.Read;
                 this.DatabaseState = DatabaseStates.Stored;
-                this.Transaction = null;
                 return true;
             }
             else
@@ -657,7 +638,6 @@ namespace Aras.Model
                         this.UpdateProperties(response.Items.First());
                         this.Action = Actions.Read;
                         this.DatabaseState = DatabaseStates.Stored;
-                        this.Transaction = null;
                         this.Property("locked_by_id").DBValue = null;
                         
                         return true;
@@ -950,10 +930,9 @@ namespace Aras.Model
             this.PropertyCache = new Dictionary<PropertyType, Property>();
             this.Caches = new Dictionary<RelationshipType, Caches.Relationship>();
             this.ItemType = ItemType;
-            this.Transaction = null;
         }
 
-        public Item(ItemType ItemType)
+        internal Item(ItemType ItemType, Transaction Transaction)
         {
             this.Initialise(ItemType);
             this.ID = Server.NewID();
@@ -961,10 +940,15 @@ namespace Aras.Model
             this.Generation = 1;
             this.IsCurrent = true;
             this._action = Actions.Create;
-            this._databaseState = DatabaseStates.Runtime;
+
+            if (!(this is Relationship))
+            {
+                // Add to Transaction
+                Transaction.Add("add", this);
+            }
         }
 
-        public Item(ItemType ItemType, IO.Item DBItem)
+        internal Item(ItemType ItemType, IO.Item DBItem)
         {
             this.Initialise(ItemType);
             this.ID = DBItem.ID;

@@ -85,13 +85,13 @@ namespace Aras.Model
             }
         }
 
-        public User(ItemType ItemType)
-            : base(ItemType)
+        internal User(ItemType ItemType, Transaction Transaction)
+            : base(ItemType, Transaction)
         {
           
         }
 
-        public User(ItemType ItemType, IO.Item DBItem)
+        internal User(ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
           

@@ -85,13 +85,13 @@ namespace Aras.Model
             this._access = null;
         }
 
-        public Permission(ItemType ItemType)
-            : base(ItemType)
+        internal Permission(ItemType ItemType, Transaction Transaction)
+            : base(ItemType, Transaction)
         {
 
         }
 
-        public Permission(ItemType ItemType, IO.Item DBItem)
+        internal Permission(ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
 

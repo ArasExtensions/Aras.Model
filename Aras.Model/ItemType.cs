@@ -129,7 +129,7 @@ namespace Aras.Model
             {
                 if (this._class == null)
                 {
-                    this._class = this.Session.Database.ItemType(this.Name);
+                    this._class = this.Session.Database.ItemTypeClass(this.Name);
 
                     if (this._class == null)
                     {

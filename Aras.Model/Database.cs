@@ -76,13 +76,13 @@ namespace Aras.Model
             }
         }
 
-        private Dictionary<String, Type> ItemTypesCache;
+        private Dictionary<String, Type> ItemTypeClassCache;
 
-        internal Type ItemType(String Name)
+        internal Type ItemTypeClass(String Name)
         {
-            if (this.ItemTypesCache.ContainsKey(Name))
+            if (this.ItemTypeClassCache.ContainsKey(Name))
             {
-                return this.ItemTypesCache[Name];
+                return this.ItemTypeClassCache[Name];
             }
             else
             {
@@ -99,7 +99,7 @@ namespace Aras.Model
             : base()
         {
             this.SessionCache = new Dictionary<String, Session>();
-            this.ItemTypesCache = new Dictionary<String, Type>();
+            this.ItemTypeClassCache = new Dictionary<String, Type>();
             this.Server = Server;
             this.ID = Server.NewID();
             this.Name = Name;
@@ -115,15 +115,15 @@ namespace Aras.Model
 
                         if (itemtypeatt != null)
                         {
-                            if (!this.ItemTypesCache.ContainsKey(itemtypeatt.Name))
+                            if (!this.ItemTypeClassCache.ContainsKey(itemtypeatt.Name))
                             {
-                                this.ItemTypesCache[itemtypeatt.Name] = type;
+                                this.ItemTypeClassCache[itemtypeatt.Name] = type;
                             }
                             else
                             {
-                                if (type.IsSubclassOf(this.ItemTypesCache[itemtypeatt.Name]))
+                                if (type.IsSubclassOf(this.ItemTypeClassCache[itemtypeatt.Name]))
                                 {
-                                    this.ItemTypesCache[itemtypeatt.Name] = type;
+                                    this.ItemTypeClassCache[itemtypeatt.Name] = type;
                                 }
                             }
                         }

@@ -116,13 +116,13 @@ namespace Aras.Model
             }
         }
 
-        public Access(RelationshipType RelationshipType, Item Source, Item Related)
-            :base(RelationshipType, Source, Related)
+        internal Access(RelationshipType RelationshipType, Transaction Transaction, Item Source, Item Related)
+            : base(RelationshipType, Transaction, Source, Related)
         {
       
         }
 
-        public Access(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
+        internal Access(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
             : base(RelationshipType, Source, DBItem)
         {
 

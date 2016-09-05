@@ -66,13 +66,13 @@ namespace Aras.Model
             }
         }
 
-        public List(ItemType ItemType)
-            :base(ItemType)
+        internal List(ItemType ItemType, Transaction Transaction)
+            : base(ItemType, Transaction)
         {
            
         }
 
-        public List(ItemType ItemType, IO.Item DBItem)
+        internal List(ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
 

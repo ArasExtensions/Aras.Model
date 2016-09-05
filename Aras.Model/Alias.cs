@@ -49,13 +49,13 @@ namespace Aras.Model
             }
         }
 
-        public Alias(RelationshipType RelationshipType, Item Source, Item Related)
-            :base(RelationshipType, Source, Related)
+        internal Alias(RelationshipType RelationshipType, Transaction Transaction, Item Source, Item Related)
+            :base(RelationshipType, Transaction, Source, Related)
         {
       
         }
 
-        public Alias(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
+        internal Alias(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
             : base(RelationshipType, Source, DBItem)
         {
 

@@ -41,13 +41,13 @@ namespace Aras.Model
             }
         }
 
-        public LifeCycleState(RelationshipType RelationshipType, Item Source, Item Related)
-            :base(RelationshipType, Source, Related)
+        internal LifeCycleState(RelationshipType RelationshipType, Transaction Transaction, Item Source, Item Related)
+            : base(RelationshipType, Transaction, Source, Related)
         {
       
         }
 
-        public LifeCycleState(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
+        internal LifeCycleState(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
             : base(RelationshipType, Source, DBItem)
         {
 

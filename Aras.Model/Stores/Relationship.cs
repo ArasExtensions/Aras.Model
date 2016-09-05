@@ -130,11 +130,6 @@ namespace Aras.Model.Stores
             return relationship;
         }
 
-        public T Create(Model.Item Related)
-        {
-            return this.Create(Related, null);
-        }
-
         internal Relationship(Caches.Relationship Cache, Condition Condition)
             : base(Condition)
         {

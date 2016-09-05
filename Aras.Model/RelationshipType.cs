@@ -47,7 +47,7 @@ namespace Aras.Model
             {
                 if (this._class == null)
                 {
-                    this._class = this.Session.Database.ItemType(this.Name);
+                    this._class = this.Session.Database.ItemTypeClass(this.Name);
 
                     if (this._class == null)
                     {
@@ -59,16 +59,16 @@ namespace Aras.Model
             }
         }
 
-        public ItemType Source { get; private set; }
+        public ItemType SourceItemType { get; private set; }
 
-        public ItemType Related { get; private set; }
+        public ItemType RelatedItemType { get; private set; }
 
-        internal RelationshipType(Session Session, String ID, String Name, String ClassStructure, ItemType Source, ItemType Related)
+        internal RelationshipType(Session Session, String ID, String Name, String ClassStructure, ItemType SourceItemType, ItemType RelatedItemType)
             : base(Session, ID, Name, ClassStructure)
         {
-            this.Source = Source;
-            this.Related = Related;
-            this.Source.AddRelationshipType(this);
+            this.SourceItemType = SourceItemType;
+            this.RelatedItemType = RelatedItemType;
+            this.SourceItemType.AddRelationshipType(this);
         }
     }
 }

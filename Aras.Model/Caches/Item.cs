@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Aras.Model.Caches
 {
@@ -56,7 +57,7 @@ namespace Aras.Model.Caches
                 if (!this.IsInCache(DBItem.ID))
                 {
                     // Create new Item from Database Item
-                    item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, DBItem });
+                    item = (Model.Item)this.ItemType.Class.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(ItemType), typeof(IO.Item) }, null).Invoke(new object[] { this.ItemType, DBItem });
                     this.AddToCache(item);
                     return item;
                 }
@@ -92,7 +93,7 @@ namespace Aras.Model.Caches
                 {
                     if (response.Items.Count() > 0)
                     {
-                        item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, response.Items.First() });
+                        item = (Model.Item)this.ItemType.Class.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(ItemType), typeof(IO.Item) }, null).Invoke(new object[] { this.ItemType, response.Items.First() });
                         this.AddToCache(item);
                     }
                     else
@@ -121,13 +122,7 @@ namespace Aras.Model.Caches
 
         public override Model.Item Create(Transaction Transaction)
         {
-            Model.Item item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType) }).Invoke(new object[] { this.ItemType });
-
-            if (Transaction != null)
-            {
-                item.Update(Transaction, false);
-            }
-                
+            Model.Item item = (Model.Item)this.ItemType.Class.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(ItemType), typeof(Transaction) }, null).Invoke(new object[] { this.ItemType, Transaction });                
             this.AddToCache(item);
 
             return item;
