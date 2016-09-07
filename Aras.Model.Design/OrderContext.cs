@@ -28,64 +28,71 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Design
 {
-    [Attributes.ItemType("FileType")]
-    public class FileType : Item
+    [Model.Attributes.ItemType("v_Order Context")]
+    public class OrderContext : Model.Relationship
     {
-        public String Name
+
+        public Double Quantity
         {
             get
             {
-                return (String)this.Property("name").Value;
+                Double? quanity = (Double?)this.Property("quantity").Value;
+
+                if (quanity == null)
+                {
+                    return 0.0;
+                }
+                else
+                {
+                    return (Double)quanity;
+                }
             }
             set
             {
-                this.Property("name").Value = value;
+                this.Property("quantity").Value = value;
             }
         }
 
-        public String Description
+        public String Value
         {
             get
             {
-                return (String)this.Property("description").Value;
+                return (String)this.Property("value").Value;
             }
             set
             {
-                this.Property("description").Value = value;
+                this.Property("value").Value = value;
             }
         }
 
-        public String Extension
+        public Order Order
         {
             get
             {
-                return (String)this.Property("extension").Value;
+                return (Order)this.Source;
             }
-            set
+        }
+
+        public VariantContext VariantContext
+        {
+            get
             {
-                this.Property("extension").Value = value;
+                return (VariantContext)this.Related;
             }
         }
 
-        protected override void OnRefresh()
+        public OrderContext(Model.RelationshipType RelationshipType, Transaction Transaction, Model.Item Source, Model.Item Related)
+            : base(RelationshipType, Transaction, Source, Related)
         {
-            base.OnRefresh();
-
-
+         
         }
 
-        public FileType(ItemType ItemType, Transaction Transaction)
-            : base(ItemType, Transaction)
+        public OrderContext(Model.RelationshipType RelationshipType, Model.Item Source, IO.Item DBItem)
+            : base(RelationshipType, Source, DBItem)
         {
-
-        }
-
-        public FileType(ItemType ItemType, IO.Item DBItem)
-            : base(ItemType, DBItem)
-        {
-
+           
         }
     }
 }

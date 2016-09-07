@@ -28,32 +28,55 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Design
 {
-    [Attributes.ItemType("Identity")]
-    public class Identity : Item
+    [Model.Attributes.ItemType("Document")]
+    public class Document : Model.Item
     {
+        public String ItemNumber
+        {
+            get
+            {
+                return (String)this.Property("item_number").Value;
+            }
+            set
+            {
+                this.Property("item_number").Value = value;
+            }
+        }
+
         public String Name
         {
             get
             {
                 return (String)this.Property("name").Value;
             }
+            set
+            {
+                this.Property("name").Value = value;
+            }
         }
 
-        public override String ToString()
+        public String Description
         {
-            return this.Name;
+            get
+            {
+                return (String)this.Property("description").Value;
+            }
+            set
+            {
+                this.Property("description").Value = value;
+            }
         }
 
-        public Identity(ItemType ItemType, Transaction Transaction)
+        public Document(Model.ItemType ItemType, Transaction Transaction)
             : base(ItemType, Transaction)
         {
-
+ 
         }
 
-        public Identity(ItemType ItemType, IO.Item DBItem)
-            :base(ItemType, DBItem)
+        public Document(Model.ItemType ItemType, IO.Item DBItem)
+            : base(ItemType, DBItem)
         {
 
         }

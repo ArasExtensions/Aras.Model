@@ -66,13 +66,13 @@ namespace Aras.Model
 
         }
 
-        internal Vault(ItemType ItemType, Transaction Transaction)
+        public Vault(ItemType ItemType, Transaction Transaction)
             : base(ItemType, Transaction)
         {
 
         }
 
-        internal Vault(ItemType ItemType, IO.Item DBItem)
+        public Vault(ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
 

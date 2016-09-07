@@ -67,7 +67,7 @@ namespace Aras.Model.Caches
                 if (!this.IsInCache(DBItem.ID))
                 {
                     // Create Relationship and add to Cache
-                    relationship = (Model.Relationship)this.RelationshipType.Class.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }, null).Invoke(new object[] { this.RelationshipType, this.Source, DBItem });
+                    relationship = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, DBItem });
                     this.AddToCache(relationship);
                 }
                 else
@@ -102,7 +102,7 @@ namespace Aras.Model.Caches
                     if (response.Items.Count() > 0)
                     {
                         // Get Related Item
-                        relationship = (Model.Relationship)this.RelationshipType.Class.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }, null).Invoke(new object[] { this.RelationshipType, this.Source, response.Items.First() });
+                        relationship = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, response.Items.First() });
                         this.AddToCache(relationship);
                     }
                     else
@@ -140,7 +140,7 @@ namespace Aras.Model.Caches
 
         public Model.Relationship Create(Model.Item Related, Transaction Transaction)
         {
-            Model.Relationship relationship = (Model.Relationship)this.RelationshipType.Class.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(RelationshipType), typeof(Transaction), typeof(Model.Item), typeof(Model.Item) }, null).Invoke(new object[] { RelationshipType, Transaction, this.Source, Related });
+            Model.Relationship relationship = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Transaction), typeof(Model.Item), typeof(Model.Item) }).Invoke(new object[] { RelationshipType, Transaction, this.Source, Related });
             this.AddToCache(relationship);
 
             if (Transaction != null)

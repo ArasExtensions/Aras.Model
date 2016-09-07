@@ -28,14 +28,37 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model.PropertyTypes
+namespace Aras.Model.Design
 {
-    public class VariableList : PropertyType
+    [Model.Attributes.ItemType("Document File")]
+    public class DocumentFile : Model.Relationship
     {
-        internal VariableList(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required)
-            :base(Type, Name, Label, ReadOnly, true, Required, null)
+        public Document Document
         {
-           
+            get
+            {
+                return (Document)this.Source;
+            }
+        }
+
+        public File File
+        {
+            get
+            {
+                return (File)this.Related;
+            }
+        }
+
+        public DocumentFile(Model.RelationshipType Type, Transaction Transaction, Model.Item Source, Model.Item Related)
+            : base(Type, Transaction, Source, Related)
+        {
+
+        }
+
+        public DocumentFile(Model.RelationshipType Type, Model.Item Source, IO.Item DBItem)
+            : base(Type, Source, DBItem)
+        {
+
         }
     }
 }

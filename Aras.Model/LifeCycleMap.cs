@@ -33,13 +33,13 @@ namespace Aras.Model
     [Attributes.ItemType("Life Cycle Map")]
     public class LifeCycleMap : Item
     {
-        internal LifeCycleMap(ItemType ItemType, Transaction Transaction)
+        public LifeCycleMap(ItemType ItemType, Transaction Transaction)
             : base(ItemType, Transaction)
         {
 
         }
 
-        internal LifeCycleMap(ItemType ItemType, IO.Item DBItem)
+        public LifeCycleMap(ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
 

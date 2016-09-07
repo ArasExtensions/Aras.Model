@@ -33,13 +33,13 @@ namespace Aras.Model
     [Attributes.ItemType("Team")]
     public class Team : Item
     {
-        internal Team(ItemType ItemType, Transaction Transaction)
+        public Team(ItemType ItemType, Transaction Transaction)
             : base(ItemType, Transaction)
         {
 
         }
 
-        internal Team(ItemType ItemType, IO.Item DBItem)
+        public Team(ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
 

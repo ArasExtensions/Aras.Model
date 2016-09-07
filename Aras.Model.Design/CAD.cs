@@ -28,32 +28,67 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Design
 {
-    [Attributes.ItemType("Identity")]
-    public class Identity : Item
+    [Model.Attributes.ItemType("CAD")]
+    public class CAD : Model.Item
     {
+        public String ItemNumber
+        {
+            get
+            {
+                return (String)this.Property("item_number").Value;
+            }
+            set
+            {
+                this.Property("item_number").Value = value;
+            }
+        }
+
         public String Name
         {
             get
             {
                 return (String)this.Property("name").Value;
             }
+            set
+            {
+                this.Property("name").Value = value;
+            }
         }
 
-        public override String ToString()
+        public File NativeFile
         {
-            return this.Name;
+            get
+            {
+                return (File)this.Property("native_file").Value;
+            }
+            set
+            {
+                this.Property("native_file").Value = value;
+            }
         }
 
-        public Identity(ItemType ItemType, Transaction Transaction)
+        public File ViewableFile
+        {
+            get
+            {
+                return (File)this.Property("viewable_file").Value;
+            }
+            set
+            {
+                this.Property("viewable_file").Value = value;
+            }
+        }
+
+        public CAD(Model.ItemType ItemType, Transaction Transaction)
             : base(ItemType, Transaction)
         {
-
+ 
         }
 
-        public Identity(ItemType ItemType, IO.Item DBItem)
-            :base(ItemType, DBItem)
+        public CAD(Model.ItemType ItemType, IO.Item DBItem)
+            : base(ItemType, DBItem)
         {
 
         }

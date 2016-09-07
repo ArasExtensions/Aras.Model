@@ -66,13 +66,20 @@ namespace Aras.Model
             }
         }
 
-        internal List(ItemType ItemType, Transaction Transaction)
+        public override void Refresh()
+        {
+            base.Refresh();
+
+            this.Values.Refresh();
+        }
+
+        public List(ItemType ItemType, Transaction Transaction)
             : base(ItemType, Transaction)
         {
            
         }
 
-        internal List(ItemType ItemType, IO.Item DBItem)
+        public List(ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
 

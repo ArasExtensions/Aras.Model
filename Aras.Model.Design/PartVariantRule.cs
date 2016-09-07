@@ -28,32 +28,35 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Design
 {
-    [Attributes.ItemType("Identity")]
-    public class Identity : Item
+    [Model.Attributes.ItemType("Part Variant Rule")]
+    public class PartVariantRule : Model.Relationship
     {
-        public String Name
+        public String Value
         {
             get
             {
-                return (String)this.Property("name").Value;
+                return (String)this.Property("value").Value;
             }
         }
 
-        public override String ToString()
+        public VariantContext VariantContext
         {
-            return this.Name;
+            get
+            {
+                return (VariantContext)this.Related;
+            }
         }
 
-        public Identity(ItemType ItemType, Transaction Transaction)
-            : base(ItemType, Transaction)
+        public PartVariantRule(Model.RelationshipType RelationshipType, Transaction Transaction, Model.Item Source, Model.Item Related)
+            : base(RelationshipType, Transaction, Source, Related)
         {
 
         }
 
-        public Identity(ItemType ItemType, IO.Item DBItem)
-            :base(ItemType, DBItem)
+        public PartVariantRule(Model.RelationshipType Type, Model.Item Source, IO.Item DBItem)
+            : base(Type, Source, DBItem)
         {
 
         }

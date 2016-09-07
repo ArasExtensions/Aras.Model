@@ -385,14 +385,6 @@ namespace Aras.Model
             return this.PropertyCache[PropertyType];
         }
 
-        protected Properties.VariableList AddVariableListRuntime(String Name, String Label, System.Boolean ReadOnly, System.Boolean Required, Model.List ValueList, Model.ListValue Default)
-        {
-            PropertyTypes.VariableList proptype = this.ItemType.AddVariableListRuntime(Name, Label, ReadOnly, Required);
-            Properties.VariableList variablelist = new Properties.VariableList(this, proptype, ValueList, Default);
-            this.PropertyCache[proptype] = variablelist;
-            return variablelist;
-        }
-
         public Boolean HasProperty(String Name)
         {
             return this.PropertyCache.ContainsKey(this.ItemType.PropertyType(Name));
@@ -932,7 +924,7 @@ namespace Aras.Model
             this.ItemType = ItemType;
         }
 
-        internal Item(ItemType ItemType, Transaction Transaction)
+        public Item(ItemType ItemType, Transaction Transaction)
         {
             this.Initialise(ItemType);
             this.ID = Server.NewID();
@@ -948,7 +940,7 @@ namespace Aras.Model
             }
         }
 
-        internal Item(ItemType ItemType, IO.Item DBItem)
+        public Item(ItemType ItemType, IO.Item DBItem)
         {
             this.Initialise(ItemType);
             this.ID = DBItem.ID;

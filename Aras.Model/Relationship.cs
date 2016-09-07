@@ -133,7 +133,7 @@ namespace Aras.Model
             }
         }
 
-        internal Relationship(RelationshipType RelationshipType, Transaction Transaction, Item Source, Item Related)
+        public Relationship(RelationshipType RelationshipType, Transaction Transaction, Item Source, Item Related)
             : base(RelationshipType, Transaction)
         {
             this.Source = Source;
@@ -143,7 +143,7 @@ namespace Aras.Model
             Transaction.Add("add", this);
         }
 
-        internal Relationship(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
+        public Relationship(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
             : base(RelationshipType, DBItem)
         {
             this.Source = Source;

@@ -28,34 +28,42 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Design
 {
-    [Attributes.ItemType("Identity")]
-    public class Identity : Item
+    [Model.Attributes.ItemType("Part Variants")]
+    public class PartVariant : Model.Relationship
     {
-        public String Name
+        public Double Quantity
         {
             get
             {
-                return (String)this.Property("name").Value;
+                Double? quanity = (Double?)this.Property("quantity").Value;
+
+                if (quanity == null)
+                {
+                    return 0.0;
+                }
+                else
+                {
+                    return (Double)quanity;
+                }
+            }
+            set
+            {
+                this.Property("quantity").Value = value;
             }
         }
 
-        public override String ToString()
+        public PartVariant(Model.RelationshipType RelationshipType, Transaction Transaction, Model.Item Source, Model.Item Related)
+            : base(RelationshipType, Transaction, Source, Related)
         {
-            return this.Name;
+       
         }
 
-        public Identity(ItemType ItemType, Transaction Transaction)
-            : base(ItemType, Transaction)
+        public PartVariant(Model.RelationshipType RelationshipType, Model.Item Source, IO.Item DBItem)
+            : base(RelationshipType, Source, DBItem)
         {
-
-        }
-
-        public Identity(ItemType ItemType, IO.Item DBItem)
-            :base(ItemType, DBItem)
-        {
-
+           
         }
     }
 }

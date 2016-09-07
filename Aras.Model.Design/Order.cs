@@ -28,34 +28,57 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Design
 {
-    [Attributes.ItemType("Identity")]
-    public class Identity : Item
+    [Model.Attributes.ItemType("v_Order")]
+    public class Order : Model.Item
     {
-        public String Name
+        public String ItemNumber
         {
             get
             {
-                return (String)this.Property("name").Value;
+                return (String)this.Property("item_number").Value;
+            }
+            set
+            {
+                this.Property("item_number").Value = value;
             }
         }
 
-        public override String ToString()
+        public Part TopLevelPart
         {
-            return this.Name;
+            get
+            {
+                return (Part)this.Property("part").Value;
+            }
+            set
+            {
+                this.Property("part").Value = value;
+            }
         }
 
-        public Identity(ItemType ItemType, Transaction Transaction)
+        public Part ConfiguredPart
+        {
+            get
+            {
+                return (Part)this.Property("configured_part").Value;
+            }
+            set
+            {
+                this.Property("configured_part").Value = value;
+            }
+        }
+
+        public Order(Model.ItemType ItemType, Transaction Transaction)
             : base(ItemType, Transaction)
         {
-
+        
         }
 
-        public Identity(ItemType ItemType, IO.Item DBItem)
-            :base(ItemType, DBItem)
+        public Order(Model.ItemType ItemType, IO.Item DBItem)
+            : base(ItemType, DBItem)
         {
-
+           
         }
     }
 }

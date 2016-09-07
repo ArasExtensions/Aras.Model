@@ -70,13 +70,13 @@ namespace Aras.Model
             return Label;
         }
 
-        internal ListValue(RelationshipType RelationshipType, Transaction Transaction, Item Source, Item Related)
+        public ListValue(RelationshipType RelationshipType, Transaction Transaction, Item Source, Item Related)
             : base(RelationshipType, Transaction, Source, Related)
         {
       
         }
 
-        internal ListValue(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
+        public ListValue(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
             : base(RelationshipType, Source, DBItem)
         {
 

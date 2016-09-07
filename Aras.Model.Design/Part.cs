@@ -28,32 +28,58 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Design
 {
-    [Attributes.ItemType("Identity")]
-    public class Identity : Item
+    [Model.Attributes.ItemType("Part")]
+    public class Part : Model.Item
     {
+        public String ItemNumber
+        {
+            get
+            {
+                return (String)this.Property("item_number").Value;
+            }
+            set
+            {
+                this.Property("item_number").Value = value;
+            }
+        }
+
         public String Name
         {
             get
             {
                 return (String)this.Property("name").Value;
             }
+            set
+            {
+                this.Property("name").Value = value;
+            }
         }
 
-        public override String ToString()
+        public Boolean IsVariant
         {
-            return this.Name;
+            get
+            {
+                if ((this.Class != null) && (this.Class.Name == "Variant"))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
         }
 
-        public Identity(ItemType ItemType, Transaction Transaction)
+        public Part(Model.ItemType ItemType, Transaction Transaction)
             : base(ItemType, Transaction)
         {
-
+ 
         }
 
-        public Identity(ItemType ItemType, IO.Item DBItem)
-            :base(ItemType, DBItem)
+        public Part(Model.ItemType ItemType, IO.Item DBItem)
+            : base(ItemType, DBItem)
         {
 
         }

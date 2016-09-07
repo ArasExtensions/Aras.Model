@@ -28,62 +28,61 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Design
 {
-    [Attributes.ItemType("FileType")]
-    public class FileType : Item
+    [Model.Attributes.ItemType("Part BOM")]
+    public class PartBOM : Model.Relationship
     {
-        public String Name
+        public Double Quantity
         {
             get
             {
-                return (String)this.Property("name").Value;
+                Double? quanity = (Double?)this.Property("quantity").Value;
+
+                if (quanity == null)
+                {
+                    return 0.0;
+                }
+                else
+                {
+                    return (Double)quanity;
+                }
             }
             set
             {
-                this.Property("name").Value = value;
+                this.Property("quantity").Value = value;
             }
         }
 
-        public String Description
+        public Int32 SortOrder
         {
             get
             {
-                return (String)this.Property("description").Value;
+                Int32? sortorder = (Int32?)this.Property("sort_order").Value;
+
+                if (sortorder == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return (Int32)sortorder;
+                }
             }
             set
             {
-                this.Property("description").Value = value;
+                this.Property("sort_order").Value = value;
             }
         }
 
-        public String Extension
-        {
-            get
-            {
-                return (String)this.Property("extension").Value;
-            }
-            set
-            {
-                this.Property("extension").Value = value;
-            }
-        }
-
-        protected override void OnRefresh()
-        {
-            base.OnRefresh();
-
-
-        }
-
-        public FileType(ItemType ItemType, Transaction Transaction)
-            : base(ItemType, Transaction)
+        public PartBOM(Model.RelationshipType RelationshipType, Transaction Transaction, Model.Item Source, Model.Item Related)
+            : base(RelationshipType, Transaction, Source, Related)
         {
 
         }
 
-        public FileType(ItemType ItemType, IO.Item DBItem)
-            : base(ItemType, DBItem)
+        public PartBOM(Model.RelationshipType Type, Model.Item Source, IO.Item DBItem)
+            : base(Type, Source, DBItem)
         {
 
         }
