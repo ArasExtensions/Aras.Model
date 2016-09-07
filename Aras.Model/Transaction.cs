@@ -127,14 +127,14 @@ namespace Aras.Model
 
         public Boolean Completed { get; private set; }
 
-        public void Commit()
+        public void Commit(Boolean UnLock)
         {
             if (!this.Completed && this.ActionsCache.Count > 0)
             {
                 // Process Actions
                 foreach (Action action in this.ActionsCache.Values)
                 {
-                    action.Commit();
+                    action.Commit(UnLock);
                 }
 
                 // Update Stores

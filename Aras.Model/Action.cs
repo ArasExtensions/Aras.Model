@@ -88,11 +88,11 @@ namespace Aras.Model
 
         internal abstract void Rollback();
 
-        internal abstract IO.Item Commit();
+        internal abstract IO.Item Commit(Boolean UnLock);
 
         internal abstract void UpdateStore();
 
-        protected IO.Item BuildItem()
+        protected IO.Item BuildItem(Boolean UnLock)
         {
             // Create IO Item
             IO.Item dbitem = new IO.Item(this.Item.ItemType.Name, this.Name);
@@ -114,7 +114,7 @@ namespace Aras.Model
 
                             if (itempropaction != null)
                             {
-                                itempropaction.Commit();
+                                itempropaction.Commit(UnLock);
                             }
                         }
                     }
@@ -126,7 +126,7 @@ namespace Aras.Model
             // Add Relations
             foreach (Actions.Relationship relationshipaction in this.RelationshipsCache.Values)
             {
-                IO.Item dbrelationship = relationshipaction.Commit();
+                IO.Item dbrelationship = relationshipaction.Commit(UnLock);
                 dbitem.AddRelationship(dbrelationship);
             }
 
@@ -140,10 +140,13 @@ namespace Aras.Model
             return request.Execute();
         }
 
-        protected void UpdateItem(IO.Item DBItem)
-        {            
-            // Unlock
-            this.Item.UnLock();
+        protected void UpdateItem(IO.Item DBItem, Boolean UnLock)
+        {
+            if (UnLock)
+            {
+                // Unlock
+                this.Item.UnLock();
+            }
 
             foreach (Actions.Relationship relation in this.RelationshipsCache.Values)
             {
@@ -154,7 +157,12 @@ namespace Aras.Model
                     if (dbrelationship.ID.Equals(relation.Item.ID))
                     {
                         relation.Item.UpdateProperties(dbrelationship);
-                        relation.Item.UnLock();
+
+                        if (UnLock)
+                        {
+                            relation.Item.UnLock();
+                        }
+
                         found = true;
                     }
                 }
@@ -162,7 +170,11 @@ namespace Aras.Model
                 if (!found && !relation.Name.Equals("delete"))
                 {
                     relation.Item.UpdateProperties(null);
-                    relation.Item.UnLock();
+
+                    if (UnLock)
+                    {
+                        relation.Item.UnLock();
+                    }
                 }
             }
         }

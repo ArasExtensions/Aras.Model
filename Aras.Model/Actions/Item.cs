@@ -34,11 +34,11 @@ namespace Aras.Model.Actions
     {
         private IO.Item Result;
         
-        internal override IO.Item Commit()
+        internal override IO.Item Commit(Boolean UnLock)
         {
             if (!this.Completed)
             {
-                IO.Item dbitem = this.BuildItem();
+                IO.Item dbitem = this.BuildItem(UnLock);
                 IO.SOAPResponse response = this.SendItem(dbitem);
 
                 if (!response.IsError)
@@ -55,12 +55,12 @@ namespace Aras.Model.Actions
                                 Model.Item newversion = this.Item.Session.Cache(this.Item.ItemType).Get(this.Result);
                                 Model.Item oldversion = this.Item;
                                 this.Item = newversion;
-                                this.UpdateItem(this.Result);
+                                this.UpdateItem(this.Result, UnLock);
                                 oldversion.OnSuperceded(newversion);
                             }
                             else
                             {
-                                this.UpdateItem(this.Result);
+                                this.UpdateItem(this.Result, UnLock);
                             }
                         }
                         else

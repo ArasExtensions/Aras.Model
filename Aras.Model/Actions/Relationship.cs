@@ -33,11 +33,11 @@ namespace Aras.Model.Actions
     internal class Relationship : Action
     {
         private IO.Item DBItem;
-        internal override IO.Item Commit()
+        internal override IO.Item Commit(Boolean UnLock)
         {
             if (!this.Completed)
             {
-                this.DBItem = this.BuildItem();
+                this.DBItem = this.BuildItem(UnLock);
 
                 if (((Model.Relationship)this.Item).Related != null)
                 {
@@ -45,7 +45,7 @@ namespace Aras.Model.Actions
 
                     if (relatedaction != null)
                     {
-                        this.DBItem.SetProperty("related_id", relatedaction.Commit().ID);
+                        this.DBItem.SetProperty("related_id", relatedaction.Commit(UnLock).ID);
                     }
                     else
                     {
