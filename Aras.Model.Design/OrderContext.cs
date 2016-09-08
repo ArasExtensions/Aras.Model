@@ -83,6 +83,16 @@ namespace Aras.Model.Design
             }
         }
 
+        public Model.IO.Item GetIOItem()
+        {
+            Model.IO.Item dbitem = new Model.IO.Item(this.ItemType.Name, "get");
+            dbitem.ID = this.ID;
+            dbitem.SetProperty("value", this.Value);
+            dbitem.SetProperty("quantity", this.Quantity.ToString());
+            dbitem.SetProperty("related_id", this.Related.ID);
+            return dbitem;
+        }
+
         public OrderContext(Model.RelationshipType RelationshipType, Transaction Transaction, Model.Item Source, Model.Item Related)
             : base(RelationshipType, Transaction, Source, Related)
         {
