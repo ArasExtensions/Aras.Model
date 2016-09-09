@@ -256,6 +256,9 @@ namespace Aras.Model.Design
         {
             base.Process(Transaction);
 
+            // Lock Items
+            this.LockItems(Transaction);
+
             if (this.TopLevelPart != null)
             {
                 // Ensure Configured Part exists
