@@ -44,6 +44,7 @@ namespace Aras.Model.Design.Debug
             Model.Session session = database.Login("admin", Model.Server.PasswordHash("innovator"));
             session.ItemType("CAD").AddToSelect("native_file,viewable_file");
 
+            /*
             Queries.Item orderquery = session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest002"));
             Model.Design.Order order = (Model.Design.Order)orderquery.First();
 
@@ -53,7 +54,15 @@ namespace Aras.Model.Design.Debug
                 order.Process(transaction);
                 transaction.Commit(true);
             }
+            */
 
+            using (Transaction transaction = session.BeginTransaction())
+            {
+                Part part = (Part)session.Store("Part").Create(transaction);
+                part.ItemNumber = "RJMTest9990004";
+                part.Property("cmb_name").Value = "Test RJM";
+                transaction.Commit(false);
+            }
         }
     }
 }

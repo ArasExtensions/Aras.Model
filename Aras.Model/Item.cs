@@ -669,6 +669,11 @@ namespace Aras.Model
             }
    
             this.DatabaseState = DatabaseStates.Stored;  
+
+            if (this.Action == Actions.Create)
+            {
+                this.Action = Actions.Read;
+            }
         }
 
         public Boolean IsManager

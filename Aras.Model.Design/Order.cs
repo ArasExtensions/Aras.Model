@@ -347,16 +347,21 @@ namespace Aras.Model.Design
             }
         }
 
+        private void Initialise()
+        {
+            this.PartCache = new Dictionary<Part, Double>();
+        }
+
         public Order(Model.ItemType ItemType, Transaction Transaction)
             : base(ItemType, Transaction)
         {
-            this.PartCache = new Dictionary<Part, Double>();
+            this.Initialise();
         }
 
         public Order(Model.ItemType ItemType, IO.Item DBItem)
             : base(ItemType, DBItem)
         {
-            this.PartCache = new Dictionary<Part, Double>();
+            this.Initialise();
         }
     }
 }

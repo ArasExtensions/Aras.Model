@@ -142,10 +142,18 @@ namespace Aras.Model
 
         protected void UpdateItem(IO.Item DBItem, Boolean UnLock)
         {
+            // Update Properties
+            this.Item.UpdateProperties(DBItem);
+
             if (UnLock)
             {
                 // Unlock
                 this.Item.UnLock();
+            }
+            else
+            {
+                // Ensure Locked
+                this.Item.Update(this.Transaction);
             }
 
             foreach (Actions.Relationship relation in this.RelationshipsCache.Values)
@@ -160,7 +168,13 @@ namespace Aras.Model
 
                         if (UnLock)
                         {
+                            // UnLock
                             relation.Item.UnLock();
+                        }
+                        else
+                        {
+                            // Ensure Locked
+                            relation.Item.Update(this.Transaction);
                         }
 
                         found = true;
