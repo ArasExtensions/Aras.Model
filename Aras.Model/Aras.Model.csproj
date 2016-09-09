@@ -79,6 +79,9 @@
     <Compile Include="PropertyTypes\Federated.cs" />
     <Compile Include="PropertyTypes\Sequence.cs" />
     <Compile Include="Props\Federated.cs" />
+    <Compile Include="Queries\Item.cs" />
+    <Compile Include="Queries\Relationship.cs" />
+    <Compile Include="Query.cs" />
     <Compile Include="Vault.cs" />
     <Compile Include="FileType.cs" />
     <Compile Include="LifeCycleMap.cs" />
@@ -90,9 +93,6 @@
     <Compile Include="PropertyTypes\FilterList.cs" />
     <Compile Include="Props\Float.cs" />
     <Compile Include="ConditionCreation.cs" />
-    <Compile Include="Cache.cs" />
-    <Compile Include="Caches\Item.cs" />
-    <Compile Include="Caches\Relationship.cs" />
     <Compile Include="Team.cs" />
     <Compile Include="Permission.cs" />
     <Compile Include="IO\Item.cs" />

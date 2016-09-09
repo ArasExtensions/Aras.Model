@@ -65,7 +65,7 @@ namespace Aras.Model
             {
                 if (this._user == null)
                 {
-                    this._user = (User)this.Cache("User").Get(this.UserID);
+                    this._user = (User)this.Store("User").Get(this.UserID);
                 }
 
                 return this._user;
@@ -142,7 +142,7 @@ namespace Aras.Model
 
                         foreach(IO.Item dbidentity in response.Items)
                         {
-                            this.IdentityCache[dbidentity.ID] = (Identity)this.Cache("Identity").Get(dbidentity);
+                            this.IdentityCache[dbidentity.ID] = (Identity)this.Store("Identity").Get(dbidentity);
                             this.IdentityMemberCache[this.IdentityCache[dbidentity.ID]] = new List<Identity>();
                         }
 
@@ -290,18 +290,18 @@ namespace Aras.Model
             return new Transaction(this);
         }
 
-        private Dictionary<ItemType, Caches.Item> Caches;
+        private Dictionary<ItemType, Stores.Item> StoresCache;
 
-        public Caches.Item Cache(ItemType ItemType)
+        public Stores.Item Store(ItemType ItemType)
         {
             if (!(ItemType is RelationshipType))
             {
-                if (!this.Caches.ContainsKey(ItemType))
+                if (!this.StoresCache.ContainsKey(ItemType))
                 {
-                    this.Caches[ItemType] = new Caches.Item(ItemType);
+                    this.StoresCache[ItemType] = new Stores.Item(ItemType);
                 }
 
-                return this.Caches[ItemType];
+                return this.StoresCache[ItemType];
             }
             else
             {
@@ -309,9 +309,9 @@ namespace Aras.Model
             }
         }
 
-        public Caches.Item Cache(String Name)
+        public Stores.Item Store(String Name)
         {
-            return this.Cache(this.ItemType(Name));
+            return this.Store(this.ItemType(Name));
         }
 
         internal Item Get(ItemType ItemType, String ID)
@@ -332,7 +332,7 @@ namespace Aras.Model
                     if (!response.IsError)
                     {
                         Item source = this.Get(((RelationshipType)ItemType).SourceItemType, response.Items.First().GetProperty("source_id"));
-                        ret = source.Cache((RelationshipType)ItemType).Get(ID);
+                        ret = source.Store((RelationshipType)ItemType).Get(ID);
                     }
                     else
                     {
@@ -341,8 +341,8 @@ namespace Aras.Model
                 }
                 else
                 {
-                    // Get Item from Cache
-                    ret = this.Cache(ItemType).Get(ID);
+                    // Get Item from Store
+                    ret = this.Store(ItemType).Get(ID);
                 }
             }
 
@@ -364,7 +364,7 @@ namespace Aras.Model
             this.Password = Password;
             this.ItemTypeNameCache = new Dictionary<String, ItemType>();
             this.ItemTypeIDCache = new Dictionary<String, ItemType>();
-            this.Caches = new Dictionary<ItemType, Caches.Item>();
+            this.StoresCache = new Dictionary<ItemType, Stores.Item>();
             this.Random = new Random();
 
             // Default Selections

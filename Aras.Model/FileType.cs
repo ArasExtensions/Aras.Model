@@ -69,13 +69,6 @@ namespace Aras.Model
             }
         }
 
-        protected override void OnRefresh()
-        {
-            base.OnRefresh();
-
-
-        }
-
         public FileType(ItemType ItemType, Transaction Transaction)
             : base(ItemType, Transaction)
         {

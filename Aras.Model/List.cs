@@ -52,14 +52,22 @@ namespace Aras.Model
             return ret;
         }
 
-        private Stores.Relationship<ListValue> _values;
-        public Stores.Relationship<ListValue> Values
+        private List<ListValue> _values;
+        public IEnumerable<ListValue> Values
         {
             get
             {
                 if (this._values == null)
                 {
-                    this._values = new Stores.Relationship<ListValue>(this, "Value", Aras.Conditions.Ne("value", ""));
+                    this._values = new List<ListValue>();
+
+                    foreach(ListValue listvalue in this.Store("Value"))
+                    {
+                        if (!String.IsNullOrEmpty(listvalue.Value))
+                        {
+                            this._values.Add(listvalue);
+                        }
+                    }
                 }
 
                 return this._values;
@@ -70,7 +78,8 @@ namespace Aras.Model
         {
             base.Refresh();
 
-            this.Values.Refresh();
+            // Reset Values
+            this._values = null;
         }
 
         public List(ItemType ItemType, Transaction Transaction)

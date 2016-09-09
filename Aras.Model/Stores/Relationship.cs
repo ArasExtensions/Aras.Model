@@ -30,26 +30,10 @@ using System.Threading.Tasks;
 
 namespace Aras.Model.Stores
 {
-    public class Relationship<T> : Store<T> where T : Model.Relationship
+    public class Relationship : Store<Model.Relationship>
     {
-        public Caches.Relationship Cache { get; private set; }
-
-        public override ItemType ItemType
-        {
-            get
-            {
-                return this.Cache.ItemType;
-            }
-        }
-
-        public Model.Item Source
-        {
-            get
-            {
-                return ((Caches.Relationship)this.Cache).Source;
-            }
-        }
-
+        public Model.Item Source { get; private set; }
+ 
         public RelationshipType RelationshipType
         {
             get
@@ -58,115 +42,143 @@ namespace Aras.Model.Stores
             }
         }
 
-        private Dictionary<Model.Item, T> FirstByRelatedCache;
-        public T FirstByRelated(Model.Item Related)
+        internal override String Select
         {
-            if (!this.FirstByRelatedCache.ContainsKey(Related))
+            get
             {
-                this.FirstByRelatedCache[Related] = null;
-            }
-
-            if (this.FirstByRelatedCache[Related] == null)
-            {
-                foreach (T relationship in this.Items)
+                if (System.String.IsNullOrEmpty(this.ItemType.Select))
                 {
-                    if (relationship.Related.Equals(Related))
+                    return String.Join(",", this.RelationshipType.SystemProperties);
+                }
+                else
+                {
+                    return String.Join(",", this.RelationshipType.SystemProperties) + "," + this.ItemType.Select;
+                }
+            }
+        }
+
+        public override Model.Relationship Get(String ID)
+        {
+            Model.Relationship relationship = null;
+
+            if (!this.InItemsCache(ID))
+            {
+                IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
+                dbitem.ID = ID;
+                dbitem.Select = this.Select;
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, dbitem);
+                IO.SOAPResponse response = request.Execute();
+
+                if (!response.IsError)
+                {
+                    if (response.Items.Count() > 0)
                     {
-                        this.FirstByRelatedCache[Related] = relationship;
-                        break;
+                        // Get Related Item
+                        relationship = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, response.Items.First() });
+                        this.AddToItemsCache(relationship);
+                    }
+                    else
+                    {
+                        throw new Exceptions.ArgumentException("Invalid Relationship ID: " + ID);
                     }
                 }
-            }
-
-            return this.FirstByRelatedCache[Related];
-
-        }
-
-        protected override void OnRefresh()
-        {
-            this.FirstByRelatedCache.Clear();
-        }
-
-        protected override List<T> Run()
-        {
-            IO.Item item = new IO.Item(this.ItemType.Name, "get");
-            item.Select = this.Cache.Select;
-            item.SetProperty("source_id", this.Source.ID);
-            item.Where = this.Where;
-            this.SetPaging(item);
-
-            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Cache.Session, item);
-            IO.SOAPResponse response = request.Execute();
-
-            List<T> ret = new List<T>();
-
-            if (!response.IsError)
-            {
-                foreach (IO.Item dbitem in response.Items)
-                {
-                    T relationship = (T)this.Cache.Get(dbitem);
-                    ret.Add(relationship);
-                }
-
-                this.UpdateNoPages(response);
-            }
-            else
-            {
-                if (!response.ErrorMessage.Equals("No items of type " + this.RelationshipType.Name + " found."))
+                else
                 {
                     throw new Exceptions.ServerException(response);
                 }
             }
+            else
+            {
+                relationship = this.GetFromItemsCache(ID);
+            }
 
-            return ret;
-        }
-
-        public T Create(Model.Item Related, Transaction Transaction)
-        {
-            T relationship = (T)((Caches.Relationship)this.Cache).Create(Related, Transaction);
-            this.NewItems.Add(relationship);
-            this.Items.Add(relationship);
-            this.OnStoreChanged();
             return relationship;
         }
 
-        internal Relationship(Caches.Relationship Cache, Condition Condition)
-            : base(Condition)
+        internal override Model.Relationship Get(IO.Item DBItem)
         {
-            this.Cache = Cache;
-            this.FirstByRelatedCache = new Dictionary<Item, T>();
+            if (DBItem.ItemType.Equals(this.ItemType.Name))
+            {
+                Model.Relationship relationship = null;
+
+                if (!this.InItemsCache(DBItem.ID))
+                {
+                    // Create Relationship and add to Cache
+                    relationship = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, DBItem });
+                    this.AddToItemsCache(relationship);
+                }
+                else
+                {
+                    // Get Relationship from Cache and update Properties from Database Item
+                    relationship = this.GetFromItemsCache(DBItem.ID);
+                    relationship.UpdateProperties(DBItem);
+                }
+
+                return relationship;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid ItemType");
+            }
         }
 
-        internal Relationship(Caches.Relationship Cache)
-            :this(Cache, null)
+        public Model.Relationship Create(Model.Item Related, Transaction Transaction)
         {
-
+            Model.Relationship relationship = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Transaction), typeof(Model.Item), typeof(Model.Item) }).Invoke(new object[] { RelationshipType, Transaction, this.Source, Related });
+            this.AddToItemsCache(relationship);
+            this.AddToCreatedCache(relationship);
+            return relationship;
         }
 
-        public Relationship(Model.Item Source, RelationshipType RelationshipType, Condition Condition)
-            :base(Condition)
+        public Queries.Relationship Query(Condition Condition)
         {
-            this.Cache = Source.Cache(RelationshipType);
-            this.FirstByRelatedCache = new Dictionary<Item, T>();
+            return new Queries.Relationship(this, Condition);
         }
 
-        public Relationship(Model.Item Source, RelationshipType RelationshipType)
-            :this(Source, RelationshipType, null)
+        protected override void ReadAllItems()
         {
+            List<Model.Relationship> ret = new List<Model.Relationship>();
 
+            // Read all Item from Database
+            IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
+            dbitem.SetProperty("source_id", this.Source.ID);
+            dbitem.Select = this.Select;
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, dbitem);
+            IO.SOAPResponse response = request.Execute();
+
+            if (!response.IsError)
+            {
+                foreach (IO.Item thisdbitem in response.Items)
+                {
+                    Model.Relationship item = null;
+
+                    if (this.InItemsCache(thisdbitem.ID))
+                    {
+                        item = this.GetFromItemsCache(thisdbitem.ID);
+                        item.UpdateProperties(thisdbitem);
+                    }
+                    else
+                    {
+                        item = (Model.Relationship)this.RelationshipType.Class.GetConstructor(new Type[] { typeof(RelationshipType), typeof(Model.Item), typeof(IO.Item) }).Invoke(new object[] { this.RelationshipType, this.Source, thisdbitem });
+                        this.AddToItemsCache(item);
+                    }
+
+                    ret.Add(item);
+                }
+            }
+            else
+            {
+                throw new Exceptions.ServerException(response);
+            }
+
+            // Replace Cache
+            this.ReplaceItemsCache(ret);
         }
 
-        public Relationship(Model.Item Source, String Name, Condition Condition)
-            :base(Condition)
+        internal Relationship(RelationshipType RelationshipType, Model.Item Source)
+            :base(RelationshipType)
         {
-            this.Cache = Source.Cache(Name);
-            this.FirstByRelatedCache = new Dictionary<Item, T>();
-        }
-
-        public Relationship(Model.Item Source, String Name)
-            :this(Source, Name, null)
-        {
-
+            this.Source = Source;
         }
     }
 }

@@ -43,11 +43,7 @@ namespace Aras.Model
                 {
                     this._access = new List<Access>();
 
-                    Stores.Relationship<Access> accessquery = new Stores.Relationship<Access>(this.Cache("Access"));
-                    accessquery.Paging = false;
-                    accessquery.Refresh();
-
-                    foreach (Access access in accessquery)
+                    foreach (Access access in this.Store("Access"))
                     {
                         switch (access.Identity.Name)
                         {
@@ -70,7 +66,6 @@ namespace Aras.Model
                                 break;
                         }
                     }
-
                 }
 
                 return this._access;

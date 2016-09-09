@@ -52,7 +52,7 @@ namespace Aras.Model.Actions
                             if (!this.Result.ID.Equals(this.Item.ID))
                             {
                                 // New Version of Item
-                                Model.Item newversion = this.Item.Session.Cache(this.Item.ItemType).Get(this.Result);
+                                Model.Item newversion = this.Item.Session.Store(this.Item.ItemType).Get(this.Result);
                                 Model.Item oldversion = this.Item;
                                 this.Item = newversion;
                                 this.UpdateItem(this.Result, UnLock);
@@ -96,7 +96,7 @@ namespace Aras.Model.Actions
                     case Model.Item.Actions.Create:
 
                         // Remove from Cache
-                        this.Item.Session.Cache(this.Item.ItemType).Delete(this.Item);
+                        this.Item.Session.Store(this.Item.ItemType).Delete(this.Item);
 
                         break;
                     
@@ -123,7 +123,7 @@ namespace Aras.Model.Actions
                 this.Item.OnDeleted();
 
                 // Remove from Cache
-                this.Item.Session.Cache(this.Item.ItemType).Delete(this.Item);
+                this.Item.Session.Store(this.Item.ItemType).Delete(this.Item);
             }
         }
 

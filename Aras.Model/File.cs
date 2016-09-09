@@ -86,20 +86,6 @@ namespace Aras.Model
             }
         }
 
-        private Stores.Relationship<Located> _locations;
-        public Stores.Relationship<Located> Locations
-        {
-            get
-            {
-                if (this._locations == null)
-                {
-                    this._locations = new Stores.Relationship<Located>(this, "Located");
-                }
-
-                return this._locations;
-            }
-        }
-
         private String _downloadToken;
         private String DownloadToken
         {
@@ -166,7 +152,7 @@ namespace Aras.Model
             {
                 if (this._userVault == null)
                 {
-                    foreach(Located located in this.Locations)
+                    foreach(Located located in this.Store("Located"))
                     {
                         if (this.ItemType.Session.User.Vault.Equals(located.Vault))
                         {
@@ -278,11 +264,6 @@ namespace Aras.Model
         protected override void OnRefresh()
         {
             base.OnRefresh();
-
-            if (this._locations != null)
-            {
-                this._locations.Refresh();
-            }
         }
 
         public File(ItemType ItemType, Transaction Transaction)

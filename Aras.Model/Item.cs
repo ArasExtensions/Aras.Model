@@ -671,23 +671,6 @@ namespace Aras.Model
             this.DatabaseState = DatabaseStates.Stored;  
         }
 
-        private Dictionary<RelationshipType, Caches.Relationship> Caches;
-
-        public Caches.Relationship Cache(RelationshipType RelationshipType)
-        {
-            if (!this.Caches.ContainsKey(RelationshipType))
-            {
-                this.Caches[RelationshipType] = new Caches.Relationship(RelationshipType, this);
-            }
-
-            return this.Caches[RelationshipType];
-        }
-
-        public Caches.Relationship Cache(String RelationshipType)
-        {
-            return this.Cache(this.ItemType.RelationshipType(RelationshipType));
-        }
-
         public Boolean IsManager
         {
             get
@@ -881,6 +864,23 @@ namespace Aras.Model
             }
         }
 
+        private Dictionary<RelationshipType, Stores.Relationship> StoresCache;
+
+        public Stores.Relationship Store(RelationshipType RelationshipType)
+        {
+            if (!this.StoresCache.ContainsKey(RelationshipType))
+            {
+                this.StoresCache[RelationshipType] = new Stores.Relationship(RelationshipType, this);
+            }
+
+            return this.StoresCache[RelationshipType];
+        }
+
+        public Stores.Relationship Store(String RelationshipType)
+        {
+            return this.Store(this.ItemType.RelationshipType(RelationshipType));
+        }
+
         public Boolean Equals(Item other)
         {
             if (other == null)
@@ -920,7 +920,7 @@ namespace Aras.Model
         private void Initialise(ItemType ItemType)
         {
             this.PropertyCache = new Dictionary<PropertyType, Property>();
-            this.Caches = new Dictionary<RelationshipType, Caches.Relationship>();
+            this.StoresCache = new Dictionary<RelationshipType, Stores.Relationship>();
             this.ItemType = ItemType;
         }
 

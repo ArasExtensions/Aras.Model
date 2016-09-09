@@ -44,11 +44,10 @@ namespace Aras.Model.Design.Debug
             Model.Session session = database.Login("admin", Model.Server.PasswordHash("innovator"));
             session.ItemType("CAD").AddToSelect("native_file,viewable_file");
 
-            Model.Stores.Item<Model.Design.Order> store = new Model.Stores.Item<Model.Design.Order>(session, "v_Order", Aras.Conditions.Eq("item_number", "RJMTest002"));
-            Model.Design.Order order = store.First();
-            Model.Stores.Relationship<OrderContext> ordercontextstore = new Stores.Relationship<OrderContext>(order, "v_Order Context");
+            Queries.Item orderquery = session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest002"));
+            Model.Design.Order order = (Model.Design.Order)orderquery.First();
 
-            foreach (Model.Design.OrderContext ordercontext in ordercontextstore)
+            foreach (Model.Design.OrderContext ordercontext in order.Store("v_Order Context"))
             {
                 VariantContext variantcontext = ordercontext.VariantContext;
                 String question = variantcontext.Question;

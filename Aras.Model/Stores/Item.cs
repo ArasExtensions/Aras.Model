@@ -30,102 +30,144 @@ using System.Threading.Tasks;
 
 namespace Aras.Model.Stores
 {
-    public class Item<T> : Store<T> where T : Model.Item
+    public class Item : Store<Model.Item>
     {
-        public Caches.Item Cache { get; private set; }
-
-        public override ItemType ItemType
+        internal override String Select
         {
             get
             {
-                return this.Cache.ItemType;
+                if (System.String.IsNullOrEmpty(this.ItemType.Select))
+                {
+                    return String.Join(",", ItemType.SystemProperties);
+                }
+                else
+                {
+                    return String.Join(",", ItemType.SystemProperties) + "," + this.ItemType.Select;
+                }
             }
         }
 
-        protected override List<T> Run()
+        public override Model.Item Get(String ID)
         {
-            IO.Item item = new IO.Item(this.ItemType.Name, "get");
-            item.Select = this.Cache.Select;
-            item.Where = this.Where;
-            this.SetPaging(item);
+            Model.Item item = null;
 
-            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Cache.Session, item);
-            IO.SOAPResponse response = request.Execute();
-
-            List<T> ret = new List<T>();
-
-            if (!response.IsError)
+            if (!this.InItemsCache(ID))
             {
-                foreach (IO.Item dbitem in response.Items)
+                // Read Item from Database
+                IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
+                dbitem.ID = ID;
+                dbitem.Select = this.Select;
+                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, dbitem);
+                IO.SOAPResponse response = request.Execute();
+
+                if (!response.IsError)
                 {
-                    T thisitem = (T)this.Cache.Get(dbitem);
-                    ret.Add(thisitem);
+                    if (response.Items.Count() > 0)
+                    {
+                        item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, response.Items.First() });
+                        this.AddToItemsCache(item);
+                    }
+                    else
+                    {
+                        throw new Exceptions.ArgumentException("ID does not exist in database");
+                    }
                 }
-
-                this.UpdateNoPages(response);
-            }
-            else
-            {
-                if (!response.ErrorMessage.Equals("No items of type " + this.ItemType.Name + " found."))
+                else
                 {
                     throw new Exceptions.ServerException(response);
                 }
             }
+            else
+            {
+                // Get Item from Cache
+                item = this.GetFromItemsCache(ID);
+            }
 
-            return ret;
-        }
-
-        public T Create(Transaction Transaction)
-        {
-            T item = (T)this.Cache.Create(Transaction);
-            this.NewItems.Add(item);
-            this.Items.Add(item);
-            this.OnStoreChanged();
             return item;
         }
 
-        public T Create()
+        protected override void ReadAllItems()
         {
-            return this.Create(null);
+            List<Model.Item> ret = new List<Model.Item>();
+
+            // Read all Item from Database
+            IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
+            dbitem.Select = this.Select;
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Session, dbitem);
+            IO.SOAPResponse response = request.Execute();
+
+            if (!response.IsError)
+            {
+                foreach(IO.Item thisdbitem in response.Items)
+                {
+                    Model.Item item = null;
+
+                    if (this.InItemsCache(thisdbitem.ID))
+                    {
+                        item = this.GetFromItemsCache(thisdbitem.ID);
+                        item.UpdateProperties(thisdbitem);
+                    }
+                    else
+                    {
+                        item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, response.Items.First() });
+                        this.AddToItemsCache(item);
+                    }
+
+                    ret.Add(item);
+                }
+            }
+            else
+            {
+                throw new Exceptions.ServerException(response);
+            }
+
+            // Replace Cache
+            this.ReplaceItemsCache(ret);
         }
 
-        protected override void OnRefresh()
+        internal override Model.Item Get(IO.Item DBItem)
         {
-           
+            if (DBItem.ItemType.Equals(this.ItemType.Name))
+            {
+                Model.Item item = null;
+
+                if (!this.InItemsCache(DBItem.ID))
+                {
+                    // Create new Item from Database Item
+                    item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, DBItem });
+                    this.AddToItemsCache(item);
+                    return item;
+                }
+                else
+                {
+                    // Get Existing Item from Cache and update Properties from Database Item
+                    item = this.GetFromItemsCache(DBItem.ID);
+                    item.UpdateProperties(DBItem);
+                }
+
+                return item;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid ItemType");
+            }
         }
 
-        internal Item(Caches.Item Cache, Condition Condition)
-            : base(Condition)
+        public Model.Item Create(Transaction Transaction)
         {
-            this.Cache = Cache;
+            Model.Item item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(Transaction) }).Invoke(new object[] { this.ItemType, Transaction });
+            this.AddToItemsCache(item);
+            this.AddToCreatedCache(item);
+            return item;
         }
 
-        internal Item(Caches.Item Cache)
-            :this(Cache, null)
+        public Queries.Item Query(Condition Condition)
         {
-
+            return new Queries.Item(this, Condition);
         }
 
-        public Item(ItemType ItemType, Condition Condition)
-            :base(Condition)
-        {
-            this.Cache = ItemType.Session.Cache(ItemType);
-        }
-
-        public Item(ItemType ItemType)
-            :this(ItemType, null)
-        {
-
-        }
-
-        public Item(Session Session, String Name, Condition Condition)
-            :base(Condition)
-        {
-            this.Cache = Session.Cache(Name);
-        }
-
-        public Item(Session Session, String Name)
-            :this(Session, Name, null)
+        internal Item(ItemType ItemType)
+            : base(ItemType)
         {
 
         }

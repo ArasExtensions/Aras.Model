@@ -38,40 +38,8 @@ namespace Aras.Model.Debug
             Database database = server.Database("CMB");
             Session session = database.Login("admin", Server.PasswordHash("innovator"));
 
-            Stores.Item<Item> partstore = new Stores.Item<Item>(session, "Part", Aras.Conditions.Eq("item_number", "RJMTest12"));
-            Item part = partstore.First();
-
-            Stores.Relationship<Relationship> partbomstore = new Stores.Relationship<Relationship>(part, "Part BOM");
-
-            List<Item> deletedrelated = new List<Item>();
-
-            using (Transaction trans = session.BeginTransaction())
-            {
-                part.Update(trans);
-
-                foreach (Relationship rel in partbomstore)
-                {
-                    deletedrelated.Add(rel.Related);
-                    rel.Delete(trans);
-    
-                }
-
-                trans.Commit();
-            }
-
-            using(Transaction trans = session.BeginTransaction())
-            {
-                part.Update(trans);
-
-                foreach(Item related in deletedrelated)
-                {
-                    partbomstore.Create(related, trans);
-                }
-
-                trans.Commit();
-            }
-
-
+            Queries.Item partquery = session.Store("Part").Query(Aras.Conditions.Eq("item_number", "RJMTest12"));
+            Item part = partquery.First();
         }
     }
 }

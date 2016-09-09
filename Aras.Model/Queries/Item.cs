@@ -1,7 +1,7 @@
 ﻿/*  
   Aras.Model provides a .NET cient library for Aras Innovator
 
-  Copyright (C) 2015 Processwall Limited.
+  Copyright (C) 2016 Processwall Limited.
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published
@@ -28,62 +28,52 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Queries
 {
-    [Attributes.ItemType("User")]
-    public class User : Item
+    public class Item : Model.Query<Model.Item>
     {
-        private Alias _alias;
-        public Alias Alias
+        protected override List<Model.Item> Run()
         {
-            get
+            IO.Item item = new IO.Item(this.Store.ItemType.Name, "get");
+            item.Select = this.Store.Select;
+            item.Where = this.Where;
+            this.SetPaging(item);
+
+            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Store.Session, item);
+            IO.SOAPResponse response = request.Execute();
+
+            List<Model.Item> ret = new List<Model.Item>();
+
+            if (!response.IsError)
             {
-                if (this._alias == null)
+                foreach (IO.Item dbitem in response.Items)
                 {
-                    this._alias = (Alias)this.Store("Alias").First();
+                    Model.Item thisitem = (Model.Item)this.Store.Get(dbitem);
+                    ret.Add(thisitem);
                 }
 
-                return this._alias;
+                this.UpdateNoPages(response);
             }
-        }
+            else
+            {
+                if (!response.ErrorMessage.Equals("No items of type " + this.Store.ItemType.Name + " found."))
+                {
+                    throw new Exceptions.ServerException(response);
+                }
+            }
 
-        public Identity Identity
-        {
-            get
-            {
-                return (Identity)this.Alias.Related;
-            }
-        }
-
-        public Vault Vault
-        {
-            get
-            {
-                return (Vault)this.Property("default_vault").Value;
-            }
-            set
-            {
-                this.Property("default_vault").Value = value;
-            }
+            return ret;
         }
 
         protected override void OnRefresh()
         {
-            base.OnRefresh();
 
-            this._alias = null;
         }
 
-        public User(ItemType ItemType, Transaction Transaction)
-            : base(ItemType, Transaction)
+        internal Item(Model.Stores.Item Store, Condition Condition)
+            : base(Store, Condition)
         {
-          
-        }
 
-        public User(ItemType ItemType, IO.Item DBItem)
-            : base(ItemType, DBItem)
-        {
-          
         }
     }
 }

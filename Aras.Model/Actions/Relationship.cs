@@ -77,7 +77,7 @@ namespace Aras.Model.Actions
                     case Model.Item.Actions.Create:
 
                         // Remove from Parent Cache
-                        ((Model.Relationship)this.Item).Source.Cache(((Model.Relationship)this.Item).RelationshipType).Delete((Model.Relationship)this.Item);
+                        ((Model.Relationship)this.Item).Source.Store(((Model.Relationship)this.Item).RelationshipType).Delete((Model.Relationship)this.Item);
 
                         break;
          
@@ -101,7 +101,7 @@ namespace Aras.Model.Actions
             if (this.Item.Action == Model.Item.Actions.Delete)
             {
                 // Remove from Parent Cache
-                ((Model.Relationship)this.Item).Source.Cache(((Model.Relationship)this.Item).RelationshipType).Delete((Model.Relationship)this.Item);
+                ((Model.Relationship)this.Item).Source.Store(((Model.Relationship)this.Item).RelationshipType).Delete((Model.Relationship)this.Item);
             }
         }
 
