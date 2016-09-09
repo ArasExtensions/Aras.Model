@@ -115,11 +115,6 @@ namespace Aras.Model.Caches
             return item;
         }
 
-        public override Model.Item Create()
-        {
-            return this.Create(null);
-        }
-
         public override Model.Item Create(Transaction Transaction)
         {
             Model.Item item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(Transaction) }).Invoke(new object[] { this.ItemType, Transaction });                

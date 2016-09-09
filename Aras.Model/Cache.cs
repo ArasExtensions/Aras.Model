@@ -73,8 +73,6 @@ namespace Aras.Model
 
         public abstract T Create(Transaction Transaction);
 
-        public abstract T Create();
-
         internal void Delete(T Item)
         {
             if (this.IsInCache(Item.ID))

@@ -123,11 +123,6 @@ namespace Aras.Model.Caches
             return relationship;
         }
 
-        public override Model.Relationship Create()
-        {
-            return this.Create(null, null);
-        }
-
         public override Model.Relationship Create(Transaction Transaction)
         {
             return this.Create(null, Transaction);
