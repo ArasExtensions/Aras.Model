@@ -47,13 +47,12 @@ namespace Aras.Model.Design.Debug
             Queries.Item orderquery = session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest002"));
             Model.Design.Order order = (Model.Design.Order)orderquery.First();
 
-            foreach (Model.Design.OrderContext ordercontext in order.Store("v_Order Context"))
+            using(Transaction transaction = session.BeginTransaction())
             {
-                VariantContext variantcontext = ordercontext.VariantContext;
-                String question = variantcontext.Question;
-                String value = ordercontext.Value;
+                order.Update(transaction);
+                order.Process(transaction);
+                transaction.Commit(true);
             }
-
 
         }
     }

@@ -199,6 +199,21 @@ namespace Aras.Model
             }
         }
 
+        public IEnumerable<T> CurrentItems()
+        {
+            List<T> currentitems = new List<T>();
+
+            foreach (T item in this)
+            {
+                if (item.Action != Item.Actions.Delete)
+                {
+                    currentitems.Add(item);
+                }
+            }
+
+            return currentitems;
+        }
+
         internal Store(ItemType ItemType)
         {
             this.ItemsCache = new Dictionary<String, T>();

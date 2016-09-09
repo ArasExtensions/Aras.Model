@@ -472,7 +472,7 @@ namespace Aras.Model
                         {
                             Transaction.Add("update", this);
                             this.Action = Actions.Update;
-                            this.OnUpdate();
+                            this.OnUpdate(Transaction);
                         }
                         else
                         {
@@ -514,7 +514,7 @@ namespace Aras.Model
             this.Action = Actions.Delete;
         }
 
-        protected virtual void OnUpdate()
+        protected virtual void OnUpdate(Transaction Transaction)
         {
            
         }
@@ -862,6 +862,11 @@ namespace Aras.Model
 
                 return (Boolean)this._canChangeAccess;
             }
+        }
+
+        public virtual void Process(Transaction Transaction)
+        {
+
         }
 
         private Dictionary<RelationshipType, Stores.Relationship> StoresCache;

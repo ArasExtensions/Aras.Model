@@ -168,7 +168,10 @@ namespace Aras.Model.Stores
             }
             else
             {
-                throw new Exceptions.ServerException(response);
+                if (!response.ErrorMessage.Equals("No items of type " + this.ItemType.Name + " found."))
+                {
+                    throw new Exceptions.ServerException(response);
+                }
             }
 
             // Replace Cache
