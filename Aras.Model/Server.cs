@@ -95,8 +95,6 @@ namespace Aras.Model
             }
         }
 
-        internal CookieContainer Cookies { get; private set; }
-
         private String _serverURL;
         public String ServerURL
         {
@@ -257,16 +255,12 @@ namespace Aras.Model
                         try
                         {
                             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.DBListURL);
-                            request.CookieContainer = this.Cookies;
                             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                             request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
                             request.Headers.Add("Cache-Control", "no-cache");
 
                             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                             {
-                                // Store Cookies
-                                this.Cookies.Add(response.Cookies);
-
                                 using (Stream result = response.GetResponseStream())
                                 {
                                     XmlDocument doc = new XmlDocument();
@@ -320,8 +314,6 @@ namespace Aras.Model
         public Server(String URL)
             :base()
         {
-            this.Cookies = new CookieContainer();
-
             // Initialise Assebly Cache
             this.AssmeblyCache = new List<Assembly>();
 

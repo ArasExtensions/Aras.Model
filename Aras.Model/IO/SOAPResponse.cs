@@ -28,11 +28,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Net;
 
 namespace Aras.Model.IO
 {
     public class SOAPResponse
     {
+        internal CookieContainer Cookies { get; private set; }
+
         public XmlDocument Doc { get; private set; }
 
         public XmlNamespaceManager Namespaces {get; private set; } 
@@ -128,8 +131,13 @@ namespace Aras.Model.IO
             }
         }
 
-        internal SOAPResponse(XmlDocument Doc)
+        internal SOAPResponse(CookieCollection Cookies, XmlDocument Doc)
         {
+            // Store Cookies
+            this.Cookies = new CookieContainer();
+            this.Cookies.Add(Cookies);
+
+            // Store XML
             this.Doc = Doc;
             this.Namespaces = new XmlNamespaceManager(this.Doc.NameTable);
             this.Namespaces.AddNamespace("SOAP-ENV", "http://schemas.xmlsoap.org/soap/envelope/");

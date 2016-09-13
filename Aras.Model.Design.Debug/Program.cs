@@ -37,24 +37,30 @@ namespace Aras.Model.Design.Debug
         static void Main(string[] args)
         {
             // Connect to Server
-            Model.Server server = new Model.Server("http://localhost/InnovatorServer100SP4/");
+            Model.Server server = new Model.Server("http://WIN-HBC9KO4SQ6E/InnovatorServer100SP4/");
             //server.ProxyURL = "http://127.0.0.1:8888";
             server.LoadAssembly("Aras.Model.Design");
             Model.Database database = server.Database("CMB");
-            Model.Session session = database.Login("admin", Model.Server.PasswordHash("innovator"));
-            session.ItemType("CAD").AddToSelect("native_file,viewable_file");
+            Model.Session session1 = database.Login("admin", Model.Server.PasswordHash("innovator"));
+            Model.Session session2 = database.Login("barrettv", Model.Server.PasswordHash("innovator"));
+
+            //session.ItemType("CAD").AddToSelect("native_file,viewable_file");
+
+            
+            Queries.Item orderquery1 = session1.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest002"));
+            Model.Design.Order order1 = (Model.Design.Order)orderquery1.First();
+
+            Queries.Item orderquery2 = session2.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest002"));
+            Model.Design.Order order2 = (Model.Design.Order)orderquery2.First();
 
             /*
-            Queries.Item orderquery = session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest002"));
-            Model.Design.Order order = (Model.Design.Order)orderquery.First();
-
             using(Transaction transaction = session.BeginTransaction())
             {
                 order.Update(transaction);
                 order.Process(transaction);
                 transaction.Commit(true);
             }
-            */
+
 
             using (Transaction transaction = session.BeginTransaction())
             {
@@ -62,7 +68,7 @@ namespace Aras.Model.Design.Debug
                 part.ItemNumber = "RJMTest9990004";
                 part.Property("cmb_name").Value = "Test RJM";
                 transaction.Commit(false);
-            }
+            }            */
         }
     }
 }

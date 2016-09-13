@@ -87,7 +87,7 @@ namespace Aras.Model.Actions
 
                 // Post Request to Vault Server
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.Item.Session.User.Vault.URL);
-                request.CookieContainer = this.Item.Session.Database.Server.Cookies;
+                request.CookieContainer = this.Item.Session.Cookies;
                 request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                 request.ContentType = "multipart/form-data; boundary=" + contentboundary;
                 request.Method = "POST";
@@ -106,7 +106,7 @@ namespace Aras.Model.Actions
                     {
                         XmlDocument doc = new XmlDocument();
                         doc.Load(result);
-                        IO.SOAPResponse response = new IO.SOAPResponse(doc);
+                        IO.SOAPResponse response = new IO.SOAPResponse(webresponse.Cookies, doc);
 
                         if (!response.IsError)
                         {

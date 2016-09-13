@@ -47,6 +47,8 @@ namespace Aras.Model.IO
 
         public String Password { get; private set; }
 
+        internal CookieContainer Cookies { get; private set; }
+
         public IEnumerable<Item> Items { get; private set; }
 
         private HttpWebRequest _request;
@@ -57,7 +59,7 @@ namespace Aras.Model.IO
                 if (this._request == null)
                 {
                     this._request = (HttpWebRequest)WebRequest.Create(this.Database.Server.ApiURL);
-                    this._request.CookieContainer = this.Server.Cookies;
+                    this._request.CookieContainer = this.Cookies;
                     this._request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                     this._request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
                     this._request.Headers.Add("Cache-Control", "no-cache");
@@ -129,15 +131,12 @@ namespace Aras.Model.IO
             try
             {
                 using (HttpWebResponse webresponse = (HttpWebResponse)this.Request.GetResponse())
-                {
-                    // Store Cookies
-                    this.Server.Cookies.Add(webresponse.Cookies);
-                    
+                {                    
                     using (Stream result = webresponse.GetResponseStream())
                     {
                         XmlDocument doc = new XmlDocument();
                         doc.Load(result);
-                        return new SOAPResponse(doc);
+                        return new SOAPResponse(webresponse.Cookies, doc);
                     }
                 }
             }
@@ -159,7 +158,7 @@ namespace Aras.Model.IO
                     {
                         XmlDocument doc = new XmlDocument();
                         doc.Load(result);
-                        return new SOAPResponse(doc);
+                        return new SOAPResponse(((HttpWebResponse)webresponse).Cookies, doc);
                     }
                 }
             }
@@ -177,6 +176,7 @@ namespace Aras.Model.IO
             this.Username = Session.Username;
             this.Password = Session.Password;
             this.Items  = new List<Item>() { Item };
+            this.Cookies = Session.Cookies;
         }
 
         public SOAPRequest(SOAPOperation Operation, Session Session, IEnumerable<Item> Items)
@@ -187,6 +187,7 @@ namespace Aras.Model.IO
             this.Username = Session.Username;
             this.Password = Session.Password;
             this.Items = Items;
+            this.Cookies = Session.Cookies;
         }
 
         public SOAPRequest(SOAPOperation Operation, Database Database, String Username, String Password)
@@ -197,6 +198,7 @@ namespace Aras.Model.IO
             this.Username = Username;
             this.Password = Password;
             this.Items = null;
+            this.Cookies = new CookieContainer();
         }
     }
 }

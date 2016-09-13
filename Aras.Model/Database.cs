@@ -56,7 +56,7 @@ namespace Aras.Model
                     if (!response.IsError)
                     {
                         String id = response.Result.SelectSingleNode("id").InnerText;
-                        this.SessionCache[Username] = new Session(this, id, Username, Password);
+                        this.SessionCache[Username] = new Session(this, id, Username, Password, response.Cookies);
                     }
                     else
                     {

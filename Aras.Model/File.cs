@@ -99,7 +99,7 @@ namespace Aras.Model
 
                     String url = this.ItemType.Session.Database.Server.AuthenticationBrokerURL + "/GetFileDownloadToken?rnd=" + this.ItemType.Session.DownloadRandom().ToString();
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                    request.CookieContainer = this.ItemType.Session.Database.Server.Cookies;
+                    request.CookieContainer = this.ItemType.Session.Cookies;
                     request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                     request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
                     request.Headers.Add("Cache-Control", "no-cache");
@@ -125,7 +125,7 @@ namespace Aras.Model
                     using (HttpWebResponse webresponse = (HttpWebResponse)request.GetResponse())
                     {
                         // Store Cookies
-                        this.ItemType.Session.Database.Server.Cookies.Add(webresponse.Cookies);
+                        this.ItemType.Session.Cookies.Add(webresponse.Cookies);
 
                         using (Stream result = webresponse.GetResponseStream())
                         {
@@ -191,7 +191,7 @@ namespace Aras.Model
             int read = 0;
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.URL);
-            request.CookieContainer = this.ItemType.Session.Database.Server.Cookies;
+            request.CookieContainer = this.ItemType.Session.Cookies;
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
             request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
             request.Headers.Add("Cache-Control", "no-cache");

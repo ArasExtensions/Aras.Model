@@ -28,6 +28,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Net;
 
 namespace Aras.Model
 {
@@ -38,6 +39,8 @@ namespace Aras.Model
         public Database Database { get; private set; }
 
         public String UserID { get; private set; }
+
+        internal CookieContainer Cookies { get; private set; }
 
         private DirectoryInfo _cacheDirectory;
         internal DirectoryInfo CacheDirectory
@@ -355,13 +358,14 @@ namespace Aras.Model
             return this.Random.NextDouble();
         }
 
-        internal Session(Database Database, String UserID, String Username, String Password)
+        internal Session(Database Database, String UserID, String Username, String Password, CookieContainer Cookies)
         {
             this.ID = Server.NewID();
             this.Database = Database;
             this.UserID = UserID;
             this.Username = Username;
             this.Password = Password;
+            this.Cookies = Cookies;
             this.ItemTypeNameCache = new Dictionary<String, ItemType>();
             this.ItemTypeIDCache = new Dictionary<String, ItemType>();
             this.StoresCache = new Dictionary<ItemType, Stores.Item>();
