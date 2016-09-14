@@ -661,18 +661,20 @@ namespace Aras.Model
                             this.Property(propname).DBValue = DBItem.GetProperty(propname);
                         }
                     }
+
+                    // Set Database State to Stored
+                    this.DatabaseState = DatabaseStates.Stored;
+
+                    // Update Action
+                    if (this.Action != Actions.Update)
+                    {
+                        this.Action = Actions.Read;
+                    }
                 }
                 else
                 {
                     throw new Exceptions.ArgumentException("Invalid Item ID");
                 }
-            }
-   
-            this.DatabaseState = DatabaseStates.Stored;  
-
-            if (this.Action == Actions.Create)
-            {
-                this.Action = Actions.Read;
             }
         }
 

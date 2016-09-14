@@ -347,6 +347,22 @@ namespace Aras.Model.Design
             }
         }
 
+        protected override void OnRefresh()
+        {
+            base.OnRefresh();
+        
+            // Refresh Order Contexts
+            this.Store("v_Order Context").Refesh();
+
+            // Refresh Configured Part
+            if (this.ConfiguredPart != null)
+            {
+                this.ConfiguredPart.Refresh();
+
+                this.ConfiguredPart.Store("Part BOM").Refesh();
+            }
+        }
+
         private void Initialise()
         {
             this.PartCache = new Dictionary<Part, Double>();

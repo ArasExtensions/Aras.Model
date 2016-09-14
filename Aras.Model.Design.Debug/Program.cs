@@ -47,10 +47,10 @@ namespace Aras.Model.Design.Debug
             //session.ItemType("CAD").AddToSelect("native_file,viewable_file");
 
             
-            Queries.Item orderquery1 = session1.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest002"));
+            Queries.Item orderquery1 = session1.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest003"));
             Model.Design.Order order1 = (Model.Design.Order)orderquery1.First();
 
-            Queries.Item orderquery2 = session2.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest002"));
+            Queries.Item orderquery2 = session2.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest003"));
             Model.Design.Order order2 = (Model.Design.Order)orderquery2.First();
 
             /*

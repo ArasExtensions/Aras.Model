@@ -174,28 +174,25 @@ namespace Aras.Model
 
         protected void SetValue(Object Value)
         {
-            if (!this.Modified)
+            if (this._value == null)
             {
-                if (this._value == null)
+                if (Value != null)
                 {
-                    if (Value != null)
-                    {
-                        this._value = Value;
-                        this.OnPropertyChanged("Value");
-                    }
+                    this._value = Value;
+                    this.OnPropertyChanged("Value");
                 }
-                else
-                {
-                    if (!this._value.Equals(Value))
-                    {
-                        this._value = Value;
-                        this.OnPropertyChanged("Value");
-                    }
-                }
-
-                this.Loaded = true;
-                this.Modified = false;
             }
+            else
+            {
+                if (!this._value.Equals(Value))
+                {
+                    this._value = Value;
+                    this.OnPropertyChanged("Value");
+                }
+            }
+
+            this.Loaded = true;
+            this.Modified = false;
         }
 
         internal abstract String DBValue { get; set; }
