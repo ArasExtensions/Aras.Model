@@ -636,7 +636,18 @@ namespace Aras.Model
                     }
                     else
                     {
-                        throw new Exceptions.ServerException(response);
+                        if (response.ErrorMessage.Equals("Aras.Server.Core.ItemIsNotLockedException"))
+                        {
+                            // Not locked
+                            this.Action = Actions.Read;
+                            this.DatabaseState = DatabaseStates.Stored;
+                            this.Property("locked_by_id").DBValue = null;
+                            return true;
+                        }
+                        else
+                        {
+                            throw new Exceptions.ServerException(response);
+                        }
                     }
                 }
                 else

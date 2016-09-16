@@ -41,27 +41,20 @@ namespace Aras.Model.Design.Debug
             //server.ProxyURL = "http://127.0.0.1:8888";
             server.LoadAssembly("Aras.Model.Design");
             Model.Database database = server.Database("CMB");
-            Model.Session session1 = database.Login("admin", Model.Server.PasswordHash("innovator"));
-            Model.Session session2 = database.Login("barrettv", Model.Server.PasswordHash("innovator"));
-
-            //session.ItemType("CAD").AddToSelect("native_file,viewable_file");
-
+            Model.Session session = database.Login("admin", Model.Server.PasswordHash("innovator"));
+           
             
-            Queries.Item orderquery1 = session1.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest003"));
-            Model.Design.Order order1 = (Model.Design.Order)orderquery1.First();
+            Queries.Item orderquery = session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest003"));
+            Model.Design.Order order = (Model.Design.Order)orderquery.First();
 
-            Queries.Item orderquery2 = session2.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest003"));
-            Model.Design.Order order2 = (Model.Design.Order)orderquery2.First();
-
-            /*
             using(Transaction transaction = session.BeginTransaction())
             {
                 order.Update(transaction);
                 order.Process(transaction);
-                transaction.Commit(true);
+                transaction.Commit(false);
             }
 
-
+            /*
             using (Transaction transaction = session.BeginTransaction())
             {
                 Part part = (Part)session.Store("Part").Create(transaction);

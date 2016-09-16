@@ -134,13 +134,19 @@ namespace Aras.Model
                 // Process Actions
                 foreach (Action action in this.ActionsCache.Values)
                 {
-                    action.Commit(UnLock);
+                    action.Commit();
                 }
 
                 // Update Stores
                 foreach (Action action in this.ActionsCache.Values)
                 {
                     action.UpdateStore();
+                }
+
+                // Check Lock
+                foreach (Action action in this.ActionsCache.Values)
+                {
+                    action.CheckLock(UnLock);
                 }
             }
 

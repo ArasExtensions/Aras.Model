@@ -33,11 +33,11 @@ namespace Aras.Model.Actions
     internal class Relationship : Action
     {
         private IO.Item DBItem;
-        internal override IO.Item Commit(Boolean UnLock)
+        internal override IO.Item Commit()
         {
             if (!this.Completed)
             {
-                this.DBItem = this.BuildItem(UnLock);
+                this.DBItem = this.BuildItem();
 
                 if (((Model.Relationship)this.Item).Related != null)
                 {
@@ -45,7 +45,7 @@ namespace Aras.Model.Actions
 
                     if (relatedaction != null)
                     {
-                        this.DBItem.SetProperty("related_id", relatedaction.Commit(UnLock).ID);
+                        this.DBItem.SetProperty("related_id", relatedaction.Commit().ID);
                     }
                     else
                     {
@@ -100,6 +100,9 @@ namespace Aras.Model.Actions
         {
             if (this.Item.Action == Model.Item.Actions.Delete)
             {
+                // Trigger Deleted Event
+                this.Item.OnDeleted();
+
                 // Remove from Parent Cache
                 ((Model.Relationship)this.Item).Source.Store(((Model.Relationship)this.Item).RelationshipType).Delete((Model.Relationship)this.Item);
             }
