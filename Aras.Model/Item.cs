@@ -493,8 +493,8 @@ namespace Aras.Model
             }
         }
 
-        [Attributes.Action("UnLockUpdate")]
-        public void UnLockUpdate(Transaction Transaction)
+        [Attributes.Action("UnlockUpdate")]
+        public void UnlockUpdate(Transaction Transaction)
         {
             if (Transaction != null)
             {
