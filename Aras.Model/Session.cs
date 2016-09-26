@@ -350,7 +350,10 @@ namespace Aras.Model
             return ret;
         }
 
-
+        public override string ToString()
+        {
+            return this.User.KeyedName;
+        }
 
         internal Session(Database Database, IO.Session IO)
         {
