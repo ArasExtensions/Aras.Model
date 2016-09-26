@@ -83,9 +83,9 @@ namespace Aras.Model.Design
             }
         }
 
-        internal Model.IO.Item GetIOItem()
+        internal IO.Item GetIOItem()
         {
-            Model.IO.Item dbitem = new Model.IO.Item(this.ItemType.Name, "get");
+            IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
             dbitem.ID = this.ID;
             dbitem.SetProperty("value", this.Value);
             dbitem.SetProperty("quantity", this.Quantity.ToString());

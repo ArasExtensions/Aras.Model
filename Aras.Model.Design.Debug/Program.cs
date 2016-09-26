@@ -41,7 +41,7 @@ namespace Aras.Model.Design.Debug
             //server.ProxyURL = "http://127.0.0.1:8888";
             server.LoadAssembly("Aras.Model.Design");
             Model.Database database = server.Database("CMB");
-            Model.Session session = database.Login("admin", Model.Server.PasswordHash("innovator"));
+            Model.Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
            
             
             Queries.Item orderquery = session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest003"));

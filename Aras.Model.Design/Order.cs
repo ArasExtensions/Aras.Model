@@ -129,11 +129,11 @@ namespace Aras.Model.Design
 
                                 case "Method":
 
-                                    Model.IO.Item dborder = new Model.IO.Item(this.ItemType.Name, partvariantrule.VariantContext.Method);
+                                    IO.Item dborder = new IO.Item(this.ItemType.Name, partvariantrule.VariantContext.Method);
                                     dborder.ID = this.ID;
 
                                     // Add this Order Context
-                                    Model.IO.Item dbordercontext = ordercontext.GetIOItem();
+                                    IO.Item dbordercontext = ordercontext.GetIOItem();
                                     dborder.AddRelationship(dbordercontext);
 
                                     // Add all other order Context
@@ -141,13 +141,13 @@ namespace Aras.Model.Design
                                     {
                                         if (!otherordercontext.Equals(ordercontext))
                                         {
-                                            Model.IO.Item dbotherordercontext = otherordercontext.GetIOItem();
+                                            IO.Item dbotherordercontext = otherordercontext.GetIOItem();
                                             dborder.AddRelationship(dbotherordercontext);
                                         }
                                     }
 
-                                    Model.IO.SOAPRequest request = new Model.IO.SOAPRequest(Model.IO.SOAPOperation.ApplyItem, this.Session, dborder);
-                                    Model.IO.SOAPResponse response = request.Execute();
+                                    IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, dborder);
+                                    IO.SOAPResponse response = request.Execute();
 
                                     if (!response.IsError)
                                     {
