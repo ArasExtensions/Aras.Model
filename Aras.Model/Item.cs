@@ -455,7 +455,8 @@ namespace Aras.Model
             this._canChangeAccess = null;
         }
 
-        public void Update(Transaction Transaction, Boolean UnLock = false)
+        [Attributes.Action("Update")]
+        public void Update(Transaction Transaction)
         {
             if (Transaction != null)
             {
@@ -468,7 +469,7 @@ namespace Aras.Model
                     case Actions.Read:
                     case Actions.Update:
 
-                        if (this.Lock(UnLock))
+                        if (this.Lock(false))
                         {
                             Transaction.Add("update", this);
                             this.Action = Actions.Update;
@@ -492,17 +493,74 @@ namespace Aras.Model
             }
         }
 
-        public void Delete(Transaction Transaction, Boolean UnLock = false)
+        [Attributes.Action("UnLockUpdate")]
+        public void UnLockUpdate(Transaction Transaction)
+        {
+            if (Transaction != null)
+            {
+                switch (this.Action)
+                {
+                    case Actions.Create:
+
+                        break;
+
+                    case Actions.Read:
+                    case Actions.Update:
+
+                        if (this.Lock(true))
+                        {
+                            Transaction.Add("update", this);
+                            this.Action = Actions.Update;
+                            this.OnUpdate(Transaction);
+                        }
+                        else
+                        {
+                            throw new Exceptions.ServerException("Failed to lock Item");
+                        }
+
+                        break;
+
+                    default:
+
+                        break;
+                }
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Transaction must not be null");
+            }
+        }
+
+        [Attributes.Action("Delete")]
+        public void Delete(Transaction Transaction)
         {
             if (Transaction != null)
             {
                 if (this.DatabaseState == DatabaseStates.Stored)
                 {
-                    if (UnLock)
-                    {
-                        this.UnLock();
-                    }
+                    // Add to Transaction
+                    Transaction.Add("delete", this);
+                }
+                else
+                {
+                    Transaction.Remove(this);
+                }
+            }
 
+            this.Action = Actions.Delete;
+        }
+
+        [Attributes.Action("UnLockDelete")]
+        public void UnlockDelete(Transaction Transaction)
+        {
+            if (Transaction != null)
+            {
+                if (this.DatabaseState == DatabaseStates.Stored)
+                {
+                    // UnLock
+                    this.UnLock();
+      
+                    // Add to Transaction
                     Transaction.Add("delete", this);
                 }
                 else
@@ -880,11 +938,6 @@ namespace Aras.Model
 
                 return (Boolean)this._canChangeAccess;
             }
-        }
-
-        public virtual void Process(Transaction Transaction)
-        {
-
         }
 
         private Dictionary<RelationshipType, Stores.Relationship> StoresCache;

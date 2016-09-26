@@ -50,7 +50,7 @@ namespace Aras.Model.Design.Debug
             using(Transaction transaction = session.BeginTransaction())
             {
                 order.Update(transaction);
-                order.Process(transaction);
+                order.BuildFlatBOM(transaction);
                 transaction.Commit(false);
             }
 

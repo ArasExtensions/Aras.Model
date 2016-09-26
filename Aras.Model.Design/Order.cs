@@ -252,10 +252,9 @@ namespace Aras.Model.Design
             this.LockItems(Transaction);
         }
 
-        public override void Process(Transaction Transaction)
+        [Attributes.Action("BuildFlatBOM")]
+        public void BuildFlatBOM(Transaction Transaction)
         {
-            base.Process(Transaction);
-
             // Lock Items
             this.LockItems(Transaction);
 
@@ -317,7 +316,7 @@ namespace Aras.Model.Design
                     else
                     {
                         // Remove PartBOM
-                        currentpartbom.Delete(Transaction, true);
+                        currentpartbom.UnlockDelete(Transaction);
                     }
                 }
 
