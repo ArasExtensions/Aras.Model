@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E5B4196A-00D0-4DE7-8104-487A7BC60784}</ProjectGuid>
+    <ProjectGuid>{20FEA736-01A1-49A3-A61F-43CAD00D9717}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Aras.Model</RootNamespace>
@@ -95,9 +95,6 @@
     <Compile Include="ConditionCreation.cs" />
     <Compile Include="Team.cs" />
     <Compile Include="Permission.cs" />
-    <Compile Include="IO\Item.cs" />
-    <Compile Include="IO\SOAPRequest.cs" />
-    <Compile Include="IO\SOAPResponse.cs" />
     <Compile Include="Alias.cs" />
     <Compile Include="ListValue.cs" />
     <Compile Include="List.cs" />
@@ -138,7 +135,12 @@
     <Compile Include="Identity.cs" />
     <Compile Include="User.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\Aras.IO\Aras.IO\Aras.IO.csproj">
+      <Project>{5acc089e-892b-4fa7-891d-b2f6d74a4d7b}</Project>
+      <Name>Aras.IO</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

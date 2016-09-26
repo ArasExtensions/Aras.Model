@@ -136,7 +136,7 @@ namespace Aras.Model
         protected IO.SOAPResponse SendItem(IO.Item DBItem)
         {
             // Send to Server
-            IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Transaction.Session, DBItem);
+            IO.SOAPRequest request = this.Transaction.Session.IO.Request(IO.SOAPOperation.ApplyItem, DBItem);
             return request.Execute();
         }
 

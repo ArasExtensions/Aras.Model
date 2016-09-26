@@ -37,9 +37,7 @@ namespace Aras.Model
     {
         public Server Server { get; private set; }
 
-        public String ID { get; private set; }
-
-        public String Name { get; private set; }
+        public IO.Database IO { get; private set; }
 
         private object SessionCacheLock = new object();
         private Dictionary<String, Session> SessionCache;
@@ -50,26 +48,8 @@ namespace Aras.Model
             {
                 if (!this.SessionCache.ContainsKey(Username))
                 {
-                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ValidateUser, this, Username, Password);
-                    IO.SOAPResponse response = request.Execute();
-
-                    if (!response.IsError)
-                    {
-                        String id = response.Result.SelectSingleNode("id").InnerText;
-                        this.SessionCache[Username] = new Session(this, id, Username, Password, response.Cookies);
-                    }
-                    else
-                    {
-                        throw new Exceptions.ServerException(response);
-                    }
-                }
-                else
-                {
-                    // Check Password
-                    if (!this.SessionCache[Username].Password.Equals(Password))
-                    {
-                        throw new Exceptions.ArgumentException("Invalid Password");
-                    }
+                    IO.Session iosession = this.IO.Login(Username, Password);
+                    this.SessionCache[Username] = new Session(this, iosession);
                 }
 
                 return this.SessionCache[Username];
@@ -92,17 +72,16 @@ namespace Aras.Model
 
         public override string ToString()
         {
-            return this.Name;
+            return this.IO.ID;
         }
 
-        internal Database(Server Server, String Name)
+        internal Database(Server Server, IO.Database IO)
             : base()
         {
             this.SessionCache = new Dictionary<String, Session>();
             this.ItemTypeClassCache = new Dictionary<String, Type>();
             this.Server = Server;
-            this.ID = Server.NewID();
-            this.Name = Name;
+            this.IO = IO;
 
             foreach(Assembly assembly in this.Server.Assemblies)
             {

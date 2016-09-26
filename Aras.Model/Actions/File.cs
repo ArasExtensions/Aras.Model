@@ -42,104 +42,43 @@ namespace Aras.Model.Actions
         {
             if (!this.Completed)
             {
-                // Read Cached File
-                byte[] filebytes = ((Model.File)this.Item).GetCacheBytes();
-
-                // Build Request
-                String contentboundary = "-------------S36Ut9A3ZtWwum";
-                MultipartFormDataContent content = new MultipartFormDataContent(contentboundary);
-
-                StringContent soapaction = new StringContent("ApplyItem");
-                content.Add(soapaction, "SOAPACTION");
-
-                StringContent authuser = new StringContent(this.Item.Session.Username);
-                content.Add(authuser, "AUTHUSER");
-
-                StringContent password = new StringContent(this.Item.Session.Password);
-                content.Add(password, "AUTHPASSWORD");
-
-                StringContent database = new StringContent(this.Item.Session.Database.Name);
-                content.Add(database, "DATABASE");
-
-                StringContent locale = new StringContent("");
-                content.Add(locale, "LOCALE");
-
-                StringContent timezone = new StringContent("GMT Standard Time");
-                content.Add(timezone, "TIMEZONE_NAME");
-
-                StringContent vault = new StringContent(this.Item.Session.User.Vault.ID);
-                content.Add(vault, "VAULTID");
-
-                IO.Item dbfile = new IO.Item("File", "add");
-                dbfile.ID = this.Item.ID;
-                dbfile.SetProperty("filename", ((Model.File)this.Item).VaultFilename);
-                dbfile.SetProperty("file_size", filebytes.Length.ToString());
-                IO.Item dbloacted = new IO.Item("Located", "add");
-                dbloacted.SetProperty("related_id", this.Item.Session.User.Vault.ID);
-                dbfile.AddRelationship(dbloacted);
-
-                String xmldata = "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\"><SOAP-ENV:Body><ApplyItem>" + dbfile.GetString() + "</ApplyItem></SOAP-ENV:Body></SOAP-ENV:Envelope>";
-                StringContent xml = new StringContent(xmldata);
-                content.Add(xml, "XMLdata");
-
-                ByteArrayContent filedata = new ByteArrayContent(filebytes);
-                content.Add(filedata, this.Item.ID, ((Model.File)this.Item).VaultFilename);
-
-                // Post Request to Vault Server
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.Item.Session.User.Vault.URL);
-                request.CookieContainer = this.Item.Session.Cookies;
-                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-                request.ContentType = "multipart/form-data; boundary=" + contentboundary;
-                request.Method = "POST";
-                request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
-                request.Headers.Add("Cache-Control", "no-cache");
-                request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
-              
-                using (Stream poststream = request.GetRequestStream())
+                // Write File to Cache
+                using (FileStream cachefile = new FileStream(((Model.File)this.Item).CacheFilename.FullName, FileMode.Open))
                 {
-                    content.CopyToAsync(poststream);
-                }
+                    IO.SOAPResponse response = this.Transaction.Session.IO.VaultWrite(cachefile, ((Model.File)this.Item).VaultFilename);
 
-                using (HttpWebResponse webresponse = (HttpWebResponse)request.GetResponse())
-                {
-                    using (Stream result = webresponse.GetResponseStream())
+                    if (!response.IsError)
                     {
-                        XmlDocument doc = new XmlDocument();
-                        doc.Load(result);
-                        IO.SOAPResponse response = new IO.SOAPResponse(webresponse.Cookies, doc);
-
-                        if (!response.IsError)
+                        if (response.Items.Count() == 1)
                         {
-                            if (response.Items.Count() == 1)
+                            this.Result = response.Items.First();
+
+                            if (this.Result.ConfigID.Equals(this.Item.ConfigID))
                             {
-                                this.Result = response.Items.First();
-
-                                if (this.Result.ConfigID.Equals(this.Item.ConfigID))
+                                if (!this.Result.ID.Equals(this.Item.ID))
                                 {
-                                    if (!this.Result.ID.Equals(this.Item.ID))
-                                    {
-                                        // New Version of Item
-                                        Model.Item newversion = this.Item.Session.Store(this.Item.ItemType).Get(this.Result);
-                                        Model.Item oldversion = this.Item;
-                                        this.Item = newversion;
-                                        this.UpdateItem(this.Result);
-                                        oldversion.OnSuperceded(newversion);
-                                    }
-                                    else
-                                    {
-                                        this.UpdateItem(this.Result);
-                                    }
-
-                                    this.Item.UpdateProperties(this.Result);
+                                    // New Version of Item
+                                    Model.Item newversion = this.Item.Session.Store(this.Item.ItemType).Get(this.Result);
+                                    Model.Item oldversion = this.Item;
+                                    this.Item = newversion;
+                                    this.UpdateItem(this.Result);
+                                    oldversion.OnSuperceded(newversion);
                                 }
                                 else
                                 {
-                                    // Result does not match Item
-                                    throw new Exceptions.ServerException("Server response does not match original Item");
+                                    this.UpdateItem(this.Result);
                                 }
+
+                                this.Item.UpdateProperties(this.Result);
+                            }
+                            else
+                            {
+                                // Result does not match Item
+                                throw new Exceptions.ServerException("Server response does not match original Item");
                             }
                         }
                     }
+
                 }
 
                 this.Completed = true;

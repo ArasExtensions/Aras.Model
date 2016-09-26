@@ -36,7 +36,7 @@ namespace Aras.Model.Debug
         {
             Server server = new Server("http://localhost/InnovatorServer100SP4");
             Database database = server.Database("CMB");
-            Session session = database.Login("admin", Server.PasswordHash("innovator"));
+            Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
             Queries.Item partquery = session.Store("Part").Query(Aras.Conditions.Eq("item_number", "RJMTest12"));
             Item part = partquery.First();

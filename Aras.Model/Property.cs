@@ -79,7 +79,7 @@ namespace Aras.Model
                         prop.Select = this.Type.Name;
                         prop.SetProperty("id", this.Item.ID);
 
-                        IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.Item.ItemType.Session, prop);
+                        IO.SOAPRequest request = this.Item.Session.IO.Request(IO.SOAPOperation.ApplyItem, prop);
                         IO.SOAPResponse response = request.Execute();
 
                         if (!response.IsError)

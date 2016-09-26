@@ -427,7 +427,7 @@ namespace Aras.Model
                 IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
                 dbitem.Select = String.Join(",", propertynames);
                 dbitem.ID = this.ID;
-                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, dbitem);
+                IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, dbitem);
                 IO.SOAPResponse response = request.Execute();
 
                 if (!response.IsError)
@@ -532,7 +532,7 @@ namespace Aras.Model
                         IO.Item lockitem = new IO.Item(this.ItemType.Name, "lock");
                         lockitem.ID = this.ID;
                         lockitem.Select = "locked_by_id";
-                        IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, lockitem);
+                        IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, lockitem);
                         IO.SOAPResponse response = request.Execute();
 
                         if (!response.IsError)
@@ -545,16 +545,16 @@ namespace Aras.Model
                             throw new Exceptions.ServerException(response);
                         }
                     }
-                    else if (this.LockedBy.ID.Equals(this.ItemType.Session.UserID))
+                    else if (this.LockedBy.ID.Equals(this.ItemType.Session.IO.UserID))
                     {
                         ret = true;
                     }
-                    else if (!this.LockedBy.ID.Equals(this.ItemType.Session.UserID) && UnLock)
+                    else if (!this.LockedBy.ID.Equals(this.ItemType.Session.IO.UserID) && UnLock)
                     {
                         // Force Unlock
                         IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
                         unlockitem.ID = this.ID;
-                        IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, unlockitem);
+                        IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, unlockitem);
                         IO.SOAPResponse response = request.Execute();
 
                         if (!response.IsError)
@@ -562,7 +562,7 @@ namespace Aras.Model
                             IO.Item lockitem = new IO.Item(this.ItemType.Name, "lock");
                             lockitem.ID = this.ID;
                             lockitem.Select = "locked_by_id";
-                            request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, lockitem);
+                            request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, lockitem);
                             response = request.Execute();
 
                             if (!response.IsError)
@@ -618,11 +618,11 @@ namespace Aras.Model
             }
             else
             {
-                if (this.LockedBy.ID.Equals(this.ItemType.Session.UserID))
+                if (this.LockedBy.ID.Equals(this.ItemType.Session.IO.UserID))
                 {
                     IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
                     unlockitem.ID = this.ID;
-                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this.ItemType.Session, unlockitem);
+                    IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, unlockitem);
                     IO.SOAPResponse response = request.Execute();
 
                     if (!response.IsError)
@@ -950,7 +950,7 @@ namespace Aras.Model
         public Item(ItemType ItemType, Transaction Transaction)
         {
             this.Initialise(ItemType);
-            this.ID = Server.NewID();
+            this.ID = IO.Server.NewID();
             this.ConfigID = this.ID;
             this.Generation = 1;
             this.IsCurrent = true;

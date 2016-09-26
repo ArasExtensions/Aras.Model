@@ -34,13 +34,17 @@ namespace Aras.Model
 {
     public class Session
     {
-        public String ID { get; private set; }
-
         public Database Database { get; private set; }
 
-        public String UserID { get; private set; }
+        public IO.Session IO { get; private set; }
 
-        internal CookieContainer Cookies { get; private set; }
+        public String ID
+        {
+            get
+            {
+                return this.IO.UserID;
+            }
+        }
 
         private DirectoryInfo _cacheDirectory;
         internal DirectoryInfo CacheDirectory
@@ -68,7 +72,7 @@ namespace Aras.Model
             {
                 if (this._user == null)
                 {
-                    this._user = (User)this.Store("User").Get(this.UserID);
+                    this._user = (User)this.Store("User").Get(this.IO.UserID);
                 }
 
                 return this._user;
@@ -128,14 +132,12 @@ namespace Aras.Model
                 {
                     this._identities = new List<Identity>();
 
-                    IO.Item identityrequest = new IO.Item("Identity", "get");
+                    IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
+                    IO.Item identityrequest = request.NewItem("Identity", "get");
                     identityrequest.Select = "id,name";
                     identityrequest.SetProperty("is_alias", "0");
-                    IO.Item memberrequest = new IO.Item("Member", "get");
+                    IO.Item memberrequest = identityrequest.NewRelationship("Member", "get");
                     memberrequest.Select = "related_id";
-                    identityrequest.AddRelationship(memberrequest);
-
-                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, identityrequest);
                     IO.SOAPResponse response = request.Execute();
 
                     if (!response.IsError)
@@ -194,10 +196,6 @@ namespace Aras.Model
             }
         }
 
-        public String Username { get; private set; }
-
-        public String Password { get; private set; }
-
         private Dictionary<String, ItemType> ItemTypeNameCache;
         private Dictionary<String, ItemType> ItemTypeIDCache;
 
@@ -205,10 +203,10 @@ namespace Aras.Model
         {
             if (DBItem.GetProperty("is_relationship").Equals("1"))
             {
-                IO.Item dbrelationshiptype = new IO.Item("RelationshipType", "get");
+                IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
+                IO.Item dbrelationshiptype = request.NewItem("RelationshipType", "get");
                 dbrelationshiptype.SetProperty("relationship_id", DBItem.ID);
                 dbrelationshiptype.Select = "source_id,related_id";
-                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, dbrelationshiptype);
                 IO.SOAPResponse response = request.Execute();
 
                 if (!response.IsError)
@@ -246,10 +244,10 @@ namespace Aras.Model
         {
             if (!this.ItemTypeNameCache.ContainsKey(Name))
             {
-                IO.Item itemtype = new IO.Item("ItemType", "get");
+                IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
+                IO.Item itemtype = request.NewItem("ItemType", "get");
                 itemtype.Select = "id,name,is_relationship,class_structure";
                 itemtype.SetProperty("name", Name);
-                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, itemtype);
                 IO.SOAPResponse response = request.Execute();
 
                 if (!response.IsError)
@@ -269,10 +267,10 @@ namespace Aras.Model
         {
             if (!this.ItemTypeIDCache.ContainsKey(ID))
             {
-                IO.Item itemtype = new IO.Item("ItemType", "get");
+                IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
+                IO.Item itemtype = request.NewItem("ItemType", "get");
                 itemtype.Select = "id,name,is_relationship,class_structure";
                 itemtype.ID = ID;
-                IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, itemtype);
                 IO.SOAPResponse response = request.Execute();
 
                 if (!response.IsError)
@@ -326,10 +324,10 @@ namespace Aras.Model
                 if (ItemType is RelationshipType)
                 {
                     // Get Source Item
-                    IO.Item dbitem = new IO.Item(ItemType.Name, "get");
+                    IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
+                    IO.Item dbitem = request.NewItem(ItemType.Name, "get");
                     dbitem.ID = ID;
                     dbitem.Select = "source_id";
-                    IO.SOAPRequest request = new IO.SOAPRequest(IO.SOAPOperation.ApplyItem, this, dbitem);
                     IO.SOAPResponse response = request.Execute();
 
                     if (!response.IsError)
@@ -352,24 +350,17 @@ namespace Aras.Model
             return ret;
         }
 
-        private Random Random;
-        internal Double DownloadRandom()
-        {
-            return this.Random.NextDouble();
-        }
 
-        internal Session(Database Database, String UserID, String Username, String Password, CookieContainer Cookies)
+
+        internal Session(Database Database, IO.Session IO)
         {
-            this.ID = Server.NewID();
             this.Database = Database;
-            this.UserID = UserID;
-            this.Username = Username;
-            this.Password = Password;
-            this.Cookies = Cookies;
+            this.IO = IO;
+
             this.ItemTypeNameCache = new Dictionary<String, ItemType>();
             this.ItemTypeIDCache = new Dictionary<String, ItemType>();
             this.StoresCache = new Dictionary<ItemType, Stores.Item>();
-            this.Random = new Random();
+            
 
             // Default Selections
             this.ItemType("Value").AddToSelect("value,label");
