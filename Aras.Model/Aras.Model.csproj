@@ -79,7 +79,9 @@
     <Compile Include="Exceptions\ServerException.cs" />
     <Compile Include="PropertyTypes\Federated.cs" />
     <Compile Include="PropertyTypes\Sequence.cs" />
+    <Compile Include="PropertyTypes\FormattedText.cs" />
     <Compile Include="Props\Federated.cs" />
+    <Compile Include="Props\FormattedText .cs" />
     <Compile Include="Queries\Item.cs" />
     <Compile Include="Queries\Relationship.cs" />
     <Compile Include="Query.cs" />

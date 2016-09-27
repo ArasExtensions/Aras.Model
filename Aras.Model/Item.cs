@@ -350,6 +350,9 @@ namespace Aras.Model
                     case "Text":
                         this.PropertyCache[PropertyType] = new Properties.Text(this, (PropertyTypes.Text)PropertyType);
                         break;
+                    case "FormattedText":
+                        this.PropertyCache[PropertyType] = new Properties.FormattedText(this, (PropertyTypes.FormattedText)PropertyType);
+                        break;
                     case "Integer":
                         this.PropertyCache[PropertyType] = new Properties.Integer(this, (PropertyTypes.Integer)PropertyType);
                         break;

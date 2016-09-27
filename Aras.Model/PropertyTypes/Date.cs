@@ -32,8 +32,8 @@ namespace Aras.Model.PropertyTypes
 {
     public class Date : PropertyType
     {
-        internal Date(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Runtime, System.Boolean Required, System.DateTime? Default)
-            :base(Type, Name, Label, ReadOnly, Runtime, Required, Default)
+        internal Date(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.DateTime? Default)
+            :base(Type, Name, Label, ReadOnly, Required, Default)
         {
   
         }

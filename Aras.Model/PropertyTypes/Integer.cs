@@ -32,8 +32,8 @@ namespace Aras.Model.PropertyTypes
 {
     public class Integer : PropertyType
     {
-        internal Integer(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Runtime, System.Boolean Required, System.Int32? Default)
-            :base(Type, Name, Label, ReadOnly, Runtime, Required, Default)
+        internal Integer(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.Int32? Default)
+            :base(Type, Name, Label, ReadOnly, Required, Default)
         {
   
         }

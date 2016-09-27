@@ -32,8 +32,8 @@ namespace Aras.Model.PropertyTypes
 {
     public class Decimal : PropertyType
     {
-        internal Decimal(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Runtime, System.Boolean Required, System.Decimal? Default)
-            :base(Type, Name, Label, ReadOnly, Runtime, Required, Default)
+        internal Decimal(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.Decimal? Default)
+            :base(Type, Name, Label, ReadOnly, Required, Default)
         {
   
         }

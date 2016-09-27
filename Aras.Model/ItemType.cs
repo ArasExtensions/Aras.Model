@@ -173,21 +173,24 @@ namespace Aras.Model
                                     case "string":
                                         Int32 length = 32;
                                         Int32.TryParse(thisprop.GetProperty("stored_length"), out length);
-                                        this._propertyTypeCache[name] = new PropertyTypes.String(this, name, label, ReadOnly, false, Required, DefaultString, length);
+                                        this._propertyTypeCache[name] = new PropertyTypes.String(this, name, label, ReadOnly, Required, DefaultString, length);
                                         break;
                                     case "ml_string":
                                         Int32 ml_length = 32;
                                         Int32.TryParse(thisprop.GetProperty("stored_length"), out ml_length);
-                                        this._propertyTypeCache[name] = new PropertyTypes.MultilingualString(this, name, label, ReadOnly, false, Required, DefaultString, ml_length);
+                                        this._propertyTypeCache[name] = new PropertyTypes.MultilingualString(this, name, label, ReadOnly, Required, DefaultString, ml_length);
                                         break;
                                     case "text":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Text(this, name, label, ReadOnly, false, Required, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Text(this, name, label, ReadOnly, Required, DefaultString);
+                                        break;
+                                    case "formatted text":
+                                        this._propertyTypeCache[name] = new PropertyTypes.FormattedText(this, name, label, ReadOnly, Required, DefaultString);
                                         break;
                                     case "md5":
-                                        this._propertyTypeCache[name] = new PropertyTypes.MD5(this, name, label, ReadOnly, false, Required, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.MD5(this, name, label, ReadOnly, Required, DefaultString);
                                         break;
                                     case "image":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Image(this, name, label, ReadOnly, false, Required, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Image(this, name, label, ReadOnly, Required, DefaultString);
                                         break;
                                     case "integer":
 
@@ -195,17 +198,17 @@ namespace Aras.Model
                                         {
                                             Int32 DefaultInteger = 0;
                                             Int32.TryParse(DefaultString, out DefaultInteger);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, false, Required, DefaultInteger);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, Required, DefaultInteger);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, false, Required, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, Required, null);
                                         }
 
                                         break;
                                     case "item":
                                         ItemType valueitemtype = this.Session.ItemTypeByID(thisprop.GetProperty("data_source"));
-                                        this._propertyTypeCache[name] = new PropertyTypes.Item(this, name, label, ReadOnly, false, Required, valueitemtype);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Item(this, name, label, ReadOnly, Required, valueitemtype);
 
                                         break;
                                     case "date":
@@ -214,17 +217,17 @@ namespace Aras.Model
                                         {
                                             DateTime DefaultDate;
                                             DateTime.TryParse(DefaultString, out DefaultDate);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, false, Required, DefaultDate);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, Required, DefaultDate);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, false, Required, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, Required, null);
                                         }
 
                                         break;
                                     case "list":
                                         List valuelist = (List)this.Session.Store("List").Get(thisprop.GetProperty("data_source"));
-                                        this._propertyTypeCache[name] = new PropertyTypes.List(this, name, label, ReadOnly, false, Required, valuelist);
+                                        this._propertyTypeCache[name] = new PropertyTypes.List(this, name, label, ReadOnly, Required, valuelist);
                                         break;
                                     case "decimal":
 
@@ -232,11 +235,11 @@ namespace Aras.Model
                                         {
                                             Decimal DefaultDecimal = 0;
                                             Decimal.TryParse(DefaultString, out DefaultDecimal);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, false, Required, DefaultDecimal);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, DefaultDecimal);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, false, Required, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, null);
                                         }
 
                                         break;
@@ -246,11 +249,11 @@ namespace Aras.Model
                                         {
                                             Double DefaultDouble = 0;
                                             Double.TryParse(DefaultString, out DefaultDouble);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Float(this, name, label, ReadOnly, false, Required, DefaultDouble);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Float(this, name, label, ReadOnly, Required, DefaultDouble);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, false, Required, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, null);
                                         }
 
                                         break;
@@ -259,26 +262,26 @@ namespace Aras.Model
                                         if (DefaultString != null)
                                         {
                                             Boolean DefaultBoolean = "1".Equals(DefaultString);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, false, Required, DefaultBoolean);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, Required, DefaultBoolean);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, false, Required, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, Required, null);
                                         }
 
                                         break;
                                     case "foreign":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Foreign(this, name, label, ReadOnly, false, Required, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Foreign(this, name, label, ReadOnly, Required, DefaultString);
                                         break;
                                     case "federated":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Federated(this, name, label, ReadOnly, false, Required, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Federated(this, name, label, ReadOnly, Required, DefaultString);
                                         break;
                                     case "sequence":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Sequence(this, name, label, ReadOnly, false, Required, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Sequence(this, name, label, ReadOnly, Required, DefaultString);
                                         break;
                                     case "filter list":
                                         List valuefilterlist = (List)this.Session.Store("List").Get(thisprop.GetProperty("data_source"));
-                                        this._propertyTypeCache[name] = new PropertyTypes.FilterList(this, name, label, ReadOnly, false, Required, valuefilterlist);
+                                        this._propertyTypeCache[name] = new PropertyTypes.FilterList(this, name, label, ReadOnly, Required, valuefilterlist);
                                         break;
                                     default:
                                         throw new NotImplementedException("Property Type not implmented: " + thisprop.GetProperty("data_type"));

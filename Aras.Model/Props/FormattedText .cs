@@ -28,49 +28,55 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Properties
 {
-    public abstract class PropertyType
+    public class FormattedText : Property
     {
-        public ItemType Type { get; private set; }
-
-        public System.String Name { get; private set; }
-
-        public System.String Label { get; private set; }
-
-        private String _columnName;
-        internal String ColumnName
+        public override Object Value
         {
             get
             {
-                if (this._columnName == null)
+                return base.Value;
+            }
+            set
+            {
+                if (value == null)
                 {
-                    this._columnName = this.Type.TableName + ".[" + this.Name + "]";
+                    if (base.Value != null)
+                    {
+                        base.Value = value;
+                    }
                 }
-
-                return this._columnName;
+                else if (value is System.String)
+                {
+                    if (!((System.String)value).Equals(base.Value))
+                    {
+                        base.Value = value;
+                    }
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Value must be a System.String");
+                }
             }
         }
 
-        public System.Boolean ReadOnly { get; private set; }
-
-        public System.Boolean Required { get; private set; }
-
-        public Object Default { get; private set; }
-
-        public override System.String ToString()
+        internal override string DBValue
         {
-            return this.Name;
+            get
+            {
+                return this.Value.ToString();
+            }
+            set
+            {
+                this.SetValue(value);
+            }
         }
 
-        internal PropertyType(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, Object Default)
+        internal FormattedText(Model.Item Item, PropertyTypes.FormattedText Type)
+            :base(Item, Type)
         {
-            this.Type = Type;
-            this.Name = Name;
-            this.Label = Label;
-            this.ReadOnly = ReadOnly;
-            this.Required = Required;
-            this.Default = Default;
+
         }
     }
 }

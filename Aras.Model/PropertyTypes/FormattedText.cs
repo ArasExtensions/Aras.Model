@@ -30,12 +30,13 @@ using System.Threading.Tasks;
 
 namespace Aras.Model.PropertyTypes
 {
-    public class Float : PropertyType
+    public class FormattedText : PropertyType
     {
-        internal Float(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.Double? Default)
+
+        internal FormattedText(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.String Default)
             :base(Type, Name, Label, ReadOnly, Required, Default)
         {
-  
+           
         }
     }
 }
