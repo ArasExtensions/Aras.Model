@@ -135,6 +135,55 @@ namespace Aras.Model.Stores
             return new Queries.Relationship(this, Condition);
         }
 
+        public void UpdateRelated(IEnumerable<Model.Item> RelatedItems, Transaction Transaction)
+        {
+            // Ensure can update Source
+            this.Source.Update(Transaction);
+
+            // Ensure all Related Items are in Store
+            foreach (Model.Item related in RelatedItems)
+            {
+                Boolean found = false;
+
+                foreach (Model.Relationship relationship in this.CurrentItems())
+                {
+                    if (related.Equals(relationship.Related))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    this.Create(related, Transaction);
+                }
+            }
+
+            // Remove any Related Items no longer needed
+            List<Model.Relationship> toberemoved = new List<Model.Relationship>();
+
+            foreach(Model.Relationship relationship in this.CurrentItems())
+            {
+                if (relationship.Related == null)
+                {
+                    toberemoved.Add(relationship);
+                }
+                else
+                {
+                    if (!RelatedItems.Contains(relationship.Related))
+                    {
+                        toberemoved.Add(relationship);
+                    }
+                }
+            }
+
+            foreach(Model.Relationship relationship in toberemoved)
+            {
+                relationship.Delete(Transaction);
+            }
+        }
+
         protected override void ReadAllItems()
         {
             List<Model.Relationship> ret = new List<Model.Relationship>();

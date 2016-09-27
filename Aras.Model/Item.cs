@@ -960,6 +960,62 @@ namespace Aras.Model
             return this.Store(this.ItemType.RelationshipType(RelationshipType));
         }
 
+        public IEnumerable<Item> RecursiveRelated(RelationshipType RelationshipType)
+        {
+            List<Item> ret = new List<Item>();
+
+            foreach(Relationship relationship in this.Store(RelationshipType))
+            {
+                if (relationship.Related != null)
+                {
+                    if (!ret.Contains(relationship.Related))
+                    {
+                        ret.Add(relationship.Related);
+                 
+                        foreach(Item relatedrelated in relationship.Related.RecursiveRelated(RelationshipType))
+                        {
+                            if (!ret.Contains(relatedrelated))
+                            {
+                                ret.Add(relatedrelated);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return ret;
+        }
+
+        public IEnumerable<Item> RecursiveRelated(String RelationshipType)
+        {
+            return this.RecursiveRelated(this.ItemType.RelationshipType(RelationshipType));
+        }
+
+        public IEnumerable<Relationship> RecursiveRelationship(RelationshipType RelationshipType)
+        {
+            List<Relationship> ret = new List<Relationship>();
+
+            foreach (Relationship relationship in this.Store(RelationshipType))
+            {
+                ret.Add(relationship);
+
+                if (relationship.Related != null)
+                {
+                    foreach (Relationship relatedrelationship in relationship.Related.RecursiveRelationship(RelationshipType))
+                    {
+                        ret.Add(relatedrelationship);
+                    }
+                }
+            }
+
+            return ret;
+        }
+
+        public IEnumerable<Relationship> RecursiveRelationship(String RelationshipType)
+        {
+            return this.RecursiveRelationship(this.ItemType.RelationshipType(RelationshipType));
+        }
+          
         public Boolean Equals(Item other)
         {
             if (other == null)
