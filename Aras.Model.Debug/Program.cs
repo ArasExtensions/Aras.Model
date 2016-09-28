@@ -34,11 +34,11 @@ namespace Aras.Model.Debug
     {
         static void Main(string[] args)
         {
-            Server server = new Server("http://localhost/InnovatorServer100SP4");
-            Database database = server.Database("CMB");
+            Server server = new Server("http://localhost/11SP6_ITGDEV");
+            Database database = server.Database("BOM Development");
             Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
-            Queries.Item partquery = session.Store("Part").Query(Aras.Conditions.Eq("item_number", "RJMTest12"));
+            Queries.Item partquery = session.Store("Part").Query(Aras.Conditions.Eq("item_number", "1234"));
             Item part = partquery.First();
         }
     }

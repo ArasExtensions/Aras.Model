@@ -37,31 +37,13 @@ namespace Aras.Model.Design.Debug
         static void Main(string[] args)
         {
             // Connect to Server
-            Model.Server server = new Model.Server("http://WIN-HBC9KO4SQ6E/InnovatorServer100SP4/");
-            //server.ProxyURL = "http://127.0.0.1:8888";
-            server.LoadAssembly("Aras.Model.Design");
-            Model.Database database = server.Database("CMB");
+            Model.Server server = new Model.Server("http://localhost/11SP6_ITGDEV");
+            Model.Database database = server.Database("BOM Development");
             Model.Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
            
             
-            Queries.Item orderquery = session.Store("v_Order").Query(Aras.Conditions.Eq("item_number", "RJMTest003"));
-            Model.Design.Order order = (Model.Design.Order)orderquery.First();
-
-            using(Transaction transaction = session.BeginTransaction())
-            {
-                order.Update(transaction);
-                order.BuildFlatBOM(transaction);
-                transaction.Commit(false);
-            }
-
-            /*
-            using (Transaction transaction = session.BeginTransaction())
-            {
-                Part part = (Part)session.Store("Part").Create(transaction);
-                part.ItemNumber = "RJMTest9990004";
-                part.Property("cmb_name").Value = "Test RJM";
-                transaction.Commit(false);
-            }            */
+            Queries.Item partquery = session.Store("Part").Query(Aras.Conditions.Eq("item_number", "1234"));
+            Model.Design.Part part = (Model.Design.Part)partquery.First();
         }
     }
 }

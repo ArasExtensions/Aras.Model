@@ -39,6 +39,14 @@ namespace Aras.Model
 
         public IO.Database IO { get; private set; }
 
+        public String ID
+        {
+            get
+            {
+                return this.IO.ID;
+            }
+        }
+
         private object SessionCacheLock = new object();
         private Dictionary<String, Session> SessionCache;
 
@@ -56,59 +64,17 @@ namespace Aras.Model
             }
         }
 
-        private Dictionary<String, Type> ItemTypeClassCache;
-
-        internal Type ItemTypeClass(String Name)
-        {
-            if (this.ItemTypeClassCache.ContainsKey(Name))
-            {
-                return this.ItemTypeClassCache[Name];
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         public override string ToString()
         {
-            return this.IO.ID;
+            return this.IO.ToString();
         }
 
         internal Database(Server Server, IO.Database IO)
             : base()
         {
             this.SessionCache = new Dictionary<String, Session>();
-            this.ItemTypeClassCache = new Dictionary<String, Type>();
             this.Server = Server;
             this.IO = IO;
-
-            foreach(Assembly assembly in this.Server.Assemblies)
-            {
-                foreach (Type type in assembly.GetTypes())
-                {
-                    if (type.IsSubclassOf(typeof(Item)))
-                    {
-                        // Get Atttribute
-                        Model.Attributes.ItemType itemtypeatt = (Model.Attributes.ItemType)type.GetCustomAttribute(typeof(Model.Attributes.ItemType));
-
-                        if (itemtypeatt != null)
-                        {
-                            if (!this.ItemTypeClassCache.ContainsKey(itemtypeatt.Name))
-                            {
-                                this.ItemTypeClassCache[itemtypeatt.Name] = type;
-                            }
-                            else
-                            {
-                                if (type.IsSubclassOf(this.ItemTypeClassCache[itemtypeatt.Name]))
-                                {
-                                    this.ItemTypeClassCache[itemtypeatt.Name] = type;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 }

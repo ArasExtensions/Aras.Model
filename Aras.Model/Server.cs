@@ -38,31 +38,53 @@ namespace Aras.Model
     {
         public IO.Server IO { get; private set; }
 
-        public DirectoryInfo AssemblyDirectory { get; set; }
+        private Dictionary<String, Type> ItemTypeClassCache;
 
-        public void LoadAssembly(String AssemblyFile)
+        internal Type ItemTypeClass(String Name)
         {
-            this.LoadAssembly(new FileInfo(this.AssemblyDirectory.FullName + "\\" + AssemblyFile + ".dll"));
-        }
-
-        private List<Assembly> AssmeblyCache;
-        internal IEnumerable<Assembly> Assemblies
-        {
-            get
+            if (this.ItemTypeClassCache.ContainsKey(Name))
             {
-                return this.AssmeblyCache;
+                return this.ItemTypeClassCache[Name];
+            }
+            else
+            {
+                return null;
             }
         }
 
-        private void LoadAssembly(FileInfo AssemblyFile)
+        private void LoadAssemblies()
         {
-            if (AssemblyFile.Exists)
-            {
-                Assembly assembly = Assembly.LoadFrom(AssemblyFile.FullName);
+            this.ItemTypeClassCache = new Dictionary<String, Type>();
 
-                if (!this.AssmeblyCache.Contains(assembly))
+            // Ensure all assemblies in execting directory are loaded and search for Item classes
+            FileInfo thisdlllocation = new FileInfo(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
+            foreach(FileInfo dllfile in thisdlllocation.Directory.GetFiles("*.dll"))
+            {
+                Assembly thisassembly = Assembly.LoadFrom(dllfile.FullName);
+
+                foreach (Type type in thisassembly.GetTypes())
                 {
-                    this.AssmeblyCache.Add(assembly);
+                    if (type.IsSubclassOf(typeof(Item)))
+                    {
+                        // Get Atttribute
+                        Model.Attributes.ItemType itemtypeatt = (Model.Attributes.ItemType)type.GetCustomAttribute(typeof(Model.Attributes.ItemType));
+
+                        if (itemtypeatt != null)
+                        {
+                            if (!this.ItemTypeClassCache.ContainsKey(itemtypeatt.Name))
+                            {
+                                this.ItemTypeClassCache[itemtypeatt.Name] = type;
+                            }
+                            else
+                            {
+                                if (type.IsSubclassOf(this.ItemTypeClassCache[itemtypeatt.Name]))
+                                {
+                                    this.ItemTypeClassCache[itemtypeatt.Name] = type;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -115,20 +137,16 @@ namespace Aras.Model
             return this.IO.URL;
         }
 
+
+
         public Server(String URL)
             :base()
         {
-            // Initialise Assebly Cache
-            this.AssmeblyCache = new List<Assembly>();
+            // Initialise Assembly Cache
+            this.LoadAssemblies();
 
             // Create IO Server
             this.IO = new IO.Server(URL);
-
-            // Default Assembly Directory
-            this.AssemblyDirectory = new DirectoryInfo(Environment.CurrentDirectory);
-
-            // Load this assembly
-            this.LoadAssembly(new FileInfo(System.Reflection.Assembly.GetExecutingAssembly().Location));
         }
     }
 }
