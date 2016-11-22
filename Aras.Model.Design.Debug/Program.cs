@@ -37,13 +37,13 @@ namespace Aras.Model.Design.Debug
         static void Main(string[] args)
         {
             // Connect to Server
-            Model.Server server = new Model.Server("http://localhost/11SP6_ITGDEV");
-            Model.Database database = server.Database("BOM Development");
+            Model.Server server = new Model.Server("http://localhost/InnovatorServer100SP4");
+            server.LoadAssembly("Aras.Model.Design");
+            Model.Database database = server.Database("CMB");
             Model.Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
-           
-            
-            Queries.Item partquery = session.Store("Part").Query(Aras.Conditions.Eq("item_number", "1234"));
-            Model.Design.Part part = (Model.Design.Part)partquery.First();
+
+
+            Model.Design.Order order = (Model.Design.Order)session.Store("v_Order").Get("D2F760CC3F9E4CA18E825BEAC170AFAF");
         }
     }
 }

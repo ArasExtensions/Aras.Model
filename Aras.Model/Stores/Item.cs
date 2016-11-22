@@ -155,7 +155,7 @@ namespace Aras.Model.Stores
 
         public Model.Item Create(Transaction Transaction)
         {
-            Model.Item item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(Transaction) }).Invoke(new object[] { this.ItemType, Transaction });
+            Model.Item item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(Model.Transaction) }).Invoke(new object[] { this.ItemType, Transaction });
             this.AddToItemsCache(item);
             this.AddToCreatedCache(item);
             return item;

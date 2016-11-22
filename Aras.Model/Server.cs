@@ -38,6 +38,22 @@ namespace Aras.Model
     {
         public IO.Server IO { get; private set; }
 
+        public DirectoryInfo AssemblyDirectory { get; set; }
+
+        public void LoadAssembly(String AssemblyFile)
+        {
+            this.LoadAssembly(new FileInfo(this.AssemblyDirectory.FullName + "\\" + AssemblyFile + ".dll"));
+        }
+
+        private List<Assembly> AssmeblyCache;
+        internal IEnumerable<Assembly> Assemblies
+        {
+            get
+            {
+                return this.AssmeblyCache;
+            }
+        }
+
         private Dictionary<String, Type> ItemTypeClassCache;
 
         internal Type ItemTypeClass(String Name)
@@ -52,35 +68,35 @@ namespace Aras.Model
             }
         }
 
-        private void LoadAssemblies()
+        private void LoadAssembly(FileInfo AssemblyFile)
         {
-            this.ItemTypeClassCache = new Dictionary<String, Type>();
-
-            // Ensure all assemblies in execting directory are loaded and search for Item classes
-            FileInfo thisdlllocation = new FileInfo(System.Reflection.Assembly.GetExecutingAssembly().Location);
-
-            foreach(FileInfo dllfile in thisdlllocation.Directory.GetFiles("*.dll"))
+            if (AssemblyFile.Exists)
             {
-                Assembly thisassembly = Assembly.LoadFrom(dllfile.FullName);
+                Assembly assembly = Assembly.LoadFrom(AssemblyFile.FullName);
 
-                foreach (Type type in thisassembly.GetTypes())
+                if (!this.AssmeblyCache.Contains(assembly))
                 {
-                    if (type.IsSubclassOf(typeof(Item)))
-                    {
-                        // Get Atttribute
-                        Model.Attributes.ItemType itemtypeatt = (Model.Attributes.ItemType)type.GetCustomAttribute(typeof(Model.Attributes.ItemType));
+                    this.AssmeblyCache.Add(assembly);
 
-                        if (itemtypeatt != null)
+                    foreach (Type type in assembly.GetTypes())
+                    {
+                        if (type.IsSubclassOf(typeof(Item)))
                         {
-                            if (!this.ItemTypeClassCache.ContainsKey(itemtypeatt.Name))
+                            // Get Atttribute
+                            Model.Attributes.ItemType itemtypeatt = (Model.Attributes.ItemType)type.GetCustomAttribute(typeof(Model.Attributes.ItemType));
+
+                            if (itemtypeatt != null)
                             {
-                                this.ItemTypeClassCache[itemtypeatt.Name] = type;
-                            }
-                            else
-                            {
-                                if (type.IsSubclassOf(this.ItemTypeClassCache[itemtypeatt.Name]))
+                                if (!this.ItemTypeClassCache.ContainsKey(itemtypeatt.Name))
                                 {
                                     this.ItemTypeClassCache[itemtypeatt.Name] = type;
+                                }
+                                else
+                                {
+                                    if (type.IsSubclassOf(this.ItemTypeClassCache[itemtypeatt.Name]))
+                                    {
+                                        this.ItemTypeClassCache[itemtypeatt.Name] = type;
+                                    }
                                 }
                             }
                         }
@@ -101,7 +117,7 @@ namespace Aras.Model
                     {
                         this._databasesCache = new Dictionary<String, Database>();
 
-                        foreach(IO.Database iodb in this.IO.Databases)
+                        foreach (IO.Database iodb in this.IO.Databases)
                         {
                             this._databasesCache[iodb.ID] = new Database(this, iodb);
                         }
@@ -137,16 +153,23 @@ namespace Aras.Model
             return this.IO.URL;
         }
 
-
-
         public Server(String URL)
-            :base()
+            : base()
         {
             // Initialise Assembly Cache
-            this.LoadAssemblies();
+            this.AssmeblyCache = new List<Assembly>();
+
+            // Initialise ItemType Cache
+            this.ItemTypeClassCache = new Dictionary<String, Type>();
 
             // Create IO Server
             this.IO = new IO.Server(URL);
+
+            // Default Assembly Directory
+            this.AssemblyDirectory = new DirectoryInfo(Environment.CurrentDirectory);
+
+            // Load this assembly
+            this.LoadAssembly(new FileInfo(System.Reflection.Assembly.GetExecutingAssembly().Location));
         }
     }
 }

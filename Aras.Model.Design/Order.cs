@@ -367,16 +367,17 @@ namespace Aras.Model.Design
             this.PartCache = new Dictionary<Part, Double>();
         }
 
-        public Order(Model.ItemType ItemType, Transaction Transaction)
+        public Order(Aras.Model.ItemType ItemType, Aras.Model.Transaction Transaction)
             : base(ItemType, Transaction)
         {
             this.Initialise();
         }
 
-        public Order(Model.ItemType ItemType, IO.Item DBItem)
+        public Order(Aras.Model.ItemType ItemType, Aras.IO.Item DBItem)
             : base(ItemType, DBItem)
         {
             this.Initialise();
         }
+
     }
 }

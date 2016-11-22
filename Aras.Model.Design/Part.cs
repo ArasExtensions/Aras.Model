@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 
 namespace Aras.Model.Design
 {
-    [Model.Attributes.ItemType("Part")]
+    [Aras.Model.Attributes.ItemType("Part")]
     public class Part : Model.Item
     {
         public String ItemNumber
@@ -72,14 +72,14 @@ namespace Aras.Model.Design
             }
         }
 
-        public Part(Model.ItemType ItemType, Transaction Transaction)
+        public Part(Aras.Model.ItemType ItemType, Aras.Model.Transaction Transaction)
             : base(ItemType, Transaction)
         {
- 
+
         }
 
-        public Part(Model.ItemType ItemType, IO.Item DBItem)
-            : base(ItemType, DBItem)
+        public Part(Aras.Model.ItemType ItemType, Aras.IO.Item DBItem)
+            :base(ItemType, DBItem)
         {
 
         }

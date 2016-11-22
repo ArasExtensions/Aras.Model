@@ -34,7 +34,7 @@ namespace Aras.Model.Debug
     {
         static void Main(string[] args)
         {
-            Server server = new Server("http://localhost/11SP6_ITGDEV");
+            Server server = new Server("http://localhost/11SP6");
             Database database = server.Database("BOM Development");
             Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
