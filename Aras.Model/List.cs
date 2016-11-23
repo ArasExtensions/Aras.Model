@@ -78,8 +78,13 @@ namespace Aras.Model
         {
             base.Refresh();
 
-            // Reset Values
-            this._values = null;
+            // Refresh Values
+            this.Store("Value").Refesh();
+
+            foreach (ListValue listvalue in this.Store("Value"))
+            {
+                listvalue.Refresh();
+            }
         }
 
         public List(ItemType ItemType, Transaction Transaction)

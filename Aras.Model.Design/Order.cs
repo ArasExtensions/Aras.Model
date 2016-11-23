@@ -353,6 +353,12 @@ namespace Aras.Model.Design
             // Refresh Order Contexts
             this.Store("v_Order Context").Refesh();
 
+            // Refresh Variant Contexts
+            foreach (Model.Design.OrderContext ordercontext in this.Store("v_Order Context"))
+            {
+                ordercontext.Refresh();
+            }
+
             // Refresh Configured Part
             if (this.ConfiguredPart != null)
             {
