@@ -342,10 +342,28 @@ namespace Aras.Model.Design
 
                 foreach (Model.Design.PartBOM partbom in this.ConfiguredPart.Store("Part BOM").CurrentItems())
                 {
-                    if (partbom.SortOrder != cnt)
+                    if (partbom.Related != null)
                     {
-                        partbom.Update(Transaction);
-                        partbom.SortOrder = cnt;
+                        Part relatedpart = (Part)partbom.Related;
+                        relatedpart.Refresh();
+
+                        Int32? variantsequence = (Int32?)relatedpart.Property("cmb_var_structure_ref").Value;
+                        if (variantsequence == null)
+                        {
+                            if (partbom.SortOrder != cnt)
+                            {
+                                partbom.Update(Transaction);
+                                partbom.SortOrder = cnt;
+                            }
+                        }
+                        else
+                        {
+                            if (partbom.SortOrder != (Int32)variantsequence)
+                            {
+                                partbom.Update(Transaction);
+                                partbom.SortOrder = (Int32)variantsequence;
+                            }
+                        }
                     }
 
                     cnt += 10;
