@@ -138,11 +138,6 @@ namespace Aras.Model.Design
         protected override void OnRefresh()
         {
             base.OnRefresh();
-
-            if (this.List != null)
-            {
-                this.List.Refresh();
-            }
         }
 
         public VariantContext(Model.ItemType ItemType, Transaction Transaction)

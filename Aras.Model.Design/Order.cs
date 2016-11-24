@@ -283,6 +283,7 @@ namespace Aras.Model.Design
                 this.ConfiguredPart.Class = this.ConfiguredPart.ItemType.GetClassName("TopLevel");
                 this.ConfiguredPart.Property("name").Value = this.Property("name").Value;
                 this.ConfiguredPart.Property("cmb_name").Value = this.Property("name").Value;
+                this.ConfiguredPart.Property("description").Value = this.Property("description").Value;
 
                 // Refesh Part Cache
                 this.RefeshPartCache(Transaction);
@@ -356,7 +357,15 @@ namespace Aras.Model.Design
             // Refresh Variant Contexts
             foreach (Model.Design.OrderContext ordercontext in this.Store("v_Order Context"))
             {
-                ordercontext.Refresh();
+                if (ordercontext.VariantContext != null)
+                {
+                    ordercontext.VariantContext.Refresh();
+
+                    if (ordercontext.VariantContext.List != null)
+                    {
+                        ordercontext.VariantContext.List.Refresh();
+                    }
+                }
             }
 
             // Refresh Configured Part

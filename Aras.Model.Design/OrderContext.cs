@@ -86,11 +86,6 @@ namespace Aras.Model.Design
         protected override void OnRefresh()
         {
             base.OnRefresh();
-        
-            if (this.VariantContext != null)
-            {
-                this.VariantContext.Refresh();
-            }
         }
 
         internal IO.Item GetIOItem()
