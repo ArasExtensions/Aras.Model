@@ -103,10 +103,14 @@ namespace Aras.Model.Design
             // Process Part Variants
             if (Part.IsVariant)
             {
+                Part.Store("Part Variants").Refesh();
+
                 foreach (Model.Design.PartVariant partvariant in Part.Store("Part Variants"))
                 {
                     Boolean selected = true;
                     Double variant_quantity = 0.0;
+
+                    partvariant.Store("Part Variant Rule").Refesh();
 
                     foreach (Model.Design.PartVariantRule partvariantrule in partvariant.Store("Part Variant Rule"))
                     {
@@ -217,6 +221,8 @@ namespace Aras.Model.Design
             }
 
             // Process Part BOM
+            Part.Store("Part BOM").Refesh();
+
             foreach (Model.Design.PartBOM partbom in Part.Store("Part BOM"))
             {
                 if (partbom.Related != null)
