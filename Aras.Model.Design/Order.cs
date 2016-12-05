@@ -314,11 +314,14 @@ namespace Aras.Model.Design
 
                     if (requiredparts.Contains(currentpart))
                     {
-                        currentparts.Add(currentpart);
+                        if (currentpartbom.DatabaseState != DatabaseStates.Deleted)
+                        {
+                            currentparts.Add(currentpart);
 
-                        // Update Quanity
-                        currentpartbom.Update(Transaction);
-                        currentpartbom.Quantity = this.PartCache[currentpart];
+                            // Update Quanity
+                            currentpartbom.Update(Transaction);
+                            currentpartbom.Quantity = this.PartCache[currentpart];
+                        }
                     }
                     else
                     {

@@ -485,9 +485,31 @@ namespace Aras.Model
 
                         break;
 
-                    default:
+                    case Actions.Delete:
+
+                        if (this.DatabaseState != DatabaseStates.Deleted)
+                        {
+                            if (this.Lock(false))
+                            {
+                                Transaction.Add("update", this);
+                                this.Action = Actions.Update;
+                                this.OnUpdate(Transaction);
+                            }
+                            else
+                            {
+                                throw new Exceptions.ServerException("Failed to lock Item");
+                            }
+                        }
+                        else
+                        {
+                            throw new Exceptions.ArgumentException("Not able to Update a Deleted Item");
+                        }
 
                         break;
+
+                    default:
+
+                        throw new Exceptions.ArgumentException("Action not implemented in Update: " + this.Action.ToString());
                 }
             }
             else
@@ -525,7 +547,7 @@ namespace Aras.Model
 
                     default:
 
-                        break;
+                        throw new Exceptions.ArgumentException("Action not implemented in UnlockUpdate: " + this.Action.ToString());
                 }
             }
             else

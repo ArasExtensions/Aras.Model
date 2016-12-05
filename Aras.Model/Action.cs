@@ -149,8 +149,11 @@ namespace Aras.Model
             }
             else
             {
-                // Ensure Locked
-                this.Item.Update(this.Transaction);
+                if (this.Item.Action != Model.Item.Actions.Delete)
+                {
+                    // Ensure Locked
+                    this.Item.Update(this.Transaction);
+                }
             }
         }
 

@@ -43,7 +43,45 @@ namespace Aras.Model.Design.Debug
             Model.Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
 
-            Model.Design.Order order = (Model.Design.Order)session.Store("v_Order").Get("D2F760CC3F9E4CA18E825BEAC170AFAF");
+            Model.Design.Part part = (Model.Design.Part)session.Store("Part").Get("D80AECB9F2694463A4EF668EE111E9C2");
+
+            List<Part> requiredparts = new List<Part>();
+
+            foreach (PartBOM partbom in part.Store("Part BOM"))
+            {
+                requiredparts.Add((Part)partbom.Related);
+            }
+
+            using (Transaction trans = session.BeginTransaction())
+            {
+                part.Update(trans);
+
+                foreach (PartBOM partbom in part.Store("Part BOM"))
+                {
+                    partbom.UnlockDelete(trans);
+                }
+
+                foreach (PartBOM partbom in part.Store("Part BOM"))
+                {
+                    // Update Quanity
+                    partbom.Update(trans);
+                    partbom.Quantity = 1.0;
+                }
+
+                foreach (PartBOM partbom in part.Store("Part BOM"))
+                {
+                    partbom.UnlockDelete(trans);
+                }
+
+                foreach (PartBOM partbom in part.Store("Part BOM"))
+                {
+                    // Update Quanity
+                    partbom.Update(trans);
+                    partbom.Quantity = 11.0;
+                }
+
+                trans.Commit(false);
+            }
         }
     }
 }
