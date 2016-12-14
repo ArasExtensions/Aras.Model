@@ -1,7 +1,7 @@
 ﻿/*  
   Aras.Model provides a .NET cient library for Aras Innovator
 
-  Copyright (C) 2015 Processwall Limited.
+  Copyright (C) 2016 Processwall Limited.
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published
@@ -27,29 +27,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Aras.Model;
-using System.IO;
 
-namespace Aras.Model.Design.Debug
+namespace Aras.Model.Design
 {
-    class Program
+    [Model.Attributes.ItemType("Variant Context Parameters")]
+    public class VariantContextParameters : Model.Relationship
     {
-        static void Main(string[] args)
+
+        public VariantContextParameters(Model.RelationshipType RelationshipType, Transaction Transaction, Model.Item Source, Model.Item Related)
+            : base(RelationshipType, Transaction, Source, Related)
         {
-            // Connect to Server
-            Model.Server server = new Model.Server("http://localhost/InnovatorServer100SP4");
-            server.LoadAssembly("Aras.Model.Design");
-            Model.Database database = server.Database("CMB");
-            Model.Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
-            Model.Design.Order order = (Model.Design.Order)session.Store("v_Order").Get("80C5C9B6C9CC49EFBC639CA5099AC474");
-
-            using (Transaction trans = session.BeginTransaction())
-            {
-                order.Update(trans);
-                order.BuildFlatBOM(trans);
-                trans.Commit(true);
-            }
         }
+
+        public VariantContextParameters(Model.RelationshipType Type, Model.Item Source, IO.Item DBItem)
+            : base(Type, Source, DBItem)
+        {
+
+        }
+
     }
 }
