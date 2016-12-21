@@ -83,6 +83,10 @@ namespace Aras.Model.Design
             }
         }
 
+        internal Boolean Calculated { get; set; }
+
+        internal Boolean Calculating { get; set; }
+
         protected override void OnRefresh()
         {
             base.OnRefresh();
@@ -101,13 +105,15 @@ namespace Aras.Model.Design
         public OrderContext(Model.RelationshipType RelationshipType, Transaction Transaction, Model.Item Source, Model.Item Related)
             : base(RelationshipType, Transaction, Source, Related)
         {
-         
+            this.Calculated = false;
+            this.Calculating = false;
         }
 
         public OrderContext(Model.RelationshipType RelationshipType, Model.Item Source, IO.Item DBItem)
             : base(RelationshipType, Source, DBItem)
         {
-           
+            this.Calculated = false;
+            this.Calculating = false;
         }
     }
 }

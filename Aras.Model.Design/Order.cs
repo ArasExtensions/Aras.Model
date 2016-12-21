@@ -79,6 +79,15 @@ namespace Aras.Model.Design
 
         private Model.Design.OrderContext OrderContext(Model.Design.VariantContext VariantContext, Transaction Transaction)
         {
+            // Ensure that Variant Context Parameter Rules are added first
+            foreach (Model.Design.VariantContextParameters varparam in VariantContext.Store("Variants Context Parameters"))
+            {
+                if (varparam.Related != null)
+                {
+                    this.OrderContext((Model.Design.VariantContext)varparam.Related, Transaction);
+                }
+            }
+
             Model.Design.OrderContext ret = null;
 
             foreach (Model.Design.OrderContext ordercontext in this.Store("v_Order Context"))
@@ -96,6 +105,90 @@ namespace Aras.Model.Design
             }
 
             return ret;
+        }
+
+        private void RunMethod(Model.Design.OrderContext OrderContext, Transaction Transaction, out String Value, out Double Quantity)
+        {
+            if (OrderContext.VariantContext.ContextType.Value == "Method")
+            {
+                if (OrderContext.Calculated)
+                {
+                    Value = OrderContext.Value;
+                    Quantity = OrderContext.Quantity;
+                }
+                else
+                {
+                    if (!OrderContext.Calculating)
+                    {
+                        OrderContext.Calculating = true;
+
+                        String childvalue = null;
+                        Double childquantity = 0.0;
+
+                        // Ensure Parameters are Calculated First
+                        foreach (Model.Design.VariantContextParameters varparam in OrderContext.VariantContext.Store("Variants Context Parameters"))
+                        {
+                            if (varparam.Related != null)
+                            {
+                                Model.Design.OrderContext childordercontext = this.OrderContext((Model.Design.VariantContext)varparam.Related, Transaction);
+
+                                this.RunMethod(childordercontext, Transaction, out childvalue, out childquantity);
+                            }
+                        }
+
+                        IO.Item dborder = new IO.Item(this.ItemType.Name, OrderContext.VariantContext.Method);
+                        dborder.ID = this.ID;
+
+                        // Add this Order Context
+                        IO.Item dbordercontext = OrderContext.GetIOItem();
+                        dborder.AddRelationship(dbordercontext);
+
+                        // Add all other order Context
+                        foreach (Model.Design.OrderContext otherordercontext in this.Store("v_Order Context"))
+                        {
+                            if (!otherordercontext.Equals(OrderContext))
+                            {
+                                IO.Item dbotherordercontext = otherordercontext.GetIOItem();
+                                dborder.AddRelationship(dbotherordercontext);
+                            }
+                        }
+
+                        IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, dborder);
+                        IO.SOAPResponse response = request.Execute();
+
+                        if (!response.IsError)
+                        {
+                            if (response.Items.Count() == 1)
+                            {
+                                Value = response.Items.First().GetProperty("value");
+                                Quantity = Double.Parse(response.Items.First().GetProperty("quantity"));
+                            }
+                            else
+                            {
+                                throw new Model.Exceptions.ServerException("Variant Method failed to return a result: " + OrderContext.VariantContext.Method);
+                            }
+                        }
+                        else
+                        {
+                            throw new Model.Exceptions.ServerException(response);
+                        }
+
+                        OrderContext.Calculated = true;
+                        OrderContext.Calculating = false;
+                    }
+                    else
+                    {
+                        // Circular Reference
+                        Value = "";
+                        Quantity = 0.0;
+                    }
+                }
+            }
+            else
+            {
+                Value = "";
+                Quantity = 0.0;
+            }
         }
 
         private void RefeshPart(Model.Design.Part Part, Double Quantity, Transaction Transaction)
@@ -133,42 +226,7 @@ namespace Aras.Model.Design
 
                                 case "Method":
 
-                                    IO.Item dborder = new IO.Item(this.ItemType.Name, partvariantrule.VariantContext.Method);
-                                    dborder.ID = this.ID;
-
-                                    // Add this Order Context
-                                    IO.Item dbordercontext = ordercontext.GetIOItem();
-                                    dborder.AddRelationship(dbordercontext);
-
-                                    // Add all other order Context
-                                    foreach (Model.Design.OrderContext otherordercontext in this.Store("v_Order Context"))
-                                    {
-                                        if (!otherordercontext.Equals(ordercontext))
-                                        {
-                                            IO.Item dbotherordercontext = otherordercontext.GetIOItem();
-                                            dborder.AddRelationship(dbotherordercontext);
-                                        }
-                                    }
-
-                                    IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, dborder);
-                                    IO.SOAPResponse response = request.Execute();
-
-                                    if (!response.IsError)
-                                    {
-                                        if (response.Items.Count() == 1)
-                                        {
-                                            order_context_value = response.Items.First().GetProperty("value");
-                                            order_context_quantity = Double.Parse(response.Items.First().GetProperty("quantity"));
-                                        }
-                                        else
-                                        {
-                                            throw new Model.Exceptions.ServerException("Variant Method failed to return a result: " + partvariantrule.VariantContext.Method);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        throw new Model.Exceptions.ServerException(response);
-                                    }
+                                    this.RunMethod(ordercontext, Transaction, out order_context_value, out order_context_quantity);
 
                                     break;
 
@@ -290,6 +348,13 @@ namespace Aras.Model.Design
                 this.ConfiguredPart.Property("name").Value = this.Property("name").Value;
                 this.ConfiguredPart.Property("cmb_name").Value = this.Property("name").Value;
                 this.ConfiguredPart.Property("description").Value = this.Property("description").Value;
+
+                // Reset all Order Contexts
+                foreach (OrderContext ordercontext in this.Store("v_Order Context"))
+                {
+                    ordercontext.Calculated = false;
+                    ordercontext.Calculating = false;
+                }
 
                 // Refesh Part Cache
                 this.RefeshPartCache(Transaction);

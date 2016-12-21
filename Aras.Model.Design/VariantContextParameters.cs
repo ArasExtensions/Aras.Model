@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 
 namespace Aras.Model.Design
 {
-    [Model.Attributes.ItemType("Variant Context Parameters")]
+    [Model.Attributes.ItemType("Variants Context Parameters")]
     public class VariantContextParameters : Model.Relationship
     {
 
