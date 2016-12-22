@@ -130,8 +130,10 @@ namespace Aras.Model.Design
                         {
                             if (varparam.Related != null)
                             {
+                                // Get Order Context
                                 Model.Design.OrderContext childordercontext = this.OrderContext((Model.Design.VariantContext)varparam.Related, Transaction);
 
+                                // Ensure Method has been run
                                 this.RunMethod(childordercontext, Transaction, out childvalue, out childquantity);
                             }
                         }
@@ -161,7 +163,10 @@ namespace Aras.Model.Design
                             if (response.Items.Count() == 1)
                             {
                                 Value = response.Items.First().GetProperty("value");
+                                OrderContext.Value = Value;
+
                                 Quantity = Double.Parse(response.Items.First().GetProperty("quantity"));
+                                OrderContext.Quantity = Quantity;
                             }
                             else
                             {
