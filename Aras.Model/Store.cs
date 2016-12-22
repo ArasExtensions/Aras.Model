@@ -78,18 +78,29 @@ namespace Aras.Model
             }
         }
 
-        protected void ReplaceItemsCache(List<T> AllItems)
+        protected void ReplaceItemsCache(List<String> AllItems)
         {
+            // Add Created Items
+            foreach(String createditemid in this.CreatedCache.Keys)
+            {
+                if (!AllItems.Contains(createditemid))
+                {
+                    AllItems.Add(createditemid);
+                }
+            }
+
+            // Build List of ID;s to be removed from Cache
             List<String> toberemoved = new List<String>();
 
             foreach(String key in this.ItemsCache.Keys)
             {
-                if(!AllItems.Contains(this.ItemsCache[key]))
+                if(!AllItems.Contains(key))
                 {
                     toberemoved.Add(key);
                 }
             }
 
+            // Remove Items from Cache
             foreach(String key in toberemoved)
             {
                 this.ItemsCache.Remove(key);

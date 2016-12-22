@@ -88,7 +88,8 @@ namespace Aras.Model.Stores
 
         protected override void ReadAllItems()
         {
-            List<Model.Item> ret = new List<Model.Item>();
+            // List to hold all ID's read from Server
+            List<String> ret = new List<String>();
 
             // Read all Item from Database
             IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
@@ -106,6 +107,12 @@ namespace Aras.Model.Stores
                     {
                         item = this.GetFromItemsCache(thisdbitem.ID);
                         item.UpdateProperties(thisdbitem);
+
+                        // Check if in CreatedCache
+                        if (this.InCreatedCache(item))
+                        {
+                            this.RemoveFromCreatedCache(item);
+                        }
                     }
                     else
                     {
@@ -113,7 +120,7 @@ namespace Aras.Model.Stores
                         this.AddToItemsCache(item);
                     }
 
-                    ret.Add(item);
+                    ret.Add(item.ID);
                 }
             }
             else
