@@ -79,10 +79,10 @@ namespace Aras.Model.Design
 
         private Model.Design.OrderContext OrderContext(Model.Design.VariantContext VariantContext, Transaction Transaction)
         {
-            // Ensure that Variant Context Parameter Rules are added first
+            // Ensure that Variant Context Parameter Method Rules are added first
             foreach (Model.Design.VariantContextParameters varparam in VariantContext.Store("Variants Context Parameters"))
             {
-                if (varparam.Related != null)
+                if ((varparam.Related != null) && (((Model.Design.VariantContext)varparam.Related).IsMethod))
                 {
                     this.OrderContext((Model.Design.VariantContext)varparam.Related, Transaction);
                 }
