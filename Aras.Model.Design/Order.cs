@@ -128,7 +128,7 @@ namespace Aras.Model.Design
                         // Ensure Parameters are Calculated First
                         foreach (Model.Design.VariantContextParameters varparam in OrderContext.VariantContext.Store("Variants Context Parameters"))
                         {
-                            if (varparam.Related != null)
+                            if ((varparam.Related != null) && (((Model.Design.VariantContext)varparam.Related).IsMethod))
                             {
                                 // Get Order Context
                                 Model.Design.OrderContext childordercontext = this.OrderContext((Model.Design.VariantContext)varparam.Related, Transaction);

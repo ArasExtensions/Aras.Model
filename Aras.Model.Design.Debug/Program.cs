@@ -42,13 +42,13 @@ namespace Aras.Model.Design.Debug
             Model.Database database = server.Database("CMB");
             Model.Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
-            Model.Design.Order order = (Model.Design.Order)session.Store("v_Order").Get("1B31D636BB1B4138BD8F5D24DE18E63F");
+            Model.Design.Order order = (Model.Design.Order)session.Store("v_Order").Get("010B12CCC5254EF6866024D9EF266A1B");
 
             using (Transaction trans = session.BeginTransaction())
             {
                 order.Update(trans);
                 order.BuildFlatBOM(trans);
-                trans.Commit(true);
+                //trans.Commit(true);
             }
         }
     }
