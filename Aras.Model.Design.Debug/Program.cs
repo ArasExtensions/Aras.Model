@@ -48,7 +48,7 @@ namespace Aras.Model.Design.Debug
             {
                 order.Update(trans);
                 order.BuildFlatBOM(trans);
-                //trans.Commit(true);
+                trans.Commit(true);
             }
         }
     }
