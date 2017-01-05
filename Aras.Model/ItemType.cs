@@ -377,6 +377,14 @@ namespace Aras.Model
 
         private List<PropertyType> SelectCache;
 
+        internal IEnumerable<PropertyType> SelectPropertyTypes
+        {
+            get
+            {
+                return this.SelectCache;
+            }
+        }
+
         public String _select;
         public String Select
         {

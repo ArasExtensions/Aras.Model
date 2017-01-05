@@ -37,9 +37,18 @@ namespace Aras.Model.Debug
             Server server = new Server("http://localhost/11SP6");
             Database database = server.Database("BOM Development");
             Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
+            session.ItemType("Part").AddToSelect("item_number,major_rev");
 
             Queries.Item partquery = session.Store("Part").Query(Aras.Conditions.Eq("item_number", "1234"));
             Item part = partquery.First();
+
+            using(Transaction trans = session.BeginTransaction())
+            {
+                part.Update(trans);
+                trans.Commit(true);
+            }
+ 
+       
         }
     }
 }

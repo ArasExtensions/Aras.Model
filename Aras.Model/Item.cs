@@ -747,12 +747,13 @@ namespace Aras.Model
                 if (this.ID == DBItem.ID)
                 {
                     this.IsCurrent = DBItem.GetProperty("is_current", "0").Equals("1");
+                    IEnumerable<String> dbpropnames = DBItem.PropertyNames;
 
-                    foreach (String propname in DBItem.PropertyNames)
+                    foreach(PropertyType proptype in this.ItemType.SelectPropertyTypes)
                     {
-                        if (this.ItemType.HasPropertyType(propname))
+                        if (dbpropnames.Contains(proptype.Name))
                         {
-                            this.Property(propname).DBValue = DBItem.GetProperty(propname);
+                            this.Property(proptype).DBValue = DBItem.GetProperty(proptype.Name);
                         }
                     }
 
