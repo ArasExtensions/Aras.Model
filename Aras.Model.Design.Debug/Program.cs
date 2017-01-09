@@ -42,7 +42,7 @@ namespace Aras.Model.Design.Debug
             Model.Database database = server.Database("CMB");
             Model.Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
-            Model.Design.Order order = (Model.Design.Order)session.Store("v_Order").Get("010B12CCC5254EF6866024D9EF266A1B");
+            Model.Design.Order order = (Model.Design.Order)session.Store("v_Order").Get("17E4C652AF9D49AAA7EFFBF489D47CF7");
 
             using (Transaction trans = session.BeginTransaction())
             {

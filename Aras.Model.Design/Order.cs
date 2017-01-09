@@ -223,9 +223,15 @@ namespace Aras.Model.Design
                             {
                                 case "Boolean":
                                 case "List":
-                                case "Quantity":
 
                                     order_context_value = ordercontext.Value;
+                                    order_context_quantity = ordercontext.Quantity;
+
+                                    break;
+
+                                case "Quantity":
+
+                                    order_context_value = "1";
                                     order_context_quantity = ordercontext.Quantity;
 
                                     break;
