@@ -135,6 +135,8 @@ namespace Aras.Model.Design
 
                                 // Ensure Method has been run
                                 this.RunMethod(childordercontext, Transaction, out childvalue, out childquantity);
+                                childordercontext.Value = childvalue;
+                                childordercontext.Quantity = childquantity;
                             }
                         }
 
@@ -366,6 +368,11 @@ namespace Aras.Model.Design
                 {
                     ordercontext.Calculated = false;
                     ordercontext.Calculating = false;
+
+                    if (ordercontext.VariantContext.IsQuantity)
+                    {
+                        ordercontext.Value = "1";
+                    }
                 }
 
                 // Refesh Part Cache

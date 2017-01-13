@@ -37,6 +37,14 @@ namespace Aras.Model.Design
         const System.Int32 DefaultMaxQuantity = 10000;
         const System.Int32 DefaultSortOrder = 10000;
 
+        public Boolean IsQuantity
+        {
+            get
+            {
+                return this.ContextType.Value.Equals("Quantity");
+            }
+        }
+
         public Boolean IsMethod
         {
             get
