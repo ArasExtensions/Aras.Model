@@ -173,6 +173,11 @@ namespace Aras.Model.Stores
             return new Queries.Item(this, Condition);
         }
 
+        public Queries.Item Query()
+        {
+            return new Queries.Item(this, null);
+        }
+
         internal Item(ItemType ItemType)
             : base(ItemType)
         {

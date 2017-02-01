@@ -135,6 +135,11 @@ namespace Aras.Model.Stores
             return new Queries.Relationship(this, Condition);
         }
 
+        public Queries.Relationship Query()
+        {
+            return new Queries.Relationship(this, null);
+        }
+
         public void UpdateRelated(IEnumerable<Model.Item> RelatedItems, Transaction Transaction)
         {
             // Ensure can update Source
