@@ -93,6 +93,17 @@ namespace Aras.Model.Conditions
                             return "(" + proptype.ColumnName + OperatorString(this.Operator) + "'" + this.Value.ToString().Replace('*', '%') + "')";
                         }
 
+                    case "Integer":
+
+                        if (this.Value == null)
+                        {
+                            return "(" + proptype.ColumnName + " is null)";
+                        }
+                        else
+                        {
+                            return "(" + proptype.ColumnName + OperatorString(this.Operator) + this.Value.ToString() + ")";
+                        }
+
                     default:
                         throw new Exceptions.ArgumentException("Property Type not implemented: " + proptype.GetType().Name);
                 }
