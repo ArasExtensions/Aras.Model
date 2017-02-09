@@ -377,6 +377,9 @@ namespace Aras.Model
                     case "Image":
                         this.PropertyCache[PropertyType] = new Properties.Image(this, (PropertyTypes.Image)PropertyType);
                         break;
+                    case "Sequence":
+                        this.PropertyCache[PropertyType] = new Properties.Sequence(this, (PropertyTypes.Sequence)PropertyType);
+                        break;
                     default:
                         throw new NotImplementedException("Property Type not implmented: " + PropertyType.GetType().Name);
                 }
