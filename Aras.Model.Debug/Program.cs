@@ -34,20 +34,37 @@ namespace Aras.Model.Debug
     {
         static void Main(string[] args)
         {
-            Server server = new Server("http://localhost/11SP6");
-            Database database = server.Database("BOM Development");
+            Server server = new Server("http://localhost/InnovatorServer100SP4");
+            Database database = server.Database("CMB");
             Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
-            session.ItemType("Part").AddToSelect("item_number,major_rev");
 
-            Queries.Item partquery = session.Store("Part").Query(Aras.Conditions.Eq("item_number", "1234"));
-            Item part = partquery.First();
+            Transaction trans = session.BeginTransaction();
+            Item quote = session.Store("CMB_Quote").Create(trans);
+            quote.Property("item_number").Value = "9999";
 
-            using(Transaction trans = session.BeginTransaction())
+            try
             {
-                part.Update(trans);
                 trans.Commit(true);
             }
- 
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+
+                trans = session.BeginTransaction();
+                quote.Update(trans);
+            }
+
+            try
+            {
+                trans.Commit(true);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+
+                trans = session.BeginTransaction();
+                quote.Update(trans);
+            }
        
         }
     }

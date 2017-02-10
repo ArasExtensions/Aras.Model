@@ -469,7 +469,7 @@ namespace Aras.Model
                 switch (this.Action)
                 {
                     case Actions.Create:
-
+                        Transaction.Add("add", this);
                         break;
 
                     case Actions.Read:
