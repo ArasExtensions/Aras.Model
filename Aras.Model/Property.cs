@@ -103,6 +103,14 @@ namespace Aras.Model
             }
         }
 
+        public Boolean Required
+        {
+            get
+            {
+                return this.Type.Required;
+            }
+        }
+
         private Boolean _readOnly;
         public Boolean ReadOnly
         {

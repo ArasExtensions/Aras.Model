@@ -68,6 +68,8 @@ namespace Aras.Model
                             this._values.Add(listvalue);
                         }
                     }
+
+                    this._values.Sort();
                 }
 
                 return this._values;
@@ -79,6 +81,7 @@ namespace Aras.Model
             base.Refresh();
 
             // Refresh Values
+            this._values = null;
             this.Store("Value").Refesh();
         }
 

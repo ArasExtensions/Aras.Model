@@ -31,7 +31,7 @@ using System.Threading.Tasks;
 namespace Aras.Model
 {
     [Attributes.ItemType("Value")]
-    public class ListValue : Relationship
+    public class ListValue : Relationship, IComparable<ListValue>
     {
         public List List
         {
@@ -62,6 +62,30 @@ namespace Aras.Model
             set
             {
                 this.Property("label").Value = value;
+            }
+        }
+
+        public System.Int32 SortOrder
+        {
+            get
+            {
+                return (System.Int32)this.Property("sort_order").Value;
+            }
+            set
+            {
+                this.Property("sort_order").Value = value;
+            }
+        }
+
+        public int CompareTo(ListValue other)
+        {
+            if (other != null)
+            {
+                return this.SortOrder.CompareTo(other.SortOrder);
+            }
+            else
+            {
+                return 1;
             }
         }
 
