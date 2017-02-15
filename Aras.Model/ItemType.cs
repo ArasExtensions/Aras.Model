@@ -501,6 +501,18 @@ namespace Aras.Model
             }
         }
 
+        public void AddRelationshipGridPropertyTypesToSelect()
+        {
+            foreach (PropertyType proptype in this.RelationshipGridPropertyTypes)
+            {
+                if (!this.SelectCache.Contains(proptype))
+                {
+                    this.SelectCache.Add(proptype);
+                    this._select = null;
+                }
+            }
+        }
+
         public bool Equals(ItemType other)
         {
             if (other != null && other is ItemType)
