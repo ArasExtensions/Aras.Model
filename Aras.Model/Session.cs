@@ -206,7 +206,7 @@ namespace Aras.Model
                 IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
                 IO.Item dbrelationshiptype = request.NewItem("RelationshipType", "get");
                 dbrelationshiptype.SetProperty("relationship_id", DBItem.ID);
-                dbrelationshiptype.Select = "source_id,related_id";
+                dbrelationshiptype.Select = "source_id,related_id,grid_view";
                 IO.SOAPResponse response = request.Execute();
 
                 if (!response.IsError)
@@ -222,7 +222,22 @@ namespace Aras.Model
                         relateditemtype = this.ItemTypeByID(dbrelateditemtype.ID);
                     }
 
-                    RelationshipType relationshiptype = new RelationshipType(this, DBItem.ID, DBItem.GetProperty("name"), DBItem.GetProperty("class_structure"), sourceitemtype, relateditemtype);
+                    RelationshipGridViews RelationshipGridView = RelationshipGridViews.Left;
+
+                    switch(dbreltype.GetProperty("grid_view"))
+                    {
+                        case "right":
+                            RelationshipGridView = RelationshipGridViews.Right;
+                            break;
+                        case "intermix":
+                            RelationshipGridView = RelationshipGridViews.InterMix;
+                            break;
+                        default:
+                            RelationshipGridView = RelationshipGridViews.Left;
+                            break;
+                    }
+
+                    RelationshipType relationshiptype = new RelationshipType(this, DBItem.ID, DBItem.GetProperty("name"), DBItem.GetProperty("class_structure"), sourceitemtype, relateditemtype, RelationshipGridView);
                     this.ItemTypeNameCache[relationshiptype.Name] = relationshiptype;
                     this.ItemTypeIDCache[relationshiptype.ID] = relationshiptype;
                 }

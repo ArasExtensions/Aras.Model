@@ -32,8 +32,8 @@ namespace Aras.Model.PropertyTypes
 {
     public class Boolean : PropertyType
     {
-        internal Boolean(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.Boolean? Default)
-            :base(Type, Name, Label, ReadOnly, Required, Default)
+        internal Boolean(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.Int32 SortOrder, System.Boolean InSearch, System.Boolean InRelationshipGrid, System.Boolean? Default)
+            :base(Type, Name, Label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, Default)
         {
   
         }

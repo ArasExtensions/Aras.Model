@@ -30,6 +30,8 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
+    public enum RelationshipGridViews { Left=1, Right=2, InterMix=3 };
+
     public class RelationshipType : ItemType
     {
         private static String[] _relationshipTypeSystemProperties = { "id", "config_id", "is_current", "generation", "source_id", "related_id" };
@@ -63,12 +65,15 @@ namespace Aras.Model
 
         public ItemType RelatedItemType { get; private set; }
 
-        internal RelationshipType(Session Session, String ID, String Name, String ClassStructure, ItemType SourceItemType, ItemType RelatedItemType)
+        public RelationshipGridViews RelationshipGridView { get; private set; }
+
+        internal RelationshipType(Session Session, String ID, String Name, String ClassStructure, ItemType SourceItemType, ItemType RelatedItemType, RelationshipGridViews RelationshipGridView)
             : base(Session, ID, Name, ClassStructure)
         {
             this.SourceItemType = SourceItemType;
             this.RelatedItemType = RelatedItemType;
             this.SourceItemType.AddRelationshipType(this);
+            this.RelationshipGridView = RelationshipGridView;
         }
     }
 }

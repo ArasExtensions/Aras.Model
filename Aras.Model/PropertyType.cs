@@ -30,13 +30,19 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public abstract class PropertyType
+    public abstract class PropertyType : IComparable<PropertyType>
     {
         public ItemType Type { get; private set; }
 
         public System.String Name { get; private set; }
 
         public System.String Label { get; private set; }
+
+        public System.Int32 SortOrder { get; private set; }
+
+        public System.Boolean InSearch { get; private set; }
+
+        public System.Boolean InRelationshipGrid { get; private set; }
 
         private String _columnName;
         internal String ColumnName
@@ -58,18 +64,33 @@ namespace Aras.Model
 
         public Object Default { get; private set; }
 
+        public int CompareTo(PropertyType other)
+        {
+            if (other != null)
+            {
+                return this.SortOrder.CompareTo(other.SortOrder);
+            }
+            else
+            {
+                return -1;
+            }
+        }
+
         public override System.String ToString()
         {
             return this.Name;
         }
 
-        internal PropertyType(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, Object Default)
+        internal PropertyType(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.Int32 SortOrder, System.Boolean InSearch, System.Boolean InRelationshipGrid, Object Default)
         {
             this.Type = Type;
             this.Name = Name;
             this.Label = Label;
             this.ReadOnly = ReadOnly;
             this.Required = Required;
+            this.SortOrder = SortOrder;
+            this.InSearch = InSearch;
+            this.InRelationshipGrid = InRelationshipGrid;
             this.Default = Default;
         }
     }

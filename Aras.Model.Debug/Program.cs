@@ -38,33 +38,9 @@ namespace Aras.Model.Debug
             Database database = server.Database("CMB");
             Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
-            Transaction trans = session.BeginTransaction();
-            Item quote = session.Store("CMB_Quote").Create(trans);
-            quote.Property("item_number").Value = "9999";
-
-            try
-            {
-                trans.Commit(true);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-
-                trans = session.BeginTransaction();
-                quote.Update(trans);
-            }
-
-            try
-            {
-                trans.Commit(true);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-
-                trans = session.BeginTransaction();
-                quote.Update(trans);
-            }
+            ItemType test = session.ItemType("dev_part");
+            IEnumerable<PropertyType> searchproptypes = test.SearchPropertyTypes;
+            IEnumerable<PropertyType> relgridproptypes = test.RelationshipGridPropertyTypes;
        
         }
     }

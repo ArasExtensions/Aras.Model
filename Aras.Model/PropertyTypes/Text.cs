@@ -33,8 +33,8 @@ namespace Aras.Model.PropertyTypes
     public class Text : PropertyType
     {
 
-        internal Text(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.String Default)
-            :base(Type, Name, Label, ReadOnly, Required, Default)
+        internal Text(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.Int32 SortOrder, System.Boolean InSearch, System.Boolean InRelationshipGrid, System.String Default)
+            :base(Type, Name, Label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, Default)
         {
            
         }
