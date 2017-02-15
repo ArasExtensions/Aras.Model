@@ -167,12 +167,25 @@ namespace Aras.Model
                             Boolean ReadOnly = "1".Equals(thisprop.GetProperty("readonly"));
                             Boolean Required = "1".Equals(thisprop.GetProperty("is_required"));
                             String DefaultString = thisprop.GetProperty("default_value");
+                            
+                            // Sort Order
                             Int32 SortOrder = 0;
-                            Int32.TryParse(thisprop.GetProperty("sort_order"), out SortOrder);
+
+                            if (!Int32.TryParse(thisprop.GetProperty("sort_order"), out SortOrder))
+                            {
+                                SortOrder = 0;
+                            }
+                            
                             Boolean InSearch = !("1".Equals(thisprop.GetProperty("is_hidden")));
                             Boolean InRelationshipGrid = !("1".Equals(thisprop.GetProperty("is_hidden2")));
-                            Int32 ColumnWidth = DefaultColumnWidth;
-                            Int32.TryParse(thisprop.GetProperty("column_width"), out ColumnWidth);
+                            
+                            // Column Width
+                            Int32 ColumnWidth = 0;
+                            
+                            if (!Int32.TryParse(thisprop.GetProperty("column_width"), out ColumnWidth))
+                            {
+                                ColumnWidth = DefaultColumnWidth;
+                            }
 
                             if (!SystemProperties.Contains(name))
                             {
