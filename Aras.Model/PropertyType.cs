@@ -44,6 +44,8 @@ namespace Aras.Model
 
         public System.Boolean InRelationshipGrid { get; private set; }
 
+        public System.Int32 ColumnWidth { get; private set; }
+
         private String _columnName;
         internal String ColumnName
         {
@@ -81,7 +83,7 @@ namespace Aras.Model
             return this.Name;
         }
 
-        internal PropertyType(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.Int32 SortOrder, System.Boolean InSearch, System.Boolean InRelationshipGrid, Object Default)
+        internal PropertyType(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.Int32 SortOrder, System.Boolean InSearch, System.Boolean InRelationshipGrid, System.Int32 ColumnWidth, Object Default)
         {
             this.Type = Type;
             this.Name = Name;
@@ -91,6 +93,7 @@ namespace Aras.Model
             this.SortOrder = SortOrder;
             this.InSearch = InSearch;
             this.InRelationshipGrid = InRelationshipGrid;
+            this.ColumnWidth = ColumnWidth;
             this.Default = Default;
         }
     }

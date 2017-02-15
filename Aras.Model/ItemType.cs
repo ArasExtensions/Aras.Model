@@ -35,6 +35,8 @@ namespace Aras.Model
 {
     public class ItemType : IEquatable<ItemType>
     {
+        private System.Int32 DefaultColumnWidth = 80;
+
         public Session Session { get; private set; }
 
         public String ID { get; private set; }
@@ -151,7 +153,7 @@ namespace Aras.Model
                     this._propertyTypeCache = new Dictionary<String, PropertyType>();
 
                     IO.Item props = new IO.Item("Property", "get");
-                    props.Select = "name,label,data_type,stored_length,readonly,default_value,data_source,is_required,sort_order,is_hidden,is_hidden2";
+                    props.Select = "name,label,data_type,stored_length,readonly,default_value,data_source,is_required,sort_order,is_hidden,is_hidden2,column_width";
                     props.SetProperty("source_id", this.ID);
                     IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, props);
                     IO.SOAPResponse response = request.Execute();
@@ -169,6 +171,8 @@ namespace Aras.Model
                             Int32.TryParse(thisprop.GetProperty("sort_order"), out SortOrder);
                             Boolean InSearch = !("1".Equals(thisprop.GetProperty("is_hidden")));
                             Boolean InRelationshipGrid = !("1".Equals(thisprop.GetProperty("is_hidden2")));
+                            Int32 ColumnWidth = DefaultColumnWidth;
+                            Int32.TryParse(thisprop.GetProperty("column_width"), out ColumnWidth);
 
                             if (!SystemProperties.Contains(name))
                             {
@@ -177,24 +181,24 @@ namespace Aras.Model
                                     case "string":
                                         Int32 length = 32;
                                         Int32.TryParse(thisprop.GetProperty("stored_length"), out length);
-                                        this._propertyTypeCache[name] = new PropertyTypes.String(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, DefaultString, length);
+                                        this._propertyTypeCache[name] = new PropertyTypes.String(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString, length);
                                         break;
                                     case "ml_string":
                                         Int32 ml_length = 32;
                                         Int32.TryParse(thisprop.GetProperty("stored_length"), out ml_length);
-                                        this._propertyTypeCache[name] = new PropertyTypes.MultilingualString(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, DefaultString, ml_length);
+                                        this._propertyTypeCache[name] = new PropertyTypes.MultilingualString(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString, ml_length);
                                         break;
                                     case "text":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Text(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Text(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
                                         break;
                                     case "formatted text":
-                                        this._propertyTypeCache[name] = new PropertyTypes.FormattedText(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.FormattedText(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
                                         break;
                                     case "md5":
-                                        this._propertyTypeCache[name] = new PropertyTypes.MD5(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.MD5(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
                                         break;
                                     case "image":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Image(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Image(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
                                         break;
                                     case "integer":
 
@@ -202,17 +206,17 @@ namespace Aras.Model
                                         {
                                             Int32 DefaultInteger = 0;
                                             Int32.TryParse(DefaultString, out DefaultInteger);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, DefaultInteger);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultInteger);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
                                         }
 
                                         break;
                                     case "item":
                                         ItemType valueitemtype = this.Session.ItemTypeByID(thisprop.GetProperty("data_source"));
-                                        this._propertyTypeCache[name] = new PropertyTypes.Item(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, valueitemtype);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Item(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, valueitemtype);
 
                                         break;
                                     case "date":
@@ -221,17 +225,17 @@ namespace Aras.Model
                                         {
                                             DateTime DefaultDate;
                                             DateTime.TryParse(DefaultString, out DefaultDate);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, DefaultDate);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultDate);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
                                         }
 
                                         break;
                                     case "list":
                                         List valuelist = (List)this.Session.Store("List").Get(thisprop.GetProperty("data_source"));
-                                        this._propertyTypeCache[name] = new PropertyTypes.List(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, valuelist);
+                                        this._propertyTypeCache[name] = new PropertyTypes.List(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, valuelist);
                                         break;
                                     case "decimal":
 
@@ -239,11 +243,11 @@ namespace Aras.Model
                                         {
                                             Decimal DefaultDecimal = 0;
                                             Decimal.TryParse(DefaultString, out DefaultDecimal);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, DefaultDecimal);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultDecimal);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
                                         }
 
                                         break;
@@ -253,11 +257,11 @@ namespace Aras.Model
                                         {
                                             Double DefaultDouble = 0;
                                             Double.TryParse(DefaultString, out DefaultDouble);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Float(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, DefaultDouble);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Float(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultDouble);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
                                         }
 
                                         break;
@@ -266,26 +270,26 @@ namespace Aras.Model
                                         if (DefaultString != null)
                                         {
                                             Boolean DefaultBoolean = "1".Equals(DefaultString);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, DefaultBoolean);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultBoolean);
                                         }
                                         else
                                         {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, null);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
                                         }
 
                                         break;
                                     case "foreign":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Foreign(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Foreign(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
                                         break;
                                     case "federated":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Federated(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Federated(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
                                         break;
                                     case "sequence":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Sequence(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, DefaultString);
+                                        this._propertyTypeCache[name] = new PropertyTypes.Sequence(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
                                         break;
                                     case "filter list":
                                         List valuefilterlist = (List)this.Session.Store("List").Get(thisprop.GetProperty("data_source"));
-                                        this._propertyTypeCache[name] = new PropertyTypes.FilterList(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, valuefilterlist);
+                                        this._propertyTypeCache[name] = new PropertyTypes.FilterList(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, valuefilterlist);
                                         break;
                                     default:
                                         throw new NotImplementedException("Property Type not implmented: " + thisprop.GetProperty("data_type"));
@@ -464,6 +468,18 @@ namespace Aras.Model
             {
                 PropertyType proptype = this.PropertyType(name);
 
+                if (!this.SelectCache.Contains(proptype))
+                {
+                    this.SelectCache.Add(proptype);
+                    this._select = null;
+                }
+            }
+        }
+
+        public void AddSearchPropertyTypesToSelect()
+        {
+            foreach(PropertyType proptype in this.SearchPropertyTypes)
+            {
                 if (!this.SelectCache.Contains(proptype))
                 {
                     this.SelectCache.Add(proptype);

@@ -34,8 +34,8 @@ namespace Aras.Model.PropertyTypes
     {
         public System.Int32 Length { get; private set; }
 
-        internal String(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.Int32 SortOrder, System.Boolean InSearch, System.Boolean InRelationshipGrid, System.String Default, System.Int32 Length)
-            :base(Type, Name, Label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, Default)
+        internal String(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.Int32 SortOrder, System.Boolean InSearch, System.Boolean InRelationshipGrid, System.Int32 ColumnWidth, System.String Default, System.Int32 Length)
+            :base(Type, Name, Label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, Default)
         {
             this.Length = Length;
         }

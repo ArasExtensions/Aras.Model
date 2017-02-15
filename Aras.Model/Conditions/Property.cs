@@ -83,6 +83,7 @@ namespace Aras.Model.Conditions
                 switch (proptype.GetType().Name)
                 {
                     case "String":
+                    case "Sequence":
 
                         if (this.Value == null)
                         {
