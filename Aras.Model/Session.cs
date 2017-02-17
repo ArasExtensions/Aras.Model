@@ -206,7 +206,7 @@ namespace Aras.Model
                 IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
                 IO.Item dbrelationshiptype = request.NewItem("RelationshipType", "get");
                 dbrelationshiptype.SetProperty("relationship_id", DBItem.ID);
-                dbrelationshiptype.Select = "source_id,related_id,grid_view";
+                dbrelationshiptype.Select = "source_id,related_id,grid_view,label,label_plural";
                 IO.SOAPResponse response = request.Execute();
 
                 if (!response.IsError)
@@ -237,7 +237,7 @@ namespace Aras.Model
                             break;
                     }
 
-                    RelationshipType relationshiptype = new RelationshipType(this, DBItem.ID, DBItem.GetProperty("name"), DBItem.GetProperty("class_structure"), sourceitemtype, relateditemtype, RelationshipGridView);
+                    RelationshipType relationshiptype = new RelationshipType(this, DBItem.ID, DBItem.GetProperty("name"), DBItem.GetProperty("label"), DBItem.GetProperty("label_plural"), DBItem.GetProperty("class_structure"), sourceitemtype, relateditemtype, RelationshipGridView);
                     this.ItemTypeNameCache[relationshiptype.Name] = relationshiptype;
                     this.ItemTypeIDCache[relationshiptype.ID] = relationshiptype;
                 }
@@ -249,7 +249,7 @@ namespace Aras.Model
             }
             else
             {
-                ItemType itemtype = new ItemType(this, DBItem.ID, DBItem.GetProperty("name"), DBItem.GetProperty("class_structure"));
+                ItemType itemtype = new ItemType(this, DBItem.ID, DBItem.GetProperty("name"), DBItem.GetProperty("label"), DBItem.GetProperty("label_plural"), DBItem.GetProperty("class_structure"));
                 this.ItemTypeNameCache[itemtype.Name] = itemtype;
                 this.ItemTypeIDCache[itemtype.ID] = itemtype;
             }

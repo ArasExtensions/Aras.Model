@@ -43,7 +43,11 @@ namespace Aras.Model
 
         public String Name { get; private set; }
 
-        private static String[] _itemSystemProperties = { "id", "config_id", "is_current", "generation" };
+        public String SingularLabel { get; private set; }
+
+        public String PluralLabel { get; private set; }
+
+        private static String[] _itemSystemProperties = { "id", "config_id", "is_current", "generation", " keyed_name" };
         internal virtual IEnumerable<String> SystemProperties
         {
             get
@@ -547,7 +551,7 @@ namespace Aras.Model
             return this.Name;
         }
 
-        internal ItemType(Session Session, String ID, String Name, String ClassStructure)
+        internal ItemType(Session Session, String ID, String Name, String SingularLabel, String PluralLabel, String ClassStructure)
         {
             this.RelationshipTypeCache = new Dictionary<String, RelationshipType>();
             this.SelectCache = new List<PropertyType>();
@@ -555,6 +559,8 @@ namespace Aras.Model
             this.Session = Session;
             this.ID = ID;
             this.Name = Name;
+            this.SingularLabel = SingularLabel;
+            this.PluralLabel = PluralLabel;
 
             if (ClassStructure != null)
             {

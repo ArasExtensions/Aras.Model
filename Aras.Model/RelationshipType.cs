@@ -67,8 +67,8 @@ namespace Aras.Model
 
         public RelationshipGridViews RelationshipGridView { get; private set; }
 
-        internal RelationshipType(Session Session, String ID, String Name, String ClassStructure, ItemType SourceItemType, ItemType RelatedItemType, RelationshipGridViews RelationshipGridView)
-            : base(Session, ID, Name, ClassStructure)
+        internal RelationshipType(Session Session, String ID, String Name, String SingularLabel, String PluralLabel, String ClassStructure, ItemType SourceItemType, ItemType RelatedItemType, RelationshipGridViews RelationshipGridView)
+            : base(Session, ID, Name, SingularLabel, PluralLabel, ClassStructure)
         {
             this.SourceItemType = SourceItemType;
             this.RelatedItemType = RelatedItemType;
