@@ -206,7 +206,7 @@ namespace Aras.Model
                 IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
                 IO.Item dbrelationshiptype = request.NewItem("RelationshipType", "get");
                 dbrelationshiptype.SetProperty("relationship_id", DBItem.ID);
-                dbrelationshiptype.Select = "source_id,related_id,grid_view,label,label_plural";
+                dbrelationshiptype.Select = "source_id,related_id,grid_view";
                 IO.SOAPResponse response = request.Execute();
 
                 if (!response.IsError)
@@ -261,7 +261,7 @@ namespace Aras.Model
             {
                 IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
                 IO.Item itemtype = request.NewItem("ItemType", "get");
-                itemtype.Select = "id,name,is_relationship,class_structure";
+                itemtype.Select = "id,name,is_relationship,class_structure,label,label_plural";
                 itemtype.SetProperty("name", Name);
                 IO.SOAPResponse response = request.Execute();
 
@@ -284,7 +284,7 @@ namespace Aras.Model
             {
                 IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
                 IO.Item itemtype = request.NewItem("ItemType", "get");
-                itemtype.Select = "id,name,is_relationship,class_structure";
+                itemtype.Select = "id,name,is_relationship,class_structure,label,label_plural";
                 itemtype.ID = ID;
                 IO.SOAPResponse response = request.Execute();
 

@@ -38,22 +38,7 @@ namespace Aras.Model.Debug
             Database database = server.Database("CMB");
             Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
-            Queries.Item query = session.Store("CMB_Quote").Query(Aras.Conditions.Eq("item_number", "166"));
-            query.Refresh();
-            Item test = query.First();
-       
-            using(Transaction trans = session.BeginTransaction())
-            {
-                test.Update(trans);
-
-                foreach (Relationship rel in test.Store("CMB_Quote Part").CurrentItems())
-                {
-                    rel.Update(trans);
-                    rel.Property("cmb_fixed_quantity").Value = true;
-                }
-
-                trans.Commit(true);
-            }
+            Model.ItemType itemtype = session.ItemType("Identity");
         }
     }
 }
