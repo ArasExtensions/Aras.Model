@@ -349,6 +349,23 @@ namespace Aras.Model
             }
         }
 
+        private String _searchPropertyOverride;
+        public String SearchPropertyTypesOverride
+        {
+            get
+            {
+                return this._searchPropertyOverride;
+            }
+            set
+            {
+                if (this._searchPropertyOverride != value)
+                {
+                    this._searchPropertyOverride = value;
+                    this._searchPropertyTypes = null;
+                }
+            }
+        }
+
         private List<PropertyType> _searchPropertyTypes;
         public IEnumerable<PropertyType> SearchPropertyTypes
         {
@@ -356,14 +373,31 @@ namespace Aras.Model
             {
                 if (this._searchPropertyTypes == null)
                 {
+                    String[] overrideproperties = null;
+
+                    if (this.SearchPropertyTypesOverride != null)
+                    {
+                        overrideproperties = this.SearchPropertyTypesOverride.Split(new char[] { ',' });
+                    }
+
                     this._searchPropertyTypes = new List<PropertyType>();
 
                     foreach(PropertyType proptype in this.PropertyTypes)
                     {
-                       if (proptype.InSearch)
-                       {
-                           this._searchPropertyTypes.Add(proptype);
-                       }
+                        if (overrideproperties == null)
+                        {
+                            if (proptype.InSearch)
+                            {
+                                this._searchPropertyTypes.Add(proptype);
+                            }
+                        }
+                        else
+                        {
+                            if (overrideproperties.Contains(proptype.Name))
+                            {
+                                this._searchPropertyTypes.Add(proptype);
+                            }
+                        }
                     }
 
                     this._searchPropertyTypes.Sort();
@@ -553,6 +587,7 @@ namespace Aras.Model
 
         internal ItemType(Session Session, String ID, String Name, String SingularLabel, String PluralLabel, String ClassStructure)
         {
+            this._searchPropertyOverride = null;
             this.RelationshipTypeCache = new Dictionary<String, RelationshipType>();
             this.SelectCache = new List<PropertyType>();
             this.RelationshipTypesLoaded = false;
