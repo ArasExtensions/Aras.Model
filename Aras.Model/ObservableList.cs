@@ -167,6 +167,8 @@ namespace Aras.Model
 
         public void Replace(IEnumerable<T> Values)
         {
+            this.NotifyListChanged = false;
+
             List<T> newvalues = Values.ToList();
 
             int thislength = this.Count();
@@ -192,6 +194,8 @@ namespace Aras.Model
                     this.Add(newvalues[i]);
                 }
             }
+
+            this.NotifyListChanged = true;
         }
 
         public ObservableList()
