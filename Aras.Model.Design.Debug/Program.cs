@@ -37,17 +37,16 @@ namespace Aras.Model.Design.Debug
         static void Main(string[] args)
         {
             // Connect to Server
-            Model.Server server = new Model.Server("http://localhost/InnovatorServer100SP4");
+            Model.Server server = new Model.Server("http://localhost/11SP9");
             server.LoadAssembly("Aras.Model.Design");
-            Model.Database database = server.Database("CMB");
+            Model.Database database = server.Database("Development");
             Model.Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
-            Model.Design.Order order = (Model.Design.Order)session.Store("v_Order").Get("17E4C652AF9D49AAA7EFFBF489D47CF7");
+            Model.Design.Document document = (Model.Design.Document)session.Store("Document").Get("17E4C652AF9D49AAA7EFFBF489D47CF7");
 
             using (Transaction trans = session.BeginTransaction())
             {
-                order.Update(trans);
-                order.BuildFlatBOM(trans);
+                document.Update(trans);
                 trans.Commit(true);
             }
         }
