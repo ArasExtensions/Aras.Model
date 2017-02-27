@@ -380,6 +380,9 @@ namespace Aras.Model
                     case "Sequence":
                         this.PropertyCache[PropertyType] = new Properties.Sequence(this, (PropertyTypes.Sequence)PropertyType);
                         break;
+                    case "Foreign":
+                        this.PropertyCache[PropertyType] = new Properties.Foreign(this, (PropertyTypes.Foreign)PropertyType);
+                        break;
                     default:
                         throw new NotImplementedException("Property Type not implmented: " + PropertyType.GetType().Name);
                 }
@@ -751,8 +754,9 @@ namespace Aras.Model
                 {
                     this.IsCurrent = DBItem.GetProperty("is_current", "0").Equals("1");
                     IEnumerable<String> dbpropnames = DBItem.PropertyNames;
+                    IEnumerable<PropertyType> proptypes = this.ItemType.PropertyTypes;
 
-                    foreach(PropertyType proptype in this.ItemType.SelectPropertyTypes)
+                    foreach (PropertyType proptype in proptypes)
                     {
                         if (dbpropnames.Contains(proptype.Name))
                         {

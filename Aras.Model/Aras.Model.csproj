@@ -82,6 +82,7 @@
     <Compile Include="PropertyTypes\FormattedText.cs" />
     <Compile Include="Props\Federated.cs" />
     <Compile Include="Props\FormattedText .cs" />
+    <Compile Include="Props\Foreign.cs" />
     <Compile Include="Props\Sequence.cs" />
     <Compile Include="Queries\Item.cs" />
     <Compile Include="Queries\Relationship.cs" />
