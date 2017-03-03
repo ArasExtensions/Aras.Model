@@ -142,14 +142,14 @@ namespace Aras.Model
 
         internal void CheckLock(Boolean UnLock)
         {
-            if (UnLock)
+            if (this.Item.Action != Model.Item.Actions.Delete)
             {
-                // Unlock
-                this.Item.UnLock();
-            }
-            else
-            {
-                if (this.Item.Action != Model.Item.Actions.Delete)
+                if (UnLock)
+                {
+                    // Unlock
+                    this.Item.UnLock();
+                }
+                else
                 {
                     // Ensure Locked
                     this.Item.Update(this.Transaction);
