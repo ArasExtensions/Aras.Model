@@ -84,6 +84,7 @@ namespace Aras.Model.Conditions
                 {
                     case "String":
                     case "Sequence":
+                    case "Text":
 
                         if (this.Value == null)
                         {
@@ -95,6 +96,7 @@ namespace Aras.Model.Conditions
                         }
 
                     case "Integer":
+                    case "Decimal":
 
                         if (this.Value == null)
                         {
