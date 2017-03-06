@@ -99,7 +99,6 @@ namespace Aras.Model
 
                 this.Loaded = true;
                 this.Modified = false;
-
             }
         }
 
