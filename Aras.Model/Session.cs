@@ -198,6 +198,20 @@ namespace Aras.Model
 
         private Dictionary<String, ItemType> ItemTypeNameCache;
         private Dictionary<String, ItemType> ItemTypeIDCache;
+        private Dictionary<String, String> DefaultSelectCache;
+
+        private void SetDefaultSelect(String ItemType, String Select)
+        {
+            this.DefaultSelectCache[ItemType] = Select;
+        }
+
+        private void ApplyDefaultSelect(ItemType ItemType)
+        {
+            if (this.DefaultSelectCache.ContainsKey(ItemType.Name))
+            {
+                ItemType.AddToSelect(this.DefaultSelectCache[ItemType.Name]);
+            }
+        }
 
         private void BuildItemType(IO.Item DBItem)
         {
@@ -240,6 +254,7 @@ namespace Aras.Model
                     RelationshipType relationshiptype = new RelationshipType(this, DBItem.ID, DBItem.GetProperty("name"), DBItem.GetProperty("label"), DBItem.GetProperty("label_plural"), DBItem.GetProperty("class_structure"), sourceitemtype, relateditemtype, RelationshipGridView);
                     this.ItemTypeNameCache[relationshiptype.Name] = relationshiptype;
                     this.ItemTypeIDCache[relationshiptype.ID] = relationshiptype;
+                    this.ApplyDefaultSelect(relationshiptype);
                 }
                 else
                 {
@@ -252,6 +267,7 @@ namespace Aras.Model
                 ItemType itemtype = new ItemType(this, DBItem.ID, DBItem.GetProperty("name"), DBItem.GetProperty("label"), DBItem.GetProperty("label_plural"), DBItem.GetProperty("class_structure"));
                 this.ItemTypeNameCache[itemtype.Name] = itemtype;
                 this.ItemTypeIDCache[itemtype.ID] = itemtype;
+                this.ApplyDefaultSelect(itemtype);
             }
         }
 
@@ -378,14 +394,14 @@ namespace Aras.Model
             this.ItemTypeNameCache = new Dictionary<String, ItemType>();
             this.ItemTypeIDCache = new Dictionary<String, ItemType>();
             this.StoresCache = new Dictionary<ItemType, Stores.Item>();
-            
+            this.DefaultSelectCache = new Dictionary<String, String>();
 
             // Default Selections
-            this.ItemType("Value").AddToSelect("value,label");
-            this.ItemType("Access").AddToSelect("can_get,can_update,can_delete,can_discover,can_change_access");
-            this.ItemType("User").AddToSelect("default_vault");
-            this.ItemType("File").AddToSelect("filename");
-            this.ItemType("Vault").AddToSelect("vault_url");
+            this.SetDefaultSelect("Value", "value,label,sort_order");
+            this.SetDefaultSelect("Access", "can_get,can_update,can_delete,can_discover,can_change_access");
+            this.SetDefaultSelect("User", "default_vault");
+            this.SetDefaultSelect("File", "filename");
+            this.SetDefaultSelect("Vault", "vault_url");
         }
     }
 }
