@@ -85,6 +85,7 @@ namespace Aras.Model.Conditions
                     case "String":
                     case "Sequence":
                     case "Text":
+                    case "List":
 
                         if (this.Value == null)
                         {
