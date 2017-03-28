@@ -143,7 +143,9 @@ namespace Aras.Model
         protected void RefreshCreatedCache()
         {
             // Remove any Items that are now in database from Created Cache
-            foreach(String key in this.CreatedCache.Keys)
+            List<String> keys = this.CreatedCache.Keys.ToList();
+
+            foreach(String key in keys)
             {
                 if (this.CreatedCache[key].Action != Item.Actions.Create)
                 {
