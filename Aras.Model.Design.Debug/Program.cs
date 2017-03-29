@@ -49,43 +49,15 @@ namespace Aras.Model.Design.Debug
             Model.Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
             // Find Document
-            Model.Design.Document document = (Model.Design.Document)session.Store("Document").Get("17E4C652AF9D49AAA7EFFBF489D47CF7");
+            Model.Design.Document document = (Model.Design.Document)session.Store("Document").Get("994DE0C5BCEA480B807B752C6103D7FE");
 
-            // Check if Update is possible
-
-            if (document.CanUpdate)
-            {
-                // Start Transaction
-                using (Transaction trans = session.BeginTransaction())
-                {
-                    // Lock Document for Update
-                    document.Update(trans);
-
-                    // Update Properties
-                    document.Property("description").Value = "New Description";
-
-                    // Commit all Changes
-                    trans.Commit(true);
-                }
-            }
-
-            // Build Three Level Assembly
             using (Transaction trans = session.BeginTransaction())
             {
-                Model.Item part1 = session.Store("Part").Create(trans);
-                part1.Property("item_number").Value = "1234";
-
-                Model.Item part2 = session.Store("Part").Create(trans);
-                part2.Property("item_number").Value = "1235";
-                part2.Store("Part BOM").Create(part1, trans);
-
-                Model.Item part3 = session.Store("Part").Create(trans);
-                part3.Property("item_number").Value = "1236";
-                part3.Store("Part BOM").Create(part2, trans);
-
-                // Commit all Changes
+                document.Update(trans);
+                document.Name = "Test";
                 trans.Commit(true);
             }
+            
         }
     }
 }

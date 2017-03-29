@@ -621,12 +621,12 @@ namespace Aras.Model
                         IO.Item lockitem = new IO.Item(this.ItemType.Name, "lock");
                         lockitem.ID = this.ID;
                         lockitem.Select = "locked_by_id";
+                        lockitem.DoGetItem = false;
                         IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, lockitem);
                         IO.SOAPResponse response = request.Execute();
 
                         if (!response.IsError)
                         {
-                            this.UpdateProperties(response.Items.First());
                             ret = true;
                         }
                         else
@@ -643,6 +643,7 @@ namespace Aras.Model
                         // Force Unlock
                         IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
                         unlockitem.ID = this.ID;
+                        unlockitem.DoGetItem = false;
                         IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, unlockitem);
                         IO.SOAPResponse response = request.Execute();
 
@@ -651,12 +652,12 @@ namespace Aras.Model
                             IO.Item lockitem = new IO.Item(this.ItemType.Name, "lock");
                             lockitem.ID = this.ID;
                             lockitem.Select = "locked_by_id";
+                            lockitem.DoGetItem = false;
                             request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, lockitem);
                             response = request.Execute();
 
                             if (!response.IsError)
                             {
-                                this.UpdateProperties(response.Items.First());
                                 ret = true;
                             }
                             else
@@ -711,12 +712,12 @@ namespace Aras.Model
                 {
                     IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
                     unlockitem.ID = this.ID;
+                    unlockitem.DoGetItem = false;
                     IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, unlockitem);
                     IO.SOAPResponse response = request.Execute();
 
                     if (!response.IsError)
                     {
-                        this.UpdateProperties(response.Items.First());
                         this.Action = Actions.Read;
                         this.DatabaseState = DatabaseStates.Stored;
                         this.Property("locked_by_id").DBValue = null;
