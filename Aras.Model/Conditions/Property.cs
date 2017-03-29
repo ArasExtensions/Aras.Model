@@ -96,6 +96,17 @@ namespace Aras.Model.Conditions
                             return "(" + proptype.ColumnName + OperatorString(this.Operator) + "'" + this.Value.ToString().Replace('*', '%') + "')";
                         }
 
+                    case "Item":
+
+                        if (this.Value != null)
+                        {
+                            return "(" + proptype.ColumnName + OperatorString(this.Operator) + "'" + this.Value.ToString() + "')";
+                        }
+                        else
+                        {
+                            return null;
+                        }
+
                     case "Integer":
                     case "Decimal":
 
