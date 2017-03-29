@@ -234,6 +234,18 @@ namespace Aras.Model
             }
         }
 
+        private void UpdateLockedBy(User User)
+        {
+            if (User == null)
+            {
+                this.Property("locked_by_id").DBValue = null;
+            }
+            else
+            {
+                this.Property("locked_by_id").DBValue = User.ID;
+            }
+        }
+
         public User LockedBy
         {
             get
@@ -627,6 +639,7 @@ namespace Aras.Model
 
                         if (!response.IsError)
                         {
+                            this.UpdateLockedBy(this.Session.User);
                             ret = true;
                         }
                         else
@@ -634,11 +647,11 @@ namespace Aras.Model
                             throw new Exceptions.ServerException(response);
                         }
                     }
-                    else if (this.LockedBy.ID.Equals(this.ItemType.Session.IO.UserID))
+                    else if (this.LockedBy.ID.Equals(this.ItemType.Session.User.ID))
                     {
                         ret = true;
                     }
-                    else if (!this.LockedBy.ID.Equals(this.ItemType.Session.IO.UserID) && UnLock)
+                    else if (!this.LockedBy.ID.Equals(this.ItemType.Session.User.ID) && UnLock)
                     {
                         // Force Unlock
                         IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
@@ -658,6 +671,7 @@ namespace Aras.Model
 
                             if (!response.IsError)
                             {
+                                this.UpdateLockedBy(this.Session.User);
                                 ret = true;
                             }
                             else
@@ -708,7 +722,7 @@ namespace Aras.Model
             }
             else
             {
-                if (this.LockedBy.ID.Equals(this.ItemType.Session.IO.UserID))
+                if (this.LockedBy.ID.Equals(this.ItemType.Session.User.ID))
                 {
                     IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
                     unlockitem.ID = this.ID;
@@ -720,7 +734,7 @@ namespace Aras.Model
                     {
                         this.Action = Actions.Read;
                         this.DatabaseState = DatabaseStates.Stored;
-                        this.Property("locked_by_id").DBValue = null;
+                        this.UpdateLockedBy(null);
                         
                         return true;
                     }
@@ -731,7 +745,7 @@ namespace Aras.Model
                             // Not locked
                             this.Action = Actions.Read;
                             this.DatabaseState = DatabaseStates.Stored;
-                            this.Property("locked_by_id").DBValue = null;
+                            this.UpdateLockedBy(null);
                             return true;
                         }
                         else
