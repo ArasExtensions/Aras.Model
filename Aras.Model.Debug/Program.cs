@@ -38,7 +38,10 @@ namespace Aras.Model.Debug
             Database database = server.Database("CMB");
             Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
-            Model.ItemType itemtype = session.ItemType("Identity");
+            foreach(Item parts in session.Store("Part"))
+            {
+                String test = parts.KeyedName;
+            }
         }
     }
 }

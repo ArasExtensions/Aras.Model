@@ -116,7 +116,7 @@ namespace Aras.Model.Stores
                     }
                     else
                     {
-                        item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, response.Items.First() });
+                        item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(ItemType), typeof(IO.Item) }).Invoke(new object[] { this.ItemType, thisdbitem });
                         this.AddToItemsCache(item);
                     }
 
