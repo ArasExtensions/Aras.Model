@@ -39,7 +39,7 @@ namespace Aras.Model.Actions
             if (!this.Completed)
             {
                 IO.Item dbitem = this.BuildItem();
-                IO.SOAPResponse response = this.SendItem(dbitem);
+                IO.Response response = this.SendItem(dbitem);
 
                 if (!response.IsError)
                 {

@@ -132,7 +132,7 @@ namespace Aras.Model
             }
         }
 
-        protected void UpdateNoPages(IO.SOAPResponse Response)
+        protected void UpdateNoPages(IO.Response Response)
         {
             if (this.Paging)
             {

@@ -43,13 +43,13 @@ namespace Aras.Model.Exceptions
 
         }
 
-        public ServerException(IO.SOAPResponse Response, Exception e)
+        public ServerException(IO.Response Response, Exception e)
             : base(Response.ErrorMessage, e)
         {
 
         }
 
-        public ServerException(IO.SOAPResponse Response)
+        public ServerException(IO.Response Response)
             : base(Response.ErrorMessage)
         {
 

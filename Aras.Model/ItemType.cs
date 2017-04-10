@@ -159,8 +159,8 @@ namespace Aras.Model
                     IO.Item props = new IO.Item("Property", "get");
                     props.Select = "name,label,data_type,stored_length,readonly,default_value,data_source,is_required,sort_order,is_hidden,is_hidden2,column_width";
                     props.SetProperty("source_id", this.ID);
-                    IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, props);
-                    IO.SOAPResponse response = request.Execute();
+                    IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, props);
+                    IO.Response response = request.Execute();
 
                     if (!response.IsError)
                     {
@@ -448,8 +448,8 @@ namespace Aras.Model
                 reltypes.Select = "relationship_id";
                 reltypes.SetProperty("source_id", this.ID);
 
-                IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, reltypes);
-                IO.SOAPResponse response = request.Execute();
+                IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, reltypes);
+                IO.Response response = request.Execute();
 
                 if (!response.IsError)
                 {

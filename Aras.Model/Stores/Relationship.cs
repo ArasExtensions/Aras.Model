@@ -66,8 +66,8 @@ namespace Aras.Model.Stores
                 IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
                 dbitem.ID = ID;
                 dbitem.Select = this.Select;
-                IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, dbitem);
-                IO.SOAPResponse response = request.Execute();
+                IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, dbitem);
+                IO.Response response = request.Execute();
 
                 if (!response.IsError)
                 {
@@ -198,8 +198,8 @@ namespace Aras.Model.Stores
             IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
             dbitem.SetProperty("source_id", this.Source.ID);
             dbitem.Select = this.Select;
-            IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, dbitem);
-            IO.SOAPResponse response = request.Execute();
+            IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, dbitem);
+            IO.Response response = request.Execute();
 
             if (!response.IsError)
             {

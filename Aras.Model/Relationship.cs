@@ -57,8 +57,8 @@ namespace Aras.Model
             IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
             dbitem.Select = String.Join(",", propertynames);
             dbitem.ID = this.ID;
-            IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, dbitem);
-            IO.SOAPResponse response = request.Execute();
+            IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, dbitem);
+            IO.Response response = request.Execute();
 
             if (!response.IsError)
             {

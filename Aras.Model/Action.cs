@@ -133,10 +133,10 @@ namespace Aras.Model
             return dbitem;
         }
 
-        protected IO.SOAPResponse SendItem(IO.Item DBItem)
+        protected IO.Response SendItem(IO.Item DBItem)
         {
             // Send to Server
-            IO.SOAPRequest request = this.Transaction.Session.IO.Request(IO.SOAPOperation.ApplyItem, DBItem);
+            IO.Request request = this.Transaction.Session.IO.Request(IO.Request.Operations.ApplyItem, DBItem);
             return request.Execute();
         }
 

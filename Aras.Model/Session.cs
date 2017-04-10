@@ -132,13 +132,13 @@ namespace Aras.Model
                 {
                     this._identities = new List<Identity>();
 
-                    IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
+                    IO.Request request = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
                     IO.Item identityrequest = request.NewItem("Identity", "get");
                     identityrequest.Select = "id,name";
                     identityrequest.SetProperty("is_alias", "0");
                     IO.Item memberrequest = identityrequest.NewRelationship("Member", "get");
                     memberrequest.Select = "related_id";
-                    IO.SOAPResponse response = request.Execute();
+                    IO.Response response = request.Execute();
 
                     if (!response.IsError)
                     {
@@ -217,11 +217,11 @@ namespace Aras.Model
         {
             if (DBItem.GetProperty("is_relationship").Equals("1"))
             {
-                IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
+                IO.Request request = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
                 IO.Item dbrelationshiptype = request.NewItem("RelationshipType", "get");
                 dbrelationshiptype.SetProperty("relationship_id", DBItem.ID);
                 dbrelationshiptype.Select = "source_id,related_id,grid_view";
-                IO.SOAPResponse response = request.Execute();
+                IO.Response response = request.Execute();
 
                 if (!response.IsError)
                 {
@@ -275,11 +275,11 @@ namespace Aras.Model
         {
             if (!this.ItemTypeNameCache.ContainsKey(Name))
             {
-                IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
+                IO.Request request = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
                 IO.Item itemtype = request.NewItem("ItemType", "get");
                 itemtype.Select = "id,name,is_relationship,class_structure,label,label_plural";
                 itemtype.SetProperty("name", Name);
-                IO.SOAPResponse response = request.Execute();
+                IO.Response response = request.Execute();
 
                 if (!response.IsError)
                 {
@@ -298,11 +298,11 @@ namespace Aras.Model
         {
             if (!this.ItemTypeIDCache.ContainsKey(ID))
             {
-                IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
+                IO.Request request = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
                 IO.Item itemtype = request.NewItem("ItemType", "get");
                 itemtype.Select = "id,name,is_relationship,class_structure,label,label_plural";
                 itemtype.ID = ID;
-                IO.SOAPResponse response = request.Execute();
+                IO.Response response = request.Execute();
 
                 if (!response.IsError)
                 {
@@ -355,11 +355,11 @@ namespace Aras.Model
                 if (ItemType is RelationshipType)
                 {
                     // Get Source Item
-                    IO.SOAPRequest request = this.IO.Request(Aras.IO.SOAPOperation.ApplyItem);
+                    IO.Request request = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
                     IO.Item dbitem = request.NewItem(ItemType.Name, "get");
                     dbitem.ID = ID;
                     dbitem.Select = "source_id";
-                    IO.SOAPResponse response = request.Execute();
+                    IO.Response response = request.Execute();
 
                     if (!response.IsError)
                     {
@@ -375,6 +375,41 @@ namespace Aras.Model
                 {
                     // Get Item from Store
                     ret = this.Store(ItemType).Get(ID);
+                }
+            }
+
+            return ret;
+        }
+
+        internal Item Get(ItemType ItemType, IO.Item DBItem)
+        {
+            Item ret = null;
+
+            if (!String.IsNullOrEmpty(DBItem.ID))
+            {
+                if (ItemType is RelationshipType)
+                {
+                    // Get Source Item
+                    IO.Request request = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
+                    IO.Item dbitem = request.NewItem(ItemType.Name, "get");
+                    dbitem.ID = DBItem.ID;
+                    dbitem.Select = "source_id";
+                    IO.Response response = request.Execute();
+
+                    if (!response.IsError)
+                    {
+                        Item source = this.Get(((RelationshipType)ItemType).SourceItemType, response.Items.First().GetProperty("source_id"));
+                        ret = source.Store((RelationshipType)ItemType).Get(DBItem);
+                    }
+                    else
+                    {
+                        throw new Exceptions.ServerException(response);
+                    }
+                }
+                else
+                {
+                    // Get Item from Store
+                    ret = this.Store(ItemType).Get(DBItem);
                 }
             }
 
@@ -402,6 +437,7 @@ namespace Aras.Model
             this.SetDefaultSelect("User", "default_vault");
             this.SetDefaultSelect("File", "filename");
             this.SetDefaultSelect("Vault", "vault_url");
+            this.SetDefaultSelect("Life Cycle State", "name");
         }
     }
 }

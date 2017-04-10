@@ -38,9 +38,14 @@ namespace Aras.Model.Debug
             Database database = server.Database("CMB");
             Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
-            foreach(Item parts in session.Store("Part"))
+            session.ItemType("Part").AddToSelect("item_number");
+
+            Queries.Item allparts = session.Store("Part").Query();
+
+            foreach (Item parts in allparts)
             {
                 String test = parts.KeyedName;
+                String test2 = (String)parts.Property("item_number").Value;
             }
         }
     }

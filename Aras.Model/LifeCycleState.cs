@@ -41,6 +41,19 @@ namespace Aras.Model
             }
         }
 
+        public String Name
+        {
+            get
+            {
+                return (String)this.Property("name").Value;
+            }
+        }
+
+        public override string ToString()
+        {
+            return this.Name;
+        }
+
         public LifeCycleState(RelationshipType RelationshipType, Transaction Transaction, Item Source, Item Related)
             : base(RelationshipType, Transaction, Source, Related)
         {

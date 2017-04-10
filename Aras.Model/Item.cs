@@ -433,6 +433,9 @@ namespace Aras.Model
         {
             if (this.DatabaseState == DatabaseStates.Stored)
             {
+                // Reset Next States
+                this._nextstates = null;
+
                 List<String> propertynames = new List<String>();
 
                 foreach(String sysprop in ItemType.SystemProperties)
@@ -448,8 +451,8 @@ namespace Aras.Model
                 IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
                 dbitem.Select = String.Join(",", propertynames);
                 dbitem.ID = this.ID;
-                IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, dbitem);
-                IO.SOAPResponse response = request.Execute();
+                IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, dbitem);
+                IO.Response response = request.Execute();
 
                 if (!response.IsError)
                 {
@@ -634,8 +637,8 @@ namespace Aras.Model
                         lockitem.ID = this.ID;
                         lockitem.Select = "locked_by_id";
                         lockitem.DoGetItem = false;
-                        IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, lockitem);
-                        IO.SOAPResponse response = request.Execute();
+                        IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, lockitem);
+                        IO.Response response = request.Execute();
 
                         if (!response.IsError)
                         {
@@ -657,8 +660,8 @@ namespace Aras.Model
                         IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
                         unlockitem.ID = this.ID;
                         unlockitem.DoGetItem = false;
-                        IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, unlockitem);
-                        IO.SOAPResponse response = request.Execute();
+                        IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, unlockitem);
+                        IO.Response response = request.Execute();
 
                         if (!response.IsError)
                         {
@@ -666,7 +669,7 @@ namespace Aras.Model
                             lockitem.ID = this.ID;
                             lockitem.Select = "locked_by_id";
                             lockitem.DoGetItem = false;
-                            request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, lockitem);
+                            request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, lockitem);
                             response = request.Execute();
 
                             if (!response.IsError)
@@ -727,8 +730,8 @@ namespace Aras.Model
                     IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
                     unlockitem.ID = this.ID;
                     unlockitem.DoGetItem = false;
-                    IO.SOAPRequest request = this.Session.IO.Request(IO.SOAPOperation.ApplyItem, unlockitem);
-                    IO.SOAPResponse response = request.Execute();
+                    IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, unlockitem);
+                    IO.Response response = request.Execute();
 
                     if (!response.IsError)
                     {
@@ -985,6 +988,76 @@ namespace Aras.Model
                 }
 
                 return (Boolean)this._canChangeAccess;
+            }
+        }
+
+        private List<LifeCycleState> _nextstates;
+        public IEnumerable<LifeCycleState> NextStates
+        {
+            get
+            {
+                if (this.DatabaseState == DatabaseStates.Stored)
+                {
+                    if (this._nextstates == null)
+                    {
+                        IO.Request request = this.Session.IO.Request(IO.Request.Operations.GetItemNextStates);
+                        IO.Item item = request.NewItem(this.ItemType.Name, "get");
+                        item.ID = this.ID;
+                        IO.Response response = request.Execute();
+
+                        if (!response.IsError)
+                        {
+                            this._nextstates = new List<LifeCycleState>();
+
+                            IO.Item lifecycletransisiton = response.Items.First();
+
+                            foreach (IO.Item dblifecyclestate in lifecycletransisiton.ToStates)
+                            {
+                                LifeCycleState lifecyclestate = (LifeCycleState)this.Session.Get(this.Session.ItemType("Life Cycle State"), dblifecyclestate);
+                                this._nextstates.Add(lifecyclestate);
+                            }
+                        }
+                        else
+                        {
+                            throw new Exceptions.ServerException(response);
+                        }
+                    }
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Item must be stored in Database before Promotion");
+                }
+
+                return this._nextstates;
+            }
+        }
+
+        public void Promote(LifeCycleState NewState)
+        {
+            if (this.NextStates.Contains(NewState))
+            {
+                IO.Request request = this.Session.IO.Request(IO.Request.Operations.PromoteItem);
+                IO.Item item = request.NewItem(this.ItemType.Name, "get");
+                item.ID = this.ID;
+                item.SetProperty("state", NewState.Name);
+                IO.Response response = request.Execute();
+
+                if (!response.IsError)
+                {
+                    // Update Current State
+                    this.Property("current_state").DBValue = NewState.ID;
+
+                    // Reset New States
+                    this._nextstates = null;
+                }
+                else
+                {
+                    throw new Exceptions.ServerException(response);
+                }
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid Promotion State: " + NewState.ToString());
             }
         }
 

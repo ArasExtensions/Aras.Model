@@ -45,7 +45,7 @@ namespace Aras.Model.Actions
                 // Write File to Cache
                 using (FileStream cachefile = new FileStream(((Model.File)this.Item).CacheFilename.FullName, FileMode.Open))
                 {
-                    IO.SOAPResponse response = this.Transaction.Session.IO.VaultWrite(cachefile, ((Model.File)this.Item).VaultFilename);
+                    IO.Response response = this.Transaction.Session.IO.VaultWrite(cachefile, ((Model.File)this.Item).VaultFilename);
 
                     if (!response.IsError)
                     {

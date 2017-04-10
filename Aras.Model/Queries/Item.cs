@@ -39,8 +39,8 @@ namespace Aras.Model.Queries
             item.Where = this.Where;
             this.SetPaging(item);
 
-            IO.SOAPRequest request = this.Store.Session.IO.Request(IO.SOAPOperation.ApplyItem, item);
-            IO.SOAPResponse response = request.Execute();
+            IO.Request request = this.Store.Session.IO.Request(IO.Request.Operations.ApplyItem, item);
+            IO.Response response = request.Execute();
 
             List<Model.Item> ret = new List<Model.Item>();
 
