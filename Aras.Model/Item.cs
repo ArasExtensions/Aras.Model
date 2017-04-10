@@ -1046,6 +1046,7 @@ namespace Aras.Model
                 {
                     // Update Current State
                     this.Property("current_state").DBValue = NewState.ID;
+                    this.Property("state").DBValue = NewState.Name;
 
                     // Reset New States
                     this._nextstates = null;
