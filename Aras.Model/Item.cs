@@ -1026,12 +1026,15 @@ namespace Aras.Model
                         {
                             this._nextstates = new List<LifeCycleState>();
 
-                            IO.Item lifecycletransisiton = response.Items.First();
-
-                            foreach (IO.Item dblifecyclestate in lifecycletransisiton.ToStates)
+                            if (response.Items.Count() > 0)
                             {
-                                LifeCycleState lifecyclestate = (LifeCycleState)this.Session.Get(this.Session.ItemType("Life Cycle State"), dblifecyclestate);
-                                this._nextstates.Add(lifecyclestate);
+                                IO.Item lifecycletransisiton = response.Items.First();
+
+                                foreach (IO.Item dblifecyclestate in lifecycletransisiton.ToStates)
+                                {
+                                    LifeCycleState lifecyclestate = (LifeCycleState)this.Session.Get(this.Session.ItemType("Life Cycle State"), dblifecyclestate);
+                                    this._nextstates.Add(lifecyclestate);
+                                }
                             }
                         }
                         else
