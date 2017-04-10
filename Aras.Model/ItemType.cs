@@ -503,7 +503,14 @@ namespace Aras.Model
 
                     foreach (PropertyType proptype in this.SelectCache)
                     {
-                        names.Add(proptype.Name);
+                        if (proptype is Model.PropertyTypes.Item)
+                        {
+                            names.Add(proptype.Name + "(" + String.Join(",", this.SystemProperties) + ")");
+                        }
+                        else
+                        {
+                            names.Add(proptype.Name);
+                        }
                     }
 
                     this._select = String.Join(",", names);

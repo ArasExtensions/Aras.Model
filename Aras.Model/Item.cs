@@ -778,7 +778,24 @@ namespace Aras.Model
                     {
                         if (dbpropnames.Contains(proptype.Name))
                         {
-                            this.Property(proptype).DBValue = DBItem.GetProperty(proptype.Name);
+                            if (proptype is PropertyTypes.Item)
+                            {
+                                IO.Item dbpropitem = DBItem.GetPropertyItem(proptype.Name);
+
+                                if (dbpropitem != null)
+                                {
+                                    Item propitem = this.Session.Get(((PropertyTypes.Item)proptype).ValueType, dbpropitem);
+                                    this.Property(proptype).DBValue = propitem.ID;
+                                }
+                                else
+                                {
+                                    this.Property(proptype).DBValue = DBItem.GetProperty(proptype.Name);
+                                }
+                            }
+                            else
+                            {
+                                this.Property(proptype).DBValue = DBItem.GetProperty(proptype.Name);
+                            }
                         }
                     }
 
