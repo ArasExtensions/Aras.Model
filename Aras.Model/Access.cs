@@ -116,14 +116,14 @@ namespace Aras.Model
             }
         }
 
-        public Access(RelationshipType RelationshipType, Transaction Transaction, Item Source, Item Related)
-            : base(RelationshipType, Transaction, Source, Related)
+        public Access(Store Store, Transaction Transaction)
+            : base(Store, Transaction)
         {
       
         }
 
-        public Access(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
-            : base(RelationshipType, Source, DBItem)
+        public Access(Store Store, IO.Item DBItem)
+            : base(Store, DBItem)
         {
 
         }

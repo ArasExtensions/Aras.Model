@@ -33,7 +33,7 @@ namespace Aras.Model
     [Attributes.ItemType("Permission")]
     public class Permission : Item
     {
-
+        /*
         private List<Access> _access;
         public IEnumerable<Access> Access
         {
@@ -71,23 +71,16 @@ namespace Aras.Model
                 return this._access;
             }
         }
+        */
 
-        protected override void OnRefresh()
-        {
-            base.OnRefresh();
-
-            // Clear Acess
-            this._access = null;
-        }
-
-        public Permission(ItemType ItemType, Transaction Transaction)
-            : base(ItemType, Transaction)
+        public Permission(Store Store, Transaction Transaction)
+            : base(Store, Transaction)
         {
 
         }
 
-        public Permission(ItemType ItemType, IO.Item DBItem)
-            : base(ItemType, DBItem)
+        public Permission(Store Store, IO.Item DBItem)
+            : base(Store, DBItem)
         {
 
         }

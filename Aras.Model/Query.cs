@@ -31,8 +31,9 @@ using System.ComponentModel;
 
 namespace Aras.Model
 {
-    public abstract class Query<T> : System.Collections.Generic.IEnumerable<T> where T : Model.Item, INotifyPropertyChanged
+    public class Query : INotifyPropertyChanged
     {
+        internal const String SystemProperties = "id,config_id,is_current,generation";
         public const Int32 MinPageSize = 5;
         public const Int32 DefaultPageSize = 25;
         public const Int32 MaxPageSize = 100;
@@ -47,7 +48,18 @@ namespace Aras.Model
             }
         }
 
-        public Store<T> Store { get; private set; }
+        private Condition _condition;
+        public Condition Condition
+        {
+            get
+            {
+                return this._condition;
+            }
+            set
+            {
+                this._condition = value;
+            }
+        }
 
         private Int32 _pageSize;
         public Int32 PageSize
@@ -85,23 +97,10 @@ namespace Aras.Model
                         this._page = value;
                         this.OnPropertyChanged("Page");
                     }
-                }
-            }
-        }
-
-        private Int32 _noPages;
-        public Int32 NoPages
-        {
-            get
-            {
-                return this._noPages;
-            }
-            protected set
-            {
-                if (this._noPages != value)
-                {
-                    this._noPages = value;
-                    this.OnPropertyChanged("NoPages");
+                    else
+                    {
+                        throw new Exceptions.ArgumentException("Invalid Page: " + value);
+                    }
                 }
             }
         }
@@ -123,162 +122,245 @@ namespace Aras.Model
             }
         }
 
-        protected void SetPaging(IO.Item Item)
-        {
-            if (this.Paging)
-            {
-                Item.PageSize = this.PageSize;
-                Item.Page = this.Page;
-            }
-        }
+        public ItemType ItemType { get; private set; }
 
-        protected void UpdateNoPages(IO.Response Response)
-        {
-            if (this.Paging)
-            {
-                if (Response.Items.Count() > 0)
-                {
-                    this.NoPages = Response.Items.First().PageMax;
-                }
-                else
-                {
-                    this.NoPages = 0;
-                }
-            }
-        }
+        private Dictionary<String, PropertyType> SelectCache;
+        private Dictionary<PropertyTypes.Item, Query> SelectPropertyCache;
 
-        private Condition _condition;
-        public Condition Condition
+        public String Select
         {
             get
             {
-                return this._condition;
+                List<String> names = new List<String>();
+
+                foreach(PropertyType proptype in this.SelectCache.Values)
+                {
+                    names.Add(proptype.Name);
+                }
+
+                return String.Join(",", names);
             }
             set
             {
-                if (this._condition == null)
+                this.SelectCache.Clear();
+                this.SelectPropertyCache.Clear();
+
+                if (!String.IsNullOrEmpty(value))
                 {
-                    if (value != null)
+                    foreach (String name in value.Split(new Char[] { ',' }))
                     {
-                        this._condition = value;
-                        this.Executed = false;
-                    }
-                }
-                else
-                {
-                    if (!this._condition.Equals(value))
-                    {
-                        this._condition = value;
-                        this.Executed = false;
+                        PropertyType proptype = this.ItemType.PropertyType(name);
+
+                        if (!this.SelectCache.ContainsKey(proptype.Name))
+                        {
+                            this.SelectCache[proptype.Name] = proptype;
+
+                            if (proptype is PropertyTypes.Item)
+                            {
+                                this.SelectPropertyCache[(PropertyTypes.Item)proptype] = new Query(((PropertyTypes.Item)proptype).ValueType);
+                            }
+                        }
                     }
                 }
             }
         }
 
-        protected System.String Where
+        public IEnumerable<PropertyType> PropertyTypes
         {
             get
             {
-                if (this.Condition == null)
-                {
-                    return null;
-                }
-                else
-                {
-                    return this.Condition.Where(this.Store.ItemType);
-                }
+                return this.SelectCache.Values;
             }
         }
 
-        protected List<T> Items;
+        public PropertyType PropertyType(String PropertyName)
+        {
+            if (this.SelectCache.ContainsKey(PropertyName))
+            {
+                return this.SelectCache[PropertyName];
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid Property Name: " + PropertyName);
+            }
+        }
 
-        public T this[int Index]
+        public Query Property(PropertyTypes.Item PropertyType)
+        {
+            if (this.SelectPropertyCache.ContainsKey(PropertyType))
+            {
+                return this.SelectPropertyCache[PropertyType];
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Property is not selected in query: " + PropertyType.ToString());
+            }
+        }
+
+        public Query Property(String PropertyType)
+        {
+            PropertyType proptype = this.ItemType.PropertyType(PropertyType);
+
+            if (proptype is PropertyTypes.Item)
+            {
+                return this.Property((PropertyTypes.Item)proptype);
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid PropertyType: " + PropertyType);
+            }
+        }
+
+        public IEnumerable<Query> Properties
         {
             get
             {
-                if (!this.Executed)
+                return this.SelectPropertyCache.Values;
+            }
+        }
+
+        private Dictionary<RelationshipType, Query> RelationshipCache;
+
+        public Query Relationship(String RelationshipType)
+        {
+            return this.Relationship(this.ItemType.RelationshipType(RelationshipType));
+        }
+
+        public Query Relationship(RelationshipType RelationshipType)
+        {
+            if (this.ItemType.RelationshipTypes.Contains(RelationshipType))
+            {
+                if (!this.RelationshipCache.ContainsKey(RelationshipType))
                 {
-                    this.Execute();
-                    this.Executed = true;
+                    this.RelationshipCache[RelationshipType] = new Query(RelationshipType);
                 }
 
-                return this.Items[Index];
+                return this.RelationshipCache[RelationshipType];
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid RelationshipType: " + RelationshipType.ToString());
             }
         }
 
-        public System.Collections.Generic.IEnumerator<T> GetEnumerator()
+
+        public IEnumerable<Query> Relationships
         {
-            if (!this.Executed)
+            get
             {
-                this.Execute();
-                this.Executed = true;
-            }
-
-            return this.Items.GetEnumerator();
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
-
-        public IEnumerable<T> Copy()
-        {
-            return this.ToList();
-        }
-
-        private Boolean Executed;
-
-        private void Execute()
-        {
-            // Clear current Items
-            this.Items.Clear();
-
-            // Run Query and set Items
-            this.Items = this.Run();
-
-            // Add Created Items to End of Results
-            foreach (T item in this.Store.CreatedItems())
-            {
-                this.Items.Add(item);
+                return this.RelationshipCache.Values;
             }
         }
 
-        protected abstract List<T> Run();
-
-        protected abstract void OnRefresh();
-
-        public IEnumerable<T> CurrentItems()
+        internal IO.Item DBQuery(String ID)
         {
-            List<T> currentitems = new List<T>();
+            IO.Item query = new IO.Item(this.ItemType.Name, "get");
+            query.ID = ID;
 
-            foreach (T item in this)
+            // Set Select
+            if (String.IsNullOrEmpty(this.Select))
             {
-                if (item.Action != Item.Actions.Delete)
+                // Use default selection
+                this.Select = "keyed_name";
+            }
+
+            query.Select = SystemProperties + "," + this.Select;
+
+            foreach (PropertyTypes.Item proptype in this.SelectPropertyCache.Keys)
+            {
+                IO.Item propquery = this.SelectPropertyCache[proptype].DBQuery();
+                query.SetPropertyItem(proptype.Name, propquery);
+            }
+
+            foreach (Query relquery in this.Relationships)
+            {
+                query.AddRelationship(relquery.DBQuery());
+            }
+
+            return query;
+        }
+
+        internal IO.Item DBQuery()
+        {
+            if (this.Condition != null)
+            {
+                IO.Item query = new IO.Item(this.ItemType.Name, "get");
+
+                // Set Select
+                if (String.IsNullOrEmpty(this.Select))
                 {
-                    currentitems.Add(item);
+                    // Use default selection
+                    this.Select = "keyed_name";
+                }
+
+                query.Select = SystemProperties + "," + this.Select;
+
+                // Set Where from Condtion
+                query.Where = this.Condition.Where(this.ItemType);
+
+                // Set Paging
+
+                if (this.Paging)
+                {
+                    query.PageSize = this.PageSize;
+                    query.Page = this.Page;
+                }
+
+                foreach (PropertyTypes.Item proptype in this.SelectPropertyCache.Keys)
+                {
+                    IO.Item propquery = this.SelectPropertyCache[proptype].DBQuery();
+                    query.SetPropertyItem(proptype.Name, propquery);
+                }
+
+                foreach (Query relquery in this.Relationships)
+                {
+                    query.AddRelationship(relquery.DBQuery());
+                }
+
+                return query;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private Store _store;
+        public Store Store
+        {
+            get
+            {
+                if (this.ItemType is RelationshipType)
+                {
+                    throw new Exceptions.ArgumentException("Store not valid for Relationship Query");
+                }
+                else
+                {
+                    if (this._store == null)
+                    {
+                        this._store = new Store(this);
+                    }
+
+                    return this._store;
                 }
             }
-
-            return currentitems;
         }
 
-        public void Refresh()
+        public override string ToString()
         {
-            this.OnRefresh();
-            this.Execute();
-            this.Executed = true;
+            return this.ItemType.ToString();
         }
 
-        internal Query(Store<T> Store, Condition Condition)
+        internal Query(ItemType ItemType)
         {
-            this.Items = new List<T>();
-            this.Store = Store;
-            this._condition = Condition;
+            this.SelectCache = new Dictionary<String, PropertyType>();
+            this.SelectPropertyCache = new Dictionary<PropertyTypes.Item, Query>();
+            this.RelationshipCache = new Dictionary<RelationshipType, Query>();
+            this.ItemType = ItemType;
             this._pageSize = DefaultPageSize;
             this._paging = false;
-            this._noPages = 0;
             this._page = 1;
+            this._condition = Aras.Conditions.All();
         }
     }
 }

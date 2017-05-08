@@ -43,6 +43,10 @@ namespace Aras.Model
             }
         }
 
+        public Item Item { get; private set; }
+
+        public PropertyType Type { get; private set; }
+
         private Boolean _modified;
         public Boolean Modified 
         { 
@@ -50,55 +54,13 @@ namespace Aras.Model
             {
                 return this._modified;
             }
-            set
+            private set
             {
                 if (this._modified != value)
                 {
                     this._modified = value;
                     this.OnPropertyChanged("Modified");
                 }
-            }
-        }
-
-        protected Boolean Loaded { get; private set; }
-
-        public Item Item { get; private set; }
-
-        public PropertyType Type { get; private set; }
-
-        public void Refresh()
-        {
-            if (!this.Modified)
-            {
-                switch (this.Item.Action)
-                {
-                    case Model.Item.Actions.Read:
-                    case Model.Item.Actions.Update:
-                    case Model.Item.Actions.Delete:
-                        IO.Item prop = new IO.Item(this.Item.ItemType.Name, "get");
-                        prop.Select = this.Type.Name;
-                        prop.SetProperty("id", this.Item.ID);
-
-                        IO.Request request = this.Item.Session.IO.Request(IO.Request.Operations.ApplyItem, prop);
-                        IO.Response response = request.Execute();
-
-                        if (!response.IsError)
-                        {
-                            this.DBValue = response.Items.First().GetProperty(this.Type.Name);
-                        }
-                        else
-                        {
-                            throw new Exceptions.ServerException(response);
-                        }
-
-                        break;
-
-                    default:
-                        break;
-                }
-
-                this.Loaded = true;
-                this.Modified = false;
             }
         }
 
@@ -127,50 +89,17 @@ namespace Aras.Model
             }
         }
 
-        private void SetReadOnly()
-        {
-            if (this.Type.ReadOnly || this.Item.Action == Model.Item.Actions.Read || this.Item.Action == Model.Item.Actions.Delete)
-            {
-                this.ReadOnly = true;
-            }
-            else
-            {
-                this.ReadOnly = false;
-            }
-        }
-
-        void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            switch(e.PropertyName)
-            {
-                case "Action":
-                    this.SetReadOnly();
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private Object _value;
         public virtual Object Value
         {
             get
             {
-                if (!this.Loaded)
-                {
-                    this.Refresh();
-                }
-
-                return this._value;
+                return this.Item.Cache.GetPropertyValue(this.Type);
             }
             set
             {
                 if (!this.ReadOnly)
                 {
-                    this._value = value;
-                    this.Modified = true;
-                    this.Loaded = true;
-                    this.OnPropertyChanged("Value");
+                    this.Modified = this.Item.Cache.SetPropertyValue(this.Type, value, false);
                 }
                 else
                 {
@@ -181,24 +110,7 @@ namespace Aras.Model
 
         protected void SetValue(Object Value)
         {
-            if (this._value == null)
-            {
-                if (Value != null)
-                {
-                    this._value = Value;
-                    this.OnPropertyChanged("Value");
-                }
-            }
-            else
-            {
-                if (!this._value.Equals(Value))
-                {
-                    this._value = Value;
-                    this.OnPropertyChanged("Value");
-                }
-            }
-
-            this.Loaded = true;
+            this.Item.Cache.SetPropertyValue(this.Type, Value, true);
             this.Modified = false;
         }
 
@@ -216,16 +128,20 @@ namespace Aras.Model
             }
         }
 
+        private void Cache_PropertyValueChanged(object sender, Cache.PropertyValueChangedEventArgs e)
+        {
+            if (e.PropertyType.Equals(this.Type))
+            {
+                this.Modified = true;
+                this.OnPropertyChanged("Value");
+            }
+        }
+
         internal Property(Item Item, PropertyType Type)
         {
             this.Item = Item;
             this.Type = Type;
-            this.SetReadOnly();
-
-            // Set Default Value
-            this._value = this.Type.Default;
-
-            this.Item.PropertyChanged += Item_PropertyChanged;
+            this.Item.Cache.PropertyValueChanged += Cache_PropertyValueChanged;
         }
     }
 }

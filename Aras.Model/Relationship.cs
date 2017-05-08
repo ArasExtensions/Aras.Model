@@ -32,121 +32,36 @@ namespace Aras.Model
 {
     public class Relationship : Item
     {
-        public RelationshipType RelationshipType
+        public Item Source
         {
             get
             {
-                return (RelationshipType)this.ItemType;
+                return (Item)this.Property("source_id").Value;
             }
         }
 
-        public override void Refresh()
-        {
-            List<String> propertynames = new List<String>();
-
-            foreach(String sysprop in RelationshipType.SystemProperties)
-            {
-                propertynames.Add(sysprop);
-            }
-
-            foreach (Property property in this.Properties)
-            {
-                propertynames.Add(property.Type.Name);
-            }
-
-            IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
-            dbitem.Select = String.Join(",", propertynames);
-            dbitem.ID = this.ID;
-            IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, dbitem);
-            IO.Response response = request.Execute();
-
-            if (!response.IsError)
-            {
-                this.UpdateProperties(response.Items.First());
-
-                this.OnRefresh();
-            }
-            else
-            {
-                throw new Exceptions.ServerException(response);
-            }
-        }
-
-        public Item Source { get; internal set; }
-
-        private Item _related;
         public Item Related
         {
             get
             {
-                return this._related;
+                return (Item)this.Property("related_id").Value;
             }
             set
             {
-                if (value != null)
-                {
-                    this._related = value;
-
-                    // Watch for Related Item Versioning
-                    this._related.Superceded += Related_Superceded;
-                }
-                else
-                {
-                    if (this._related != null)
-                    {
-                        // Stop watching current Related Item
-                        this._related.Superceded -= Related_Superceded;
-                    }
-
-                    this._related = null;
-                }
+                this.Property("related_id").Value = value;
             }
         }
 
-        void Related_Superceded(object sender, SupercededEventArgs e)
+        public Relationship(Store Store, Transaction Transaction)
+            : base(Store, Transaction)
         {
-            // Stop watching current Related Item
-            this._related.Superceded -= Related_Superceded;
 
-            // Set new Related Item
-            this._related = e.NewGeneration;
-
-            // Watch for Related Item Superceded
-            this._related.Superceded += Related_Superceded;
         }
 
-        internal override void UpdateProperties(IO.Item DBItem)
+        public Relationship(Store Store, IO.Item DBItem)
+            : base(Store, DBItem)
         {
-            base.UpdateProperties(DBItem);
 
-            if (DBItem != null)
-            {
-                IO.Item dbrelated = DBItem.GetPropertyItem("related_id");
-
-                if (dbrelated != null)
-                {
-                    this._related = this.ItemType.Session.Get(this.RelationshipType.RelatedItemType, dbrelated.ID);
-
-                    // Watch for Related Item Versioning
-                    this._related.Superceded += Related_Superceded;
-                }
-            }
-        }
-
-        public Relationship(RelationshipType RelationshipType, Transaction Transaction, Item Source, Item Related)
-            : base(RelationshipType, Transaction)
-        {
-            this.Source = Source;
-            this._related = Related;
-
-            // Add to Transaction
-            Transaction.Add("add", this);
-        }
-
-        public Relationship(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
-            : base(RelationshipType, DBItem)
-        {
-            this.Source = Source;
         }
     }
 }

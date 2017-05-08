@@ -49,7 +49,9 @@ namespace Aras.Model.Design.Debug
             Model.Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
             // Find Document
-            Model.Design.Document document = (Model.Design.Document)session.Store("Document").Get("994DE0C5BCEA480B807B752C6103D7FE");
+            Model.Query docquery = session.Query("Document");
+            docquery.Select = "item_number,name,description";
+            Model.Design.Document document = (Model.Design.Document)docquery.Store.Get("994DE0C5BCEA480B807B752C6103D7FE");
 
             using (Transaction trans = session.BeginTransaction())
             {

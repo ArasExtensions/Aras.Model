@@ -26,17 +26,39 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Aras.Model.Exceptions
+namespace Aras.Model.Conditions
 {
-    public class UnLockException : Exception
+    public class All : Condition
     {
-        public Item Item { get; private set; }
+        internal Guid ID { get; private set; }
 
-        public UnLockException(Item Item)
-            : base("Failed to unlock Item")
+        internal override String Where(ItemType ItemType)
         {
-            this.Item = Item;
+            return null;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ID.GetHashCode();
+        }
+
+        public override bool Equals(Condition other)
+        {
+            if (other is Conditions.All)
+            {
+                return this.ID.Equals(((Conditions.All)other).ID);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        internal All()
+            :base()
+        {
+            this.ID = Guid.NewGuid();
         }
     }
 }

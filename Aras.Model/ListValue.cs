@@ -30,80 +30,24 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    [Attributes.ItemType("Value")]
-    public class ListValue : Relationship, IComparable<ListValue>
+    public class ListValue
     {
-        public List List
-        {
-            get
-            {
-                return (List)this.Source;
-            }
-        }
+        public List List { get; private set; }
 
-        public String Value
-        {
-            get
-            {
-                return (String)this.Property("value").Value;
-            }
-            set
-            {
-                this.Property("value").Value = value;
-            }
-        }
+        public String Value { get; private set; }
 
-        public String Label
-        {
-            get
-            {
-                return (String)this.Property("label").Value;
-            }
-            set
-            {
-                this.Property("label").Value = value;
-            }
-        }
-
-        public System.Int32 SortOrder
-        {
-            get
-            {
-                return (System.Int32)this.Property("sort_order").Value;
-            }
-            set
-            {
-                this.Property("sort_order").Value = value;
-            }
-        }
-
-        public int CompareTo(ListValue other)
-        {
-            if (other != null)
-            {
-                return this.SortOrder.CompareTo(other.SortOrder);
-            }
-            else
-            {
-                return 1;
-            }
-        }
+        public String Label { get; private set; }
 
         public override string ToString()
         {
-            return Label;
+            return this.Value;
         }
 
-        public ListValue(RelationshipType RelationshipType, Transaction Transaction, Item Source, Item Related)
-            : base(RelationshipType, Transaction, Source, Related)
+        internal ListValue(List List, String Value, String Label)
         {
-      
-        }
-
-        public ListValue(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
-            : base(RelationshipType, Source, DBItem)
-        {
-
+            this.List = List;
+            this.Value = Value;
+            this.Label = Label;
         }
     }
 }

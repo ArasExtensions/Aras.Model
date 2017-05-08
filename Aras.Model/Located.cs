@@ -49,14 +49,14 @@ namespace Aras.Model
             }
         }
 
-        public Located(RelationshipType RelationshipType, Transaction Transaction, Item Source, Item Related)
-            : base(RelationshipType, Transaction, Source, Related)
+        public Located(Store Store, Transaction Transaction)
+            : base(Store, Transaction)
         {
       
         }
 
-        public Located(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
-            : base(RelationshipType, Source, DBItem)
+        public Located(Store Store, IO.Item DBItem)
+            : base(Store, DBItem)
         {
 
         }

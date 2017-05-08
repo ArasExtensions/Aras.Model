@@ -28,57 +28,37 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Conditions
 {
-    [Attributes.ItemType("FileType")]
-    public class FileType : Item
+    public class None : Condition
     {
-        public String Name
+        internal Guid ID { get; private set; }
+
+        internal override String Where(ItemType ItemType)
         {
-            get
-            {
-                return (String)this.Property("name").Value;
-            }
-            set
-            {
-                this.Property("name").Value = value;
-            }
+            return null;
         }
 
-        public String Description
+        public override int GetHashCode()
         {
-            get
-            {
-                return (String)this.Property("description").Value;
-            }
-            set
-            {
-                this.Property("description").Value = value;
-            }
+            return this.ID.GetHashCode();
         }
 
-        public String Extension
+        public override bool Equals(Condition other)
         {
-            get
+            if (other is Conditions.None)
             {
-                return (String)this.Property("extension").Value;
+                return this.ID.Equals(((Conditions.None)other).ID);
             }
-            set
+            else
             {
-                this.Property("extension").Value = value;
+                return false;
             }
         }
-
-        public FileType(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        internal None()
+            :base()
         {
-
-        }
-
-        public FileType(Store Store, IO.Item DBItem)
-            : base(Store, DBItem)
-        {
-
+            this.ID = Guid.NewGuid();
         }
     }
 }

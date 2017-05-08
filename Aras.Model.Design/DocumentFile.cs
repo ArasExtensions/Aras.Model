@@ -49,14 +49,14 @@ namespace Aras.Model.Design
             }
         }
 
-        public DocumentFile(Model.RelationshipType Type, Transaction Transaction, Model.Item Source, Model.Item Related)
-            : base(Type, Transaction, Source, Related)
+        public DocumentFile(Model.Store Store, Transaction Transaction)
+            : base(Store, Transaction)
         {
 
         }
 
-        public DocumentFile(Model.RelationshipType Type, Model.Item Source, IO.Item DBItem)
-            : base(Type, Source, DBItem)
+        public DocumentFile(Model.Store Store, IO.Item DBItem)
+            : base(Store, DBItem)
         {
 
         }

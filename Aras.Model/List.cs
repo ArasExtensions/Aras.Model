@@ -30,71 +30,82 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    [Attributes.ItemType("List")]
-    public class List : Item
+    public class List : IEquatable<List>
     {
-        public ListValue ListValue(String Value)
+        public Session Session { get; private set; }
+
+        public String ID { get; private set; }
+
+        public String Name { get; private set; }
+
+        private List<ListValue> ValuesCache;
+
+        internal void AddListValue(ListValue Value)
         {
-            ListValue ret = null;
-
-            if (!System.String.IsNullOrEmpty(Value))
-            {
-                foreach (ListValue listvalue in this.Values)
-                {
-                    if (listvalue.Value.Equals(Value))
-                    {
-                        ret = listvalue;
-                        break;
-                    }
-                }
-            }
-
-            return ret;
+            this.ValuesCache.Add(Value);
         }
 
-        private List<ListValue> _values;
         public IEnumerable<ListValue> Values
         {
             get
             {
-                if (this._values == null)
-                {
-                    this._values = new List<ListValue>();
-
-                    foreach(ListValue listvalue in this.Store("Value"))
-                    {
-                        if (!String.IsNullOrEmpty(listvalue.Value))
-                        {
-                            this._values.Add(listvalue);
-                        }
-                    }
-
-                    this._values.Sort();
-                }
-
-                return this._values;
+                return this.ValuesCache;
             }
         }
 
-        public override void Refresh()
+        public ListValue ListValue(String Value)
         {
-            base.Refresh();
+            foreach(ListValue listvalue in this.Values)
+            {
+                if (listvalue.Value == Value)
+                {
+                    return listvalue;
+                }
+            }
 
-            // Refresh Values
-            this._values = null;
-            this.Store("Value").Refesh();
+            return null;
         }
 
-        public List(ItemType ItemType, Transaction Transaction)
-            : base(ItemType, Transaction)
+        public bool Equals(List other)
         {
-           
+            if (other != null)
+            {
+                return this.ID.Equals(other.ID);
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        public List(ItemType ItemType, IO.Item DBItem)
-            : base(ItemType, DBItem)
+        public override bool Equals(object obj)
         {
+            if (obj is List)
+            {
+                return this.Equals((List)obj);
+            }
+            else
+            {
+                return false;
+            }
+        }
 
+        public override int GetHashCode()
+        {
+            return this.ID.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return this.Name;
+        }
+
+        internal List(Session Session, String ID, String Name)
+        {
+            this.ValuesCache = new List<ListValue>();
+            this.Session = Session;
+            this.ID = ID;
+            this.Name = Name;
         }
     }
 }

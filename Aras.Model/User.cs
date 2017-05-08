@@ -33,28 +33,6 @@ namespace Aras.Model
     [Attributes.ItemType("User")]
     public class User : Item
     {
-        private Alias _alias;
-        public Alias Alias
-        {
-            get
-            {
-                if (this._alias == null)
-                {
-                    this._alias = (Alias)this.Store("Alias").First();
-                }
-
-                return this._alias;
-            }
-        }
-
-        public Identity Identity
-        {
-            get
-            {
-                return (Identity)this.Alias.Related;
-            }
-        }
-
         public Vault Vault
         {
             get
@@ -67,21 +45,14 @@ namespace Aras.Model
             }
         }
 
-        protected override void OnRefresh()
-        {
-            base.OnRefresh();
-
-            this._alias = null;
-        }
-
-        public User(ItemType ItemType, Transaction Transaction)
-            : base(ItemType, Transaction)
+        public User(Store Store, Transaction Transaction)
+            : base(Store, Transaction)
         {
           
         }
 
-        public User(ItemType ItemType, IO.Item DBItem)
-            : base(ItemType, DBItem)
+        public User(Store Store, IO.Item DBItem)
+            : base(Store, DBItem)
         {
           
         }

@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E5B4196A-00D0-4DE7-8104-487A7BC60784}</ProjectGuid>
+    <ProjectGuid>{4EEE1056-FCB1-4523-8884-76E41149832F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Aras.Model</RootNamespace>
@@ -29,29 +29,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -59,86 +40,84 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Access.cs" />
     <Compile Include="Action.cs" />
     <Compile Include="Actions\File.cs" />
     <Compile Include="Actions\Item.cs" />
     <Compile Include="Actions\Relationship.cs" />
-    <Compile Include="Access.cs" />
+    <Compile Include="Alias.cs" />
     <Compile Include="Attributes\Action.cs" />
-    <Compile Include="Located.cs" />
     <Compile Include="Attributes\ItemType.cs" />
+    <Compile Include="Cache\Item.cs" />
     <Compile Include="Class.cs" />
     <Compile Include="Condition.cs" />
-    <Compile Include="Conditions\Or.cs" />
+    <Compile Include="ConditionCreation.cs" />
+    <Compile Include="Conditions\None.cs" />
+    <Compile Include="Conditions\All.cs" />
     <Compile Include="Conditions\And.cs" />
+    <Compile Include="Conditions\Or.cs" />
     <Compile Include="Conditions\Property.cs" />
     <Compile Include="Database.cs" />
-    <Compile Include="Exceptions\UnLockException.cs" />
-    <Compile Include="Exceptions\ReadOnlyException.cs" />
     <Compile Include="Exceptions\ArgumentException.cs" />
+    <Compile Include="Exceptions\ReadOnlyException.cs" />
     <Compile Include="Exceptions\ServerException.cs" />
-    <Compile Include="PropertyTypes\Federated.cs" />
-    <Compile Include="PropertyTypes\Sequence.cs" />
-    <Compile Include="PropertyTypes\FormattedText.cs" />
-    <Compile Include="Props\Federated.cs" />
-    <Compile Include="Props\FormattedText .cs" />
-    <Compile Include="Props\Foreign.cs" />
-    <Compile Include="Props\Sequence.cs" />
-    <Compile Include="Queries\Item.cs" />
-    <Compile Include="Queries\Relationship.cs" />
-    <Compile Include="Query.cs" />
-    <Compile Include="Vault.cs" />
+    <Compile Include="File.cs" />
     <Compile Include="FileType.cs" />
+    <Compile Include="Identity.cs" />
+    <Compile Include="Item.cs" />
+    <Compile Include="ItemType.cs" />
     <Compile Include="LifeCycleMap.cs" />
     <Compile Include="LifeCycleState.cs" />
-    <Compile Include="ObservableList.cs" />
-    <Compile Include="File.cs" />
-    <Compile Include="PropertyTypes\Float.cs" />
-    <Compile Include="PropertyTypes\Foreign.cs" />
-    <Compile Include="PropertyTypes\FilterList.cs" />
-    <Compile Include="Props\Float.cs" />
-    <Compile Include="ConditionCreation.cs" />
-    <Compile Include="Team.cs" />
-    <Compile Include="Permission.cs" />
-    <Compile Include="Alias.cs" />
-    <Compile Include="ListValue.cs" />
     <Compile Include="List.cs" />
-    <Compile Include="PropertyType.cs" />
+    <Compile Include="Located.cs" />
+    <Compile Include="ObservableList.cs" />
+    <Compile Include="Permission.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Property.cs" />
+    <Compile Include="PropertyType.cs" />
+    <Compile Include="PropertyTypes\Boolean.cs" />
     <Compile Include="PropertyTypes\Date.cs" />
     <Compile Include="PropertyTypes\Decimal.cs" />
-    <Compile Include="PropertyTypes\Boolean.cs" />
-    <Compile Include="PropertyTypes\Integer.cs" />
-    <Compile Include="PropertyTypes\List.cs" />
-    <Compile Include="PropertyTypes\Item.cs" />
+    <Compile Include="PropertyTypes\Federated.cs" />
+    <Compile Include="PropertyTypes\FilterList.cs" />
+    <Compile Include="PropertyTypes\Float.cs" />
+    <Compile Include="PropertyTypes\Foreign.cs" />
+    <Compile Include="PropertyTypes\FormattedText.cs" />
     <Compile Include="PropertyTypes\Image.cs" />
-    <Compile Include="PropertyTypes\MultilingualString.cs" />
+    <Compile Include="PropertyTypes\Integer.cs" />
+    <Compile Include="PropertyTypes\Item.cs" />
+    <Compile Include="PropertyTypes\List.cs" />
     <Compile Include="PropertyTypes\MD5.cs" />
-    <Compile Include="PropertyTypes\Text.cs" />
+    <Compile Include="PropertyTypes\MultilingualString.cs" />
+    <Compile Include="PropertyTypes\Sequence.cs" />
     <Compile Include="PropertyTypes\String.cs" />
+    <Compile Include="PropertyTypes\Text.cs" />
+    <Compile Include="Props\Boolean.cs" />
     <Compile Include="Props\Date.cs" />
     <Compile Include="Props\Decimal.cs" />
-    <Compile Include="Props\Boolean.cs" />
-    <Compile Include="Props\Integer.cs" />
-    <Compile Include="Props\List.cs" />
-    <Compile Include="Props\Item.cs" />
+    <Compile Include="Props\Federated.cs" />
+    <Compile Include="Props\Float.cs" />
+    <Compile Include="Props\Foreign.cs" />
+    <Compile Include="Props\FormattedText .cs" />
     <Compile Include="Props\Image.cs" />
+    <Compile Include="Props\Integer.cs" />
+    <Compile Include="Props\Item.cs" />
+    <Compile Include="Props\List.cs" />
     <Compile Include="Props\MultilingualString.cs" />
-    <Compile Include="Props\Text.cs" />
+    <Compile Include="Props\Sequence.cs" />
     <Compile Include="Props\String.cs" />
-    <Compile Include="RelationshipType.cs" />
-    <Compile Include="ItemType.cs" />
-    <Compile Include="Stores\Item.cs" />
-    <Compile Include="Stores\Relationship.cs" />
-    <Compile Include="Store.cs" />
-    <Compile Include="Item.cs" />
+    <Compile Include="Props\Text.cs" />
+    <Compile Include="Query.cs" />
     <Compile Include="Relationship.cs" />
+    <Compile Include="RelationshipType.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="Session.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ListValue.cs" />
+    <Compile Include="Store.cs" />
+    <Compile Include="Team.cs" />
     <Compile Include="Transaction.cs" />
-    <Compile Include="Identity.cs" />
     <Compile Include="User.cs" />
+    <Compile Include="Vault.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Aras.IO\Aras.IO\Aras.IO.csproj">

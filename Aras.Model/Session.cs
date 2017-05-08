@@ -65,379 +65,199 @@ namespace Aras.Model
             }
         }
 
-        private User _user;
-        public User User
-        {
-            get
-            {
-                if (this._user == null)
-                {
-                    this._user = (User)this.Store("User").Get(this.IO.UserID);
-                }
-
-                return this._user;
-            }
-        }
-
-        public Identity Alias
-        {
-            get
-            {
-                return this.User.Identity;
-            }
-        }
-
-        private List<Identity> GetParentIdentities(Identity Identity)
-        {
-            List<Identity> identities = new List<Identity>();
-
-            foreach(Identity thisidentity in this.IdentityCache.Values)
-            {
-                foreach (Identity thischildidentity in this.IdentityMemberCache[thisidentity])
-                {
-                    if (thischildidentity.Equals(Identity))
-                    {
-                        if (!identities.Contains(thisidentity))
-                            identities.Add(thisidentity);
-                    }
-                }
-            }
-
-            List<Identity> ret = new List<Identity>();
-
-            foreach(Identity identity in identities)
-            {
-                ret.Add(identity);
-
-                foreach(Identity parentidentiy in this.GetParentIdentities(identity))
-                {
-                    if (!ret.Contains(parentidentiy))
-                    {
-                        ret.Add(parentidentiy);
-                    }
-                }
-            }
-
-            return identities;
-        }
-
-        Dictionary<String, Identity> IdentityCache;
-        Dictionary<Identity, List<Identity>> IdentityMemberCache;
-        private List<Identity> _identities;
-        public IEnumerable<Identity> Identities
-        {
-            get
-            {
-                if (this._identities == null)
-                {
-                    this._identities = new List<Identity>();
-
-                    IO.Request request = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
-                    IO.Item identityrequest = request.NewItem("Identity", "get");
-                    identityrequest.Select = "id,name";
-                    identityrequest.SetProperty("is_alias", "0");
-                    IO.Item memberrequest = identityrequest.NewRelationship("Member", "get");
-                    memberrequest.Select = "related_id";
-                    IO.Response response = request.Execute();
-
-                    if (!response.IsError)
-                    {
-                        IdentityCache = new Dictionary<String, Identity>();
-                        IdentityMemberCache = new Dictionary<Identity, List<Identity>>();
-
-                        foreach(IO.Item dbidentity in response.Items)
-                        {
-                            this.IdentityCache[dbidentity.ID] = (Identity)this.Store("Identity").Get(dbidentity);
-                            this.IdentityMemberCache[this.IdentityCache[dbidentity.ID]] = new List<Identity>();
-                        }
-
-                        foreach (IO.Item dbidentity in response.Items)
-                        {
-                            Identity identity = this.IdentityCache[dbidentity.ID];
-
-                            foreach (IO.Item dbmember in dbidentity.Relationships)
-                            {
-                                String childidentityid = dbmember.GetPropertyItem("related_id").ID;
-
-                                if (childidentityid.Equals(this.Alias.ID))
-                                {
-                                    this.IdentityMemberCache[identity].Add(this.Alias);
-                                }
-                                else if (this.IdentityCache.ContainsKey(childidentityid))
-                                {
-                                    Identity childidentity = this.IdentityCache[childidentityid];
-                                    this.IdentityMemberCache[identity].Add(childidentity);
-                                }
-                            }
-                        }
-
-                        this._identities = this.GetParentIdentities(this.Alias);
-
-                        // Add Alias
-                        this._identities.Add(this.Alias);
-
-                        // Add Owner and Manager
-                        foreach(Identity identity in this.IdentityCache.Values)
-                        {
-                            if (identity.Name.Equals("Owner") || identity.Equals("Manager"))
-                            {
-                                this._identities.Add(identity);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        throw new Exceptions.ServerException(response);
-                    }
-
-                }
-
-                return this._identities;
-            }
-        }
-
-        private Dictionary<String, ItemType> ItemTypeNameCache;
-        private Dictionary<String, ItemType> ItemTypeIDCache;
-        private Dictionary<String, String> DefaultSelectCache;
-
-        private void SetDefaultSelect(String ItemType, String Select)
-        {
-            this.DefaultSelectCache[ItemType] = Select;
-        }
-
-        private void ApplyDefaultSelect(ItemType ItemType)
-        {
-            if (this.DefaultSelectCache.ContainsKey(ItemType.Name))
-            {
-                ItemType.AddToSelect(this.DefaultSelectCache[ItemType.Name]);
-            }
-        }
-
-        private void BuildItemType(IO.Item DBItem)
-        {
-            if (DBItem.GetProperty("is_relationship").Equals("1"))
-            {
-                IO.Request request = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
-                IO.Item dbrelationshiptype = request.NewItem("RelationshipType", "get");
-                dbrelationshiptype.SetProperty("relationship_id", DBItem.ID);
-                dbrelationshiptype.Select = "source_id,related_id,grid_view";
-                IO.Response response = request.Execute();
-
-                if (!response.IsError)
-                {
-                    IO.Item dbreltype = response.Items.First();
-                    String sourceitemtypeid = dbreltype.GetProperty("source_id");
-                    IO.Item dbrelateditemtype = dbreltype.GetPropertyItem("related_id");
-                    ItemType sourceitemtype = this.ItemTypeByID(sourceitemtypeid);
-                    ItemType relateditemtype = null;
-
-                    if (dbrelateditemtype != null)
-                    {
-                        relateditemtype = this.ItemTypeByID(dbrelateditemtype.ID);
-                    }
-
-                    RelationshipGridViews RelationshipGridView = RelationshipGridViews.Left;
-
-                    switch(dbreltype.GetProperty("grid_view"))
-                    {
-                        case "right":
-                            RelationshipGridView = RelationshipGridViews.Right;
-                            break;
-                        case "intermix":
-                            RelationshipGridView = RelationshipGridViews.InterMix;
-                            break;
-                        default:
-                            RelationshipGridView = RelationshipGridViews.Left;
-                            break;
-                    }
-
-                    RelationshipType relationshiptype = new RelationshipType(this, DBItem.ID, DBItem.GetProperty("name"), DBItem.GetProperty("label"), DBItem.GetProperty("label_plural"), DBItem.GetProperty("class_structure"), sourceitemtype, relateditemtype, RelationshipGridView);
-                    this.ItemTypeNameCache[relationshiptype.Name] = relationshiptype;
-                    this.ItemTypeIDCache[relationshiptype.ID] = relationshiptype;
-                    this.ApplyDefaultSelect(relationshiptype);
-                }
-                else
-                {
-                    throw new Exceptions.ServerException(response);
-                }
-
-            }
-            else
-            {
-                ItemType itemtype = new ItemType(this, DBItem.ID, DBItem.GetProperty("name"), DBItem.GetProperty("label"), DBItem.GetProperty("label_plural"), DBItem.GetProperty("class_structure"));
-                this.ItemTypeNameCache[itemtype.Name] = itemtype;
-                this.ItemTypeIDCache[itemtype.ID] = itemtype;
-                this.ApplyDefaultSelect(itemtype);
-            }
-        }
-
-        public ItemType ItemType(String Name)
-        {
-            if (!this.ItemTypeNameCache.ContainsKey(Name))
-            {
-                IO.Request request = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
-                IO.Item itemtype = request.NewItem("ItemType", "get");
-                itemtype.Select = "id,name,is_relationship,class_structure,label,label_plural";
-                itemtype.SetProperty("name", Name);
-                IO.Response response = request.Execute();
-
-                if (!response.IsError)
-                {
-                    this.BuildItemType(response.Items.First());
-                }
-                else
-                {
-                    throw new Exceptions.ServerException(response);
-                }
-            }
-
-            return this.ItemTypeNameCache[Name];
-        }
-
-        internal ItemType ItemTypeByID(String ID)
-        {
-            if (!this.ItemTypeIDCache.ContainsKey(ID))
-            {
-                IO.Request request = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
-                IO.Item itemtype = request.NewItem("ItemType", "get");
-                itemtype.Select = "id,name,is_relationship,class_structure,label,label_plural";
-                itemtype.ID = ID;
-                IO.Response response = request.Execute();
-
-                if (!response.IsError)
-                {
-                    this.BuildItemType(response.Items.First());
-                }
-                else
-                {
-                    throw new Exceptions.ServerException(response);
-                }
-            }
-
-            return this.ItemTypeIDCache[ID];
-        }
- 
         public Transaction BeginTransaction()
         {
             return new Transaction(this);
         }
 
-        private Dictionary<ItemType, Stores.Item> StoresCache;
+        private Dictionary<String, ItemType> ItemTypeNameCache;
+        private Dictionary<String, ItemType> ItemTypeIDCache;
+        private Dictionary<String, List> ListIDCache;
 
-        public Stores.Item Store(ItemType ItemType)
+        public ItemType ItemType(String Name)
         {
-            if (!(ItemType is RelationshipType))
+            if (this.ItemTypeNameCache.ContainsKey(Name))
             {
-                if (!this.StoresCache.ContainsKey(ItemType))
-                {
-                    this.StoresCache[ItemType] = new Stores.Item(ItemType);
-                }
-
-                return this.StoresCache[ItemType];
+                return this.ItemTypeNameCache[Name];
             }
             else
             {
-                throw new ArgumentException("Can not access Cache for a RelationshipType");
+                throw new Exceptions.ArgumentException("Invalid ItemType Name: " + Name);
             }
         }
 
-        public Stores.Item Store(String Name)
+        public ItemType ItemTypeByID(String ID)
         {
-            return this.Store(this.ItemType(Name));
+            if (this.ItemTypeIDCache.ContainsKey(ID))
+            {
+                return this.ItemTypeIDCache[ID];
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid ItemType ID: " + ID);
+            }
         }
 
-        internal Item Get(ItemType ItemType, String ID)
+        public List ListByID(String ID)
         {
-            Item ret = null;
-
-            if (!String.IsNullOrEmpty(ID))
+            if (this.ListIDCache.ContainsKey(ID))
             {
-                if (ItemType is RelationshipType)
-                {
-                    // Get Source Item
-                    IO.Request request = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
-                    IO.Item dbitem = request.NewItem(ItemType.Name, "get");
-                    dbitem.ID = ID;
-                    dbitem.Select = "source_id";
-                    IO.Response response = request.Execute();
+                return this.ListIDCache[ID];
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid List ID: " + ID);
+            }
+        }
 
-                    if (!response.IsError)
+        private void BuildCaches()
+        {
+            this.ItemTypeNameCache = new Dictionary<String, ItemType>();
+            this.ItemTypeIDCache = new Dictionary<String, ItemType>();
+            this.ListIDCache = new Dictionary<String, List>();
+
+            // Build ItemType Cache
+            IO.Request itemtyperequest = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
+            IO.Item itemtypequery = itemtyperequest.NewItem("ItemType", "get");
+            itemtypequery.Select = "id,name,is_relationship,class_structure,label,label_plural";
+            IO.Response itemtyperesponse = itemtyperequest.Execute();
+
+            if (!itemtyperesponse.IsError)
+            {
+                foreach (IO.Item dbitem in itemtyperesponse.Items)
+                {
+                    ItemType itemtype = null;
+
+                    if (dbitem.GetProperty("is_relationship").Equals("1"))
                     {
-                        Item source = this.Get(((RelationshipType)ItemType).SourceItemType, response.Items.First().GetProperty("source_id"));
-                        ret = source.Store((RelationshipType)ItemType).Get(ID);
+                        itemtype = new RelationshipType(this, dbitem.ID, dbitem.GetProperty("name"), dbitem.GetProperty("label"), dbitem.GetProperty("label_plural"), dbitem.GetProperty("class_structure"));
                     }
                     else
                     {
-                        throw new Exceptions.ServerException(response);
+                        itemtype = new ItemType(this, dbitem.ID, dbitem.GetProperty("name"), dbitem.GetProperty("label"), dbitem.GetProperty("label_plural"), dbitem.GetProperty("class_structure"));
                     }
-                }
-                else
-                {
-                    // Get Item from Store
-                    ret = this.Store(ItemType).Get(ID);
+
+                    this.ItemTypeIDCache[itemtype.ID] = itemtype;
+                    this.ItemTypeNameCache[itemtype.Name] = itemtype;
                 }
             }
-
-            return ret;
-        }
-
-        internal Item Get(ItemType ItemType, IO.Item DBItem)
-        {
-            Item ret = null;
-
-            if (!String.IsNullOrEmpty(DBItem.ID))
+            else
             {
-                if (ItemType is RelationshipType)
-                {
-                    // Get Source Item
-                    IO.Request request = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
-                    IO.Item dbitem = request.NewItem(ItemType.Name, "get");
-                    dbitem.ID = DBItem.ID;
-                    dbitem.Select = "source_id";
-                    IO.Response response = request.Execute();
-
-                    if (!response.IsError)
-                    {
-                        Item source = this.Get(((RelationshipType)ItemType).SourceItemType, response.Items.First().GetProperty("source_id"));
-                        ret = source.Store((RelationshipType)ItemType).Get(DBItem);
-                    }
-                    else
-                    {
-                        throw new Exceptions.ServerException(response);
-                    }
-                }
-                else
-                {
-                    // Get Item from Store
-                    ret = this.Store(ItemType).Get(DBItem);
-                }
+                throw new Exceptions.ServerException(itemtyperesponse);
             }
 
-            return ret;
+            // Build RelationshipType Cache
+            IO.Request relationshiptyperequest = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
+            IO.Item relationshiptypequery = relationshiptyperequest.NewItem("RelationshipType", "get");
+            relationshiptypequery.Select = "relationship_id,source_id(id),related_id(id),grid_view";
+            IO.Response relationshiptyperesponse = relationshiptyperequest.Execute();
+
+            if (!relationshiptyperesponse.IsError)
+            {
+                foreach (IO.Item dbitem in relationshiptyperesponse.Items)
+                {
+                    RelationshipType relationshiptype = (RelationshipType)this.ItemTypeIDCache[dbitem.GetProperty("relationship_id")];
+
+                    String source_id = dbitem.GetProperty("source_id");
+
+                    if (!String.IsNullOrEmpty(source_id))
+                    {
+                        relationshiptype.Source = this.ItemTypeIDCache[source_id];
+                        relationshiptype.Source.AddRelationshipType(relationshiptype);
+                    }
+
+                    String related_id = dbitem.GetProperty("related_id");
+
+                    if (!String.IsNullOrEmpty(related_id))
+                    {
+                        relationshiptype.Related = this.ItemTypeIDCache[related_id];
+                    }
+
+                    switch (dbitem.GetProperty("grid_view"))
+                    {
+                        case "right":
+                            relationshiptype.RelationshipGridView = RelationshipGridViews.Right;
+                            break;
+                        case "intermix":
+                            relationshiptype.RelationshipGridView = RelationshipGridViews.InterMix;
+                            break;
+                        default:
+                            relationshiptype.RelationshipGridView = RelationshipGridViews.Left;
+                            break;
+                    } 
+                }
+            }
+            else
+            {
+                throw new Exceptions.ServerException(relationshiptyperesponse);
+            }
+
+            // Build List Cache
+            IO.Request listrequest = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
+            IO.Item listquery = listrequest.NewItem("List", "get");
+            listquery.Select = "id,name";
+            listquery.OrderBy = "sort_order";
+            IO.Item valuequery = listrequest.NewItem("Value", "get");
+            valuequery.Select = "value,label";
+            listquery.AddRelationship(valuequery);
+            IO.Response listresponse = listrequest.Execute();
+
+            if (!listresponse.IsError)
+            {
+                foreach(IO.Item dbitem in listresponse.Items)
+                {
+                    List list = new List(this, dbitem.ID, dbitem.GetProperty("name"));
+
+                    foreach(IO.Item dbvalue in dbitem.Relationships)
+                    {
+                        ListValue listvalue = new ListValue(list, dbvalue.GetProperty("value"), dbvalue.GetProperty("label"));
+                        list.AddListValue(listvalue);
+                    }
+
+                    this.ListIDCache[list.ID] = list;
+                }
+            }
+            else
+            {
+                throw new Exceptions.ServerException(listresponse);
+            }
         }
 
-        public override string ToString()
+        public Query Query(ItemType ItemType)
         {
-            return this.User.KeyedName;
+            return new Query(ItemType);
+        }
+
+        public Query Query(String ItemType)
+        {
+            return this.Query(this.ItemType(ItemType));
+        }
+
+        private Dictionary<String, Cache.Item> ItemCache;
+
+        internal Cache.Item GetItemCache(ItemType ItemType)
+        {
+            Cache.Item cacheitem = new Cache.Item(ItemType);
+            this.ItemCache[cacheitem.ID] = cacheitem;
+            return cacheitem;
+        }
+
+        internal Cache.Item GetItemCache(ItemType ItemType, String ID, String ConfigID, Int32 Generation, Boolean IsCurrent)
+        {
+            if (!this.ItemCache.ContainsKey(ID))
+            {
+                this.ItemCache[ID] = new Cache.Item(ItemType, ID, ConfigID, Generation, IsCurrent);
+            }
+
+            return this.ItemCache[ID];
         }
 
         internal Session(Database Database, IO.Session IO)
         {
+            this.ItemCache = new Dictionary<String, Cache.Item>();
             this.Database = Database;
             this.IO = IO;
-
-            this.ItemTypeNameCache = new Dictionary<String, ItemType>();
-            this.ItemTypeIDCache = new Dictionary<String, ItemType>();
-            this.StoresCache = new Dictionary<ItemType, Stores.Item>();
-            this.DefaultSelectCache = new Dictionary<String, String>();
-
-            // Default Selections
-            this.SetDefaultSelect("Value", "value,label,sort_order");
-            this.SetDefaultSelect("Access", "can_get,can_update,can_delete,can_discover,can_change_access");
-            this.SetDefaultSelect("User", "default_vault");
-            this.SetDefaultSelect("File", "filename");
-            this.SetDefaultSelect("Vault", "vault_url");
-            this.SetDefaultSelect("Life Cycle State", "name");
+            this.BuildCaches();
         }
     }
 }

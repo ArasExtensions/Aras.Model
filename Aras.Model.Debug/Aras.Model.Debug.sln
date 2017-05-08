@@ -3,30 +3,40 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aras.Model.Debug", "Aras.Model.Debug.csproj", "{B319A2B7-5923-4E28-B623-B50851B7088E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aras.Model.Debug", "Aras.Model.Debug.csproj", "{D3299C5E-A4AA-46D6-BC6C-F1179D00BE89}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aras.Model", "..\Aras.Model\Aras.Model.csproj", "{E5B4196A-00D0-4DE7-8104-487A7BC60784}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aras.Model", "..\Aras.Model\Aras.Model.csproj", "{4EEE1056-FCB1-4523-8884-76E41149832F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aras.IO", "..\..\Aras.IO\Aras.IO\Aras.IO.csproj", "{5ACC089E-892B-4FA7-891D-B2F6D74A4D7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B319A2B7-5923-4E28-B623-B50851B7088E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B319A2B7-5923-4E28-B623-B50851B7088E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B319A2B7-5923-4E28-B623-B50851B7088E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B319A2B7-5923-4E28-B623-B50851B7088E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E5B4196A-00D0-4DE7-8104-487A7BC60784}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E5B4196A-00D0-4DE7-8104-487A7BC60784}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E5B4196A-00D0-4DE7-8104-487A7BC60784}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E5B4196A-00D0-4DE7-8104-487A7BC60784}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3299C5E-A4AA-46D6-BC6C-F1179D00BE89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3299C5E-A4AA-46D6-BC6C-F1179D00BE89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3299C5E-A4AA-46D6-BC6C-F1179D00BE89}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D3299C5E-A4AA-46D6-BC6C-F1179D00BE89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3299C5E-A4AA-46D6-BC6C-F1179D00BE89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3299C5E-A4AA-46D6-BC6C-F1179D00BE89}.Release|x64.ActiveCfg = Release|Any CPU
+		{4EEE1056-FCB1-4523-8884-76E41149832F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EEE1056-FCB1-4523-8884-76E41149832F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EEE1056-FCB1-4523-8884-76E41149832F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4EEE1056-FCB1-4523-8884-76E41149832F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EEE1056-FCB1-4523-8884-76E41149832F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EEE1056-FCB1-4523-8884-76E41149832F}.Release|x64.ActiveCfg = Release|Any CPU
 		{5ACC089E-892B-4FA7-891D-B2F6D74A4D7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5ACC089E-892B-4FA7-891D-B2F6D74A4D7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5ACC089E-892B-4FA7-891D-B2F6D74A4D7B}.Debug|x64.ActiveCfg = Debug|x64
+		{5ACC089E-892B-4FA7-891D-B2F6D74A4D7B}.Debug|x64.Build.0 = Debug|x64
 		{5ACC089E-892B-4FA7-891D-B2F6D74A4D7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5ACC089E-892B-4FA7-891D-B2F6D74A4D7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5ACC089E-892B-4FA7-891D-B2F6D74A4D7B}.Release|x64.ActiveCfg = Release|x64
+		{5ACC089E-892B-4FA7-891D-B2F6D74A4D7B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

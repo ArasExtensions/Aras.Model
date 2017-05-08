@@ -64,8 +64,8 @@ namespace Aras.Model.Actions
 
         void Source_Superceded(object sender, SupercededEventArgs e)
         {
-            ((Model.Relationship)this.Item).Source.Superceded -= Source_Superceded;
-            ((Model.Relationship)this.Item).Source = e.NewGeneration;
+            //((Model.Relationship)this.Item).Source.Superceded -= Source_Superceded;
+            //((Model.Relationship)this.Item).Source = e.NewGeneration;
         }
 
         internal override void Rollback()
@@ -77,7 +77,7 @@ namespace Aras.Model.Actions
                     case Model.Item.Actions.Create:
 
                         // Remove from Parent Cache
-                        ((Model.Relationship)this.Item).Source.Store(((Model.Relationship)this.Item).RelationshipType).Delete((Model.Relationship)this.Item);
+                        //((Model.Relationship)this.Item).Source.Store(((Model.Relationship)this.Item).RelationshipType).Delete((Model.Relationship)this.Item);
 
                         break;
          
@@ -104,7 +104,7 @@ namespace Aras.Model.Actions
                 this.Item.OnDeleted();
 
                 // Remove from Parent Cache
-                ((Model.Relationship)this.Item).Source.Store(((Model.Relationship)this.Item).RelationshipType).Delete((Model.Relationship)this.Item);
+                //((Model.Relationship)this.Item).Source.Store(((Model.Relationship)this.Item).RelationshipType).Delete((Model.Relationship)this.Item);
             }
         }
 

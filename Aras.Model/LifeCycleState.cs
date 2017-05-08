@@ -54,14 +54,14 @@ namespace Aras.Model
             return this.Name;
         }
 
-        public LifeCycleState(RelationshipType RelationshipType, Transaction Transaction, Item Source, Item Related)
-            : base(RelationshipType, Transaction, Source, Related)
+        public LifeCycleState(Store Store, Transaction Transaction)
+            : base(Store, Transaction)
         {
       
         }
 
-        public LifeCycleState(RelationshipType RelationshipType, Item Source, IO.Item DBItem)
-            : base(RelationshipType, Source, DBItem)
+        public LifeCycleState(Store Store, Item Source, IO.Item DBItem)
+            : base(Store, DBItem)
         {
 
         }

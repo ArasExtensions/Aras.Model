@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B319A2B7-5923-4E28-B623-B50851B7088E}</ProjectGuid>
+    <ProjectGuid>{D3299C5E-A4AA-46D6-BC6C-F1179D00BE89}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Aras.Model.Debug</RootNamespace>
@@ -54,7 +54,7 @@
       <Name>Aras.IO</Name>
     </ProjectReference>
     <ProjectReference Include="..\Aras.Model\Aras.Model.csproj">
-      <Project>{20fea736-01a1-49a3-a61f-43cad00d9717}</Project>
+      <Project>{4eee1056-fcb1-4523-8884-76e41149832f}</Project>
       <Name>Aras.Model</Name>
     </ProjectReference>
   </ItemGroup>

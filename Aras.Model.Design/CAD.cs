@@ -81,14 +81,14 @@ namespace Aras.Model.Design
             }
         }
 
-        public CAD(Model.ItemType ItemType, Transaction Transaction)
-            : base(ItemType, Transaction)
+        public CAD(Model.Store Store, Transaction Transaction)
+            : base(Store, Transaction)
         {
  
         }
 
-        public CAD(Model.ItemType ItemType, IO.Item DBItem)
-            : base(ItemType, DBItem)
+        public CAD(Model.Store Store, IO.Item DBItem)
+            : base(Store, DBItem)
         {
 
         }

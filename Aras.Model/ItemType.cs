@@ -28,14 +28,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using System.IO;
-using System.Net;
 
 namespace Aras.Model
 {
     public class ItemType : IEquatable<ItemType>
     {
         private System.Int32 DefaultColumnWidth = 80;
+
+        private readonly String[] SystemProperties = { "id", "config_id" };
 
         public Session Session { get; private set; }
 
@@ -46,29 +46,6 @@ namespace Aras.Model
         public String SingularLabel { get; private set; }
 
         public String PluralLabel { get; private set; }
-
-        private static String[] _itemSystemProperties = { "id", "config_id", "is_current", "generation", " keyed_name" };
-        internal virtual IEnumerable<String> SystemProperties
-        {
-            get
-            {
-                return _itemSystemProperties;
-            }
-        }
-
-        private String _tableName;
-        internal String TableName
-        {
-            get
-            {
-                if (this._tableName == null)
-                {
-                    this._tableName = "[" + this.Name.ToLower().Replace(' ', '_') + "]";
-                }
-
-                return this._tableName;
-            }
-        }
 
         public Class ClassStructure { get; private set; }
 
@@ -139,11 +116,63 @@ namespace Aras.Model
 
                     if (this._class == null)
                     {
-                        this._class = typeof(Item);
+                        if (this.Name.Equals("File"))
+                        {
+                            this._class = typeof(File);
+                        }
+                        else if (this is RelationshipType)
+                        {
+                            this._class = typeof(Relationship);
+                        }
+                        else
+                        {
+                            this._class = typeof(Item);
+                        }
                     }
                 }
 
                 return this._class;
+            }
+        }
+
+        private Dictionary<String, RelationshipType> RelationshipTypeNameCache;
+
+        internal void AddRelationshipType(RelationshipType RelationshipType)
+        {
+            if (this.Equals(RelationshipType.Source))
+            {
+                this.RelationshipTypeNameCache[RelationshipType.Name] = RelationshipType;
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid RelationshipType Source");
+            }
+        }
+
+        public IEnumerable<RelationshipType> RelationshipTypes
+        {
+            get
+            {
+                return this.RelationshipTypeNameCache.Values;
+            }
+        }
+
+        public RelationshipType RelationshipType(String Name)
+        {
+            return this.RelationshipTypeNameCache[Name];
+        }
+
+        private String _tableName;
+        internal String TableName
+        {
+            get
+            {
+                if (this._tableName == null)
+                {
+                    this._tableName = "[" + this.Name.ToLower().Replace(' ', '_') + "]";
+                }
+
+                return this._tableName;
             }
         }
 
@@ -171,7 +200,7 @@ namespace Aras.Model
                             Boolean ReadOnly = "1".Equals(thisprop.GetProperty("readonly"));
                             Boolean Required = "1".Equals(thisprop.GetProperty("is_required"));
                             String DefaultString = thisprop.GetProperty("default_value");
-                            
+
                             // Sort Order
                             Int32 SortOrder = 0;
 
@@ -179,13 +208,13 @@ namespace Aras.Model
                             {
                                 SortOrder = 0;
                             }
-                            
+
                             Boolean InSearch = !("1".Equals(thisprop.GetProperty("is_hidden")));
                             Boolean InRelationshipGrid = !("1".Equals(thisprop.GetProperty("is_hidden2")));
-                            
+
                             // Column Width
                             Int32 ColumnWidth = 0;
-                            
+
                             if (!Int32.TryParse(thisprop.GetProperty("column_width"), out ColumnWidth))
                             {
                                 ColumnWidth = DefaultColumnWidth;
@@ -251,7 +280,7 @@ namespace Aras.Model
 
                                         break;
                                     case "list":
-                                        List valuelist = (List)this.Session.Store("List").Get(thisprop.GetProperty("data_source"));
+                                        List valuelist = (List)this.Session.ListByID(thisprop.GetProperty("data_source"));
                                         this._propertyTypeCache[name] = new PropertyTypes.List(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, valuelist);
                                         break;
                                     case "decimal":
@@ -305,7 +334,7 @@ namespace Aras.Model
                                         this._propertyTypeCache[name] = new PropertyTypes.Sequence(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
                                         break;
                                     case "filter list":
-                                        List valuefilterlist = (List)this.Session.Store("List").Get(thisprop.GetProperty("data_source"));
+                                        List valuefilterlist = (List)this.Session.ListByID(thisprop.GetProperty("data_source"));
                                         this._propertyTypeCache[name] = new PropertyTypes.FilterList(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, valuefilterlist);
                                         break;
                                     default:
@@ -349,218 +378,9 @@ namespace Aras.Model
             }
         }
 
-        private String _searchPropertyOverride;
-        public String SearchPropertyTypesOverride
-        {
-            get
-            {
-                return this._searchPropertyOverride;
-            }
-            set
-            {
-                if (this._searchPropertyOverride != value)
-                {
-                    this._searchPropertyOverride = value;
-                    this._searchPropertyTypes = null;
-                }
-            }
-        }
-
-        private List<PropertyType> _searchPropertyTypes;
-        public IEnumerable<PropertyType> SearchPropertyTypes
-        {
-            get
-            {
-                if (this._searchPropertyTypes == null)
-                {
-                    String[] overrideproperties = null;
-
-                    if (this.SearchPropertyTypesOverride != null)
-                    {
-                        overrideproperties = this.SearchPropertyTypesOverride.Split(new char[] { ',' });
-                    }
-
-                    this._searchPropertyTypes = new List<PropertyType>();
-
-                    foreach(PropertyType proptype in this.PropertyTypes)
-                    {
-                        if (overrideproperties == null)
-                        {
-                            if (proptype.InSearch)
-                            {
-                                this._searchPropertyTypes.Add(proptype);
-                            }
-                        }
-                        else
-                        {
-                            if (overrideproperties.Contains(proptype.Name))
-                            {
-                                this._searchPropertyTypes.Add(proptype);
-                            }
-                        }
-                    }
-
-                    this._searchPropertyTypes.Sort();
-                }
-
-                return this._searchPropertyTypes;
-            }
-        }
-
-        private List<PropertyType> _relationshipGridPropertyTypes;
-        public IEnumerable<PropertyType> RelationshipGridPropertyTypes
-        {
-            get
-            {
-                if (this._relationshipGridPropertyTypes == null)
-                {
-                    this._relationshipGridPropertyTypes = new List<PropertyType>();
-
-                    foreach (PropertyType proptype in this.PropertyTypes)
-                    {
-                        if (proptype.InRelationshipGrid)
-                        {
-                            this._relationshipGridPropertyTypes.Add(proptype);
-                        }
-                    }
-
-                    this._relationshipGridPropertyTypes.Sort();
-                }
-
-                return this._relationshipGridPropertyTypes;
-            }
-        }
-
-        private Dictionary<String, RelationshipType> RelationshipTypeCache;
-
-        internal void AddRelationshipType(RelationshipType RelationshipType)
-        {
-            this.RelationshipTypeCache[RelationshipType.Name] = RelationshipType;
-        }
-
-        private Boolean RelationshipTypesLoaded { get; set; }
-
-        private void LoadRelationshipTypes()
-        {
-            if (!this.RelationshipTypesLoaded)
-            {
-                IO.Item reltypes = new IO.Item("RelationshipType", "get");
-                reltypes.Select = "relationship_id";
-                reltypes.SetProperty("source_id", this.ID);
-
-                IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, reltypes);
-                IO.Response response = request.Execute();
-
-                if (!response.IsError)
-                {
-                    foreach (IO.Item reltype in response.Items)
-                    {
-                        ItemType itemtype = this.Session.ItemTypeByID(reltype.GetProperty("relationship_id"));
-                    }
-
-                    this.RelationshipTypesLoaded = true;
-                }
-                else
-                {
-                    throw new Exceptions.ServerException(response);
-                }
-            }
-        }
-
-        public IEnumerable<RelationshipType> RelationshipTypes
-        {
-            get
-            {
-                this.LoadRelationshipTypes();
-                return this.RelationshipTypeCache.Values;
-            }
-        }
-
-        public RelationshipType RelationshipType(String Name)
-        {
-            this.LoadRelationshipTypes();
-            return this.RelationshipTypeCache[Name];
-        }
-
-        private List<PropertyType> SelectCache;
-
-        internal IEnumerable<PropertyType> SelectPropertyTypes
-        {
-            get
-            {
-                return this.SelectCache;
-            }
-        }
-
-        public String _select;
-        public String Select
-        {
-            get
-            {
-                if (this._select == null)
-                {
-                    List<String> names = new List<String>();
-
-                    foreach (PropertyType proptype in this.SelectCache)
-                    {
-                        if (proptype is Model.PropertyTypes.Item)
-                        {
-                            names.Add(proptype.Name + "(" + String.Join(",", this.SystemProperties) + ")");
-                        }
-                        else
-                        {
-                            names.Add(proptype.Name);
-                        }
-                    }
-
-                    this._select = String.Join(",", names);
-                }
-
-                return this._select;
-            }
-        }
-
-        public void AddToSelect(String Names)
-        {
-            foreach (String name in Names.Split(','))
-            {
-                PropertyType proptype = this.PropertyType(name);
-
-                if (!this.SelectCache.Contains(proptype))
-                {
-                    this.SelectCache.Add(proptype);
-                    this._select = null;
-                }
-            }
-        }
-
-        public void AddSearchPropertyTypesToSelect()
-        {
-            foreach(PropertyType proptype in this.SearchPropertyTypes)
-            {
-                if (!this.SelectCache.Contains(proptype))
-                {
-                    this.SelectCache.Add(proptype);
-                    this._select = null;
-                }
-            }
-        }
-
-        public void AddRelationshipGridPropertyTypesToSelect()
-        {
-            foreach (PropertyType proptype in this.RelationshipGridPropertyTypes)
-            {
-                if (!this.SelectCache.Contains(proptype))
-                {
-                    this.SelectCache.Add(proptype);
-                    this._select = null;
-                }
-            }
-        }
-
         public bool Equals(ItemType other)
         {
-            if (other != null && other is ItemType)
+            if (other != null)
             {
                 return this.ID.Equals(other.ID);
             }
@@ -572,7 +392,7 @@ namespace Aras.Model
 
         public override bool Equals(object obj)
         {
-            if (obj != null && obj is ItemType)
+            if (obj is ItemType)
             {
                 return this.Equals((ItemType)obj);
             }
@@ -594,10 +414,7 @@ namespace Aras.Model
 
         internal ItemType(Session Session, String ID, String Name, String SingularLabel, String PluralLabel, String ClassStructure)
         {
-            this._searchPropertyOverride = null;
-            this.RelationshipTypeCache = new Dictionary<String, RelationshipType>();
-            this.SelectCache = new List<PropertyType>();
-            this.RelationshipTypesLoaded = false;
+            this.RelationshipTypeNameCache = new Dictionary<string, RelationshipType>();
             this.Session = Session;
             this.ID = ID;
             this.Name = Name;

@@ -54,7 +54,7 @@ namespace Aras.Model
 
     public delegate void DeletedEventHandler(object sender, DeletedEventArgs e);
 
-    public class Item : INotifyPropertyChanged, IEquatable<Item>
+    public class Item : IEquatable<Item>, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -80,345 +80,120 @@ namespace Aras.Model
 
         internal void OnDeleted()
         {
-            this.DatabaseState = DatabaseStates.Deleted;
-
             if (this.Deleted != null)
             {
                 Deleted(this, new DeletedEventArgs());
             }
         }
 
-        public Session Session
-        {
-            get
-            {
-                return this.ItemType.Session;
-            }
-        }
+        public enum States { New, Stored, Deleted };
 
         public enum Actions { Create, Read, Update, Delete };
 
-        private Actions _action;
-        public Actions Action 
-        { 
-            get
-            {
-                return this._action;
-            }
-            private set
-            {
-                if (this._action != value)
-                {
-                    this._action = value;
-                    this.OnPropertyChanged("Action");
-                }
-            }
-        }
+        public enum Locks { None, User, OtherUser };
 
-        public enum DatabaseStates { New, Stored, Deleted };
+        internal Cache.Item Cache { get; private set; }
 
-        private DatabaseStates _databaseState;
-        public DatabaseStates DatabaseState
+        public Store Store { get; private set; }
+
+        public ItemType ItemType
         {
             get
             {
-                return this._databaseState;
-            }
-            private set
-            {
-                if (this._databaseState != value)
-                {
-                    this._databaseState = value;
-                    this.OnPropertyChanged("DatabaseState");
-                }
+                return this.Cache.ItemType;
             }
         }
 
-        public ItemType ItemType { get; private set; }
-
-        public String ID { get; private set; }
-
-        public String ConfigID { get; private set; }
-
-        public Int32 Generation { get; private set; }
-
-        public Boolean IsCurrent { get; private set; }
-
-        public Boolean Locked(Boolean Refresh)
-        {
-            if (this.Action == Actions.Create)
-            {
-                return true;
-            }
-            else
-            {
-                if (Refresh)
-                {
-                    this.Property("locked_by_id").Refresh();
-                }
-
-                if (this.LockedBy != null && this.LockedBy.Equals(this.Session.User))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
-        public Class Class
+        public String ID
         {
             get
             {
-                return this.ItemType.ClassStructure.Search((String)this.Property("classification").Value);
-            }
-            set
-            {
-                if (value != null)
-                {
-                    if (value.ItemType.Equals(this.ItemType))
-                    {
-                        this.Property("classification").Value = value.Fullname;
-                    }
-                    else
-                    {
-                        throw new Exceptions.ArgumentException("Class is from another ItemType");
-                    }
-                }
-                else
-                {
-                    this.Property("classification").Value = null;
-                }
+                return this.Cache.ID;
             }
         }
 
-        public String KeyedName
+        public String ConfigID
         {
             get
             {
-                return (String)this.Property("keyed_name").Value;
+                return this.Cache.ConfigID;
             }
         }
 
-        public User CreatedBy
+        public Int32 Generation
         {
             get
             {
-                return (User)this.Property("created_by_id").Value;
+                return this.Cache.Generation;
             }
         }
 
-        public DateTime CreatedOn
+        public Boolean IsCurrent
         {
             get
             {
-                return (DateTime)this.Property("created_on").Value;
+                return this.Cache.IsCurrent;
             }
         }
 
-        public LifeCycleState CurrentState
+        public States State
         {
             get
             {
-                return (LifeCycleState)this.Property("current_state").Value;
+                return this.Cache.State;
             }
         }
 
-        public Boolean IsReleased
+        public Actions Action
         {
             get
             {
-                return (Boolean)this.Property("is_released").Value;
+                return this.Cache.Action;
             }
         }
 
-        private void UpdateLockedBy(User User)
-        {
-            if (User == null)
-            {
-                this.Property("locked_by_id").DBValue = null;
-            }
-            else
-            {
-                this.Property("locked_by_id").DBValue = User.ID;
-            }
-        }
-
-        public User LockedBy
+        public Locks Locked
         {
             get
             {
-                return (User)this.Property("locked_by_id").Value;
-            }
-            private set
-            {
-                this.Property("locked_by_id").Value = value;
+                return this.Cache.Locked;
             }
         }
 
-        public String MajorRev
+        internal void UnLock()
         {
-            get
-            {
-                return (String)this.Property("major_rev").Value;
-            }
+            this.Cache.UnLock();
         }
 
-        public Identity ManagedBy
+        public void Update(Transaction Transaction)
         {
-            get
-            {
-                return (Identity)this.Property("managed_by_id").Value;
-            }
+            this.Cache.Update(this, Transaction);
+            this.OnUpdate(Transaction);
         }
 
-        public String MinorRev
+        protected virtual void OnUpdate(Transaction Transaction)
         {
-            get
-            {
-                return (String)this.Property("minor_rev").Value;
-            }
-        }
 
-        public User ModifiedBy
-        {
-            get
-            {
-                return (User)this.Property("modified_by_id").Value;
-            }
-        }
-
-        public DateTime ModifiedOn
-        {
-            get
-            {
-                return (DateTime)this.Property("modified_on").Value;
-            }
-        }
-
-        public Identity OwnedBy
-        {
-            get
-            {
-                return (Identity)this.Property("owned_by_id").Value;
-            }
-        }
-
-        public Permission Permission
-        {
-            get
-            {
-                return (Permission)this.Property("permission_id").Value;
-            }
-        }
-
-        public override string ToString()
-        {
-            if (this.HasProperty("keyed_name"))
-            {
-                return this.KeyedName;
-            }
-            else
-            {
-                return this.ID;
-            }
-        }
-
-        public String State
-        {
-            get
-            {
-                return (String)this.Property("state").Value;
-            }
-        }
-
-        public Team Team
-        {
-            get
-            {
-                return (Team)this.Property("team_id").Value;
-            }
         }
 
         private Dictionary<PropertyType, Property> PropertyCache;
 
         public Property Property(PropertyType PropertyType)
         {
-            if (!this.PropertyCache.ContainsKey(PropertyType))
+            if (this.PropertyCache.ContainsKey(PropertyType))
             {
-                switch (PropertyType.GetType().Name)
-                {
-                    case "String":
-                        this.PropertyCache[PropertyType] = new Properties.String(this, (PropertyTypes.String)PropertyType);
-                        break;
-                    case "Federated":
-                        this.PropertyCache[PropertyType] = new Properties.Federated(this, (PropertyTypes.Federated)PropertyType);
-                        break;
-                    case "MultilingualString":
-                        this.PropertyCache[PropertyType] = new Properties.MultilingualString(this, (PropertyTypes.MultilingualString)PropertyType);
-                        break;
-                    case "Text":
-                        this.PropertyCache[PropertyType] = new Properties.Text(this, (PropertyTypes.Text)PropertyType);
-                        break;
-                    case "FormattedText":
-                        this.PropertyCache[PropertyType] = new Properties.FormattedText(this, (PropertyTypes.FormattedText)PropertyType);
-                        break;
-                    case "Integer":
-                        this.PropertyCache[PropertyType] = new Properties.Integer(this, (PropertyTypes.Integer)PropertyType);
-                        break;
-                    case "Item":
-                        this.PropertyCache[PropertyType] = new Properties.Item(this, (PropertyTypes.Item)PropertyType);
-                        break;
-                    case "Date":
-                        this.PropertyCache[PropertyType] = new Properties.Date(this, (PropertyTypes.Date)PropertyType);
-                        break;
-                    case "List":
-                        this.PropertyCache[PropertyType] = new Properties.List(this, (PropertyTypes.List)PropertyType);
-                        break;
-                    case "Decimal":
-                        this.PropertyCache[PropertyType] = new Properties.Decimal(this, (PropertyTypes.Decimal)PropertyType);
-                        break;
-                    case "Float":
-                        this.PropertyCache[PropertyType] = new Properties.Float(this, (PropertyTypes.Float)PropertyType);
-                        break;
-                    case "Boolean":
-                        this.PropertyCache[PropertyType] = new Properties.Boolean(this, (PropertyTypes.Boolean)PropertyType);
-                        break;
-                    case "Image":
-                        this.PropertyCache[PropertyType] = new Properties.Image(this, (PropertyTypes.Image)PropertyType);
-                        break;
-                    case "Sequence":
-                        this.PropertyCache[PropertyType] = new Properties.Sequence(this, (PropertyTypes.Sequence)PropertyType);
-                        break;
-                    case "Foreign":
-                        this.PropertyCache[PropertyType] = new Properties.Foreign(this, (PropertyTypes.Foreign)PropertyType);
-                        break;
-                    default:
-                        throw new NotImplementedException("Property Type not implmented: " + PropertyType.GetType().Name);
-                }
-
-                // Ensure selected in future
-                this.ItemType.AddToSelect(PropertyType.Name);
+                return this.PropertyCache[PropertyType];
             }
-
-            return this.PropertyCache[PropertyType];
+            else
+            {
+                throw new Exceptions.ArgumentException("Invalid PropertyType: " + PropertyType.ToString());
+            }
         }
 
-        public Boolean HasProperty(String Name)
+        public Property Property(String PropertyName)
         {
-            return this.PropertyCache.ContainsKey(this.ItemType.PropertyType(Name));
-        }
-
-        public Boolean HasProperty(PropertyType Type)
-        {
-            return this.PropertyCache.ContainsKey(Type);
-        }
-
-        public Property Property(String Name)
-        {
-            return this.Property(this.ItemType.PropertyType(Name));
+            PropertyType proptype = this.Store.Query.PropertyType(PropertyName);
+            return this.Property(proptype);
         }
 
         public IEnumerable<Property> Properties
@@ -429,732 +204,161 @@ namespace Aras.Model
             }
         }
 
-        public virtual void Refresh()
+        private Dictionary<RelationshipType, Store> RelationshipsCache;
+
+        public IEnumerable<RelationshipType> RelationshipTypes
         {
-            if (this.DatabaseState == DatabaseStates.Stored)
+            get
             {
-                // Reset Next States
-                this._nextstates = null;
-
-                List<String> propertynames = new List<String>();
-
-                foreach(String sysprop in ItemType.SystemProperties)
-                {
-                    propertynames.Add(sysprop);
-                }
-           
-                foreach (Property property in this.Properties)
-                {
-                    propertynames.Add(property.Type.Name);
-                }
-
-                IO.Item dbitem = new IO.Item(this.ItemType.Name, "get");
-                dbitem.Select = String.Join(",", propertynames);
-                dbitem.ID = this.ID;
-                IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, dbitem);
-                IO.Response response = request.Execute();
-
-                if (!response.IsError)
-                {
-                    this.UpdateProperties(response.Items.First());
-                    this.OnRefresh();
-                }
-                else
-                {
-                    throw new Exceptions.ServerException(response);
-                }
+                return this.RelationshipsCache.Keys;
             }
         }
 
-        protected virtual void OnRefresh()
+        public Store Relationships(RelationshipType RelationshipType)
         {
-            // Clear Item Access
-            this._itemAccess = null;
-
-            // Clear Permissions
-            this._canGet = null;
-            this._canUpdate = null;
-            this._canDelete = null;
-            this._canDiscover = null;
-            this._canChangeAccess = null;
-        }
-
-        [Attributes.Action("Update")]
-        public void Update(Transaction Transaction)
-        {
-            if (Transaction != null)
+            if (this.RelationshipsCache.ContainsKey(RelationshipType))
             {
-                switch (this.Action)
-                {
-                    case Actions.Create:
-                        Transaction.Add("add", this);
-                        break;
-
-                    case Actions.Read:
-                    case Actions.Update:
-
-                        if (this.Lock(false))
-                        {
-                            Transaction.Add("update", this);
-                            this.Action = Actions.Update;
-                            this.OnUpdate(Transaction);
-                        }
-                        else
-                        {
-                            throw new Exceptions.ServerException("Failed to lock Item");
-                        }
-
-                        break;
-
-                    case Actions.Delete:
-
-                        if (this.DatabaseState != DatabaseStates.Deleted)
-                        {
-                            if (this.Lock(false))
-                            {
-                                Transaction.Add("update", this);
-                                this.Action = Actions.Update;
-                                this.OnUpdate(Transaction);
-                            }
-                            else
-                            {
-                                throw new Exceptions.ServerException("Failed to lock Item");
-                            }
-                        }
-                        else
-                        {
-                            throw new Exceptions.ArgumentException("Not able to Update a Deleted Item");
-                        }
-
-                        break;
-
-                    default:
-
-                        throw new Exceptions.ArgumentException("Action not implemented in Update: " + this.Action.ToString());
-                }
+                return this.RelationshipsCache[RelationshipType];
             }
             else
             {
-                throw new Exceptions.ArgumentException("Transaction must not be null");
+                throw new Exceptions.ArgumentException("Invalid Relationship Type");
             }
         }
 
-        [Attributes.Action("UnlockUpdate")]
-        public void UnlockUpdate(Transaction Transaction)
+        public Store Relationships(String RelationshipTypeName)
         {
-            if (Transaction != null)
+            RelationshipType reltype = (RelationshipType)this.Store.Session.ItemType(RelationshipTypeName);
+            return this.Relationships(reltype);
+        }
+
+        private void Initalise()
+        {
+            // Watch for Changes in Cache
+            this.Cache.PropertyChanged += ItemCache_PropertyChanged;
+
+            this.PropertyCache = new Dictionary<PropertyType, Property>();
+
+            foreach (PropertyType proptype in this.Store.Query.PropertyTypes)
             {
-                switch (this.Action)
+                switch (proptype.GetType().Name)
                 {
-                    case Actions.Create:
-
+                    case "String":
+                        this.PropertyCache[proptype] = new Properties.String(this, (PropertyTypes.String)proptype);
                         break;
-
-                    case Actions.Read:
-                    case Actions.Update:
-
-                        if (this.Lock(true))
-                        {
-                            Transaction.Add("update", this);
-                            this.Action = Actions.Update;
-                            this.OnUpdate(Transaction);
-                        }
-                        else
-                        {
-                            throw new Exceptions.ServerException("Failed to lock Item");
-                        }
-
+                    case "Federated":
+                        this.PropertyCache[proptype] = new Properties.Federated(this, (PropertyTypes.Federated)proptype);
                         break;
-
+                    case "MultilingualString":
+                        this.PropertyCache[proptype] = new Properties.MultilingualString(this, (PropertyTypes.MultilingualString)proptype);
+                        break;
+                    case "Text":
+                        this.PropertyCache[proptype] = new Properties.Text(this, (PropertyTypes.Text)proptype);
+                        break;
+                    case "FormattedText":
+                        this.PropertyCache[proptype] = new Properties.FormattedText(this, (PropertyTypes.FormattedText)proptype);
+                        break;
+                    case "Integer":
+                        this.PropertyCache[proptype] = new Properties.Integer(this, (PropertyTypes.Integer)proptype);
+                        break;
+                    case "Item":
+                        this.PropertyCache[proptype] = new Properties.Item(this, (PropertyTypes.Item)proptype);
+                        break;
+                    case "Date":
+                        this.PropertyCache[proptype] = new Properties.Date(this, (PropertyTypes.Date)proptype);
+                        break;
+                    case "List":
+                        this.PropertyCache[proptype] = new Properties.List(this, (PropertyTypes.List)proptype);
+                        break;
+                    case "Decimal":
+                        this.PropertyCache[proptype] = new Properties.Decimal(this, (PropertyTypes.Decimal)proptype);
+                        break;
+                    case "Float":
+                        this.PropertyCache[proptype] = new Properties.Float(this, (PropertyTypes.Float)proptype);
+                        break;
+                    case "Boolean":
+                        this.PropertyCache[proptype] = new Properties.Boolean(this, (PropertyTypes.Boolean)proptype);
+                        break;
+                    case "Image":
+                        this.PropertyCache[proptype] = new Properties.Image(this, (PropertyTypes.Image)proptype);
+                        break;
+                    case "Sequence":
+                        this.PropertyCache[proptype] = new Properties.Sequence(this, (PropertyTypes.Sequence)proptype);
+                        break;
+                    case "Foreign":
+                        this.PropertyCache[proptype] = new Properties.Foreign(this, (PropertyTypes.Foreign)proptype);
+                        break;
                     default:
-
-                        throw new Exceptions.ArgumentException("Action not implemented in UnlockUpdate: " + this.Action.ToString());
-                }
-            }
-            else
-            {
-                throw new Exceptions.ArgumentException("Transaction must not be null");
-            }
-        }
-
-        [Attributes.Action("Delete")]
-        public void Delete(Transaction Transaction)
-        {
-            if (Transaction != null)
-            {
-                if (this.DatabaseState == DatabaseStates.Stored)
-                {
-                    // Add to Transaction
-                    Transaction.Add("delete", this);
-                }
-                else
-                {
-                    Transaction.Remove(this);
+                        throw new NotImplementedException("Property Type not implmented: " + proptype.GetType().Name);
                 }
             }
 
-            this.Action = Actions.Delete;
-        }
+            this.RelationshipsCache = new Dictionary<RelationshipType, Store>();
 
-        [Attributes.Action("UnLockDelete")]
-        public void UnlockDelete(Transaction Transaction)
-        {
-            if (Transaction != null)
+            foreach(Query relquery in this.Store.Query.Relationships)
             {
-                if (this.DatabaseState == DatabaseStates.Stored)
-                {
-                    // UnLock
-                    this.UnLock();
-      
-                    // Add to Transaction
-                    Transaction.Add("delete", this);
-                }
-                else
-                {
-                    Transaction.Remove(this);
-                }
+                this.RelationshipsCache[(RelationshipType)relquery.ItemType] = new Store(relquery);
             }
-
-            this.Action = Actions.Delete;
         }
 
-        protected virtual void OnUpdate(Transaction Transaction)
+        private void ItemCache_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-           
+            this.OnPropertyChanged(e.PropertyName);
         }
 
-        private Boolean Lock(Boolean UnLock)
+        internal void UpdateProperties(IO.Item DBItem)
         {
-            Boolean ret = false;
-
-            switch(this.DatabaseState)
+            if (this.ID.Equals(DBItem.ID))
             {
-                case DatabaseStates.Stored:
-
-                    if (this.LockedBy == null)
+                foreach(Property property in this.PropertyCache.Values)
+                {
+                    if (property is Properties.Item)
                     {
-                        IO.Item lockitem = new IO.Item(this.ItemType.Name, "lock");
-                        lockitem.ID = this.ID;
-                        lockitem.Select = "locked_by_id";
-                        lockitem.DoGetItem = false;
-                        IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, lockitem);
-                        IO.Response response = request.Execute();
+                        IO.Item dbpropitem = DBItem.GetPropertyItem(property.Type.Name);
 
-                        if (!response.IsError)
+                        if (dbpropitem != null)
                         {
-                            this.UpdateLockedBy(this.Session.User);
-                            ret = true;
+                            property.DBValue = this.Store.Query.Property((PropertyTypes.Item)property.Type).Store.Create(dbpropitem).ID;
                         }
                         else
                         {
-                            throw new Exceptions.ServerException(response);
-                        }
-                    }
-                    else if (this.LockedBy.ID.Equals(this.ItemType.Session.User.ID))
-                    {
-                        ret = true;
-                    }
-                    else if (!this.LockedBy.ID.Equals(this.ItemType.Session.User.ID) && UnLock)
-                    {
-                        // Force Unlock
-                        IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
-                        unlockitem.ID = this.ID;
-                        unlockitem.DoGetItem = false;
-                        IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, unlockitem);
-                        IO.Response response = request.Execute();
-
-                        if (!response.IsError)
-                        {
-                            IO.Item lockitem = new IO.Item(this.ItemType.Name, "lock");
-                            lockitem.ID = this.ID;
-                            lockitem.Select = "locked_by_id";
-                            lockitem.DoGetItem = false;
-                            request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, lockitem);
-                            response = request.Execute();
-
-                            if (!response.IsError)
-                            {
-                                this.UpdateLockedBy(this.Session.User);
-                                ret = true;
-                            }
-                            else
-                            {
-                                throw new Exceptions.ServerException(response);
-                            }
-                        }
-                        else
-                        {
-                            if (response.ErrorMessage.Equals("Aras.Server.Core.ItemIsLockedBySomeoneElseException"))
-                            {
-                                throw new Exceptions.UnLockException(this);
-                            }
-                            else
-                            {
-                                throw new Exceptions.ServerException(response);
-                            }
+                            property.DBValue = null;
                         }
                     }
                     else
                     {
-                        ret = false;
+                        property.DBValue = DBItem.GetProperty(property.Type.Name);
                     }
+                }
 
-                    break;
+                Dictionary<RelationshipType, List<IO.Item>> dbrels = new Dictionary<RelationshipType, List<IO.Item>>();
 
-                case DatabaseStates.Deleted:
-
-                    throw new Exceptions.ArgumentException("Item is Deleted");
-
-                default:
-
-                    ret = true;
-
-                    break;
-            }
-
-            return ret;
-        }
-
-        internal Boolean UnLock()
-        {
-            if (this.LockedBy == null)
-            {
-                this.Action = Actions.Read;
-                this.DatabaseState = DatabaseStates.Stored;
-                return true;
-            }
-            else
-            {
-                if (this.LockedBy.ID.Equals(this.ItemType.Session.User.ID))
+                foreach (IO.Item dbrel in DBItem.Relationships)
                 {
-                    IO.Item unlockitem = new IO.Item(this.ItemType.Name, "unlock");
-                    unlockitem.ID = this.ID;
-                    unlockitem.DoGetItem = false;
-                    IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, unlockitem);
-                    IO.Response response = request.Execute();
+                    ItemType reltype = this.Store.Session.ItemType(dbrel.ItemType);
 
-                    if (!response.IsError)
+                    if (reltype is RelationshipType)
                     {
-                        this.Action = Actions.Read;
-                        this.DatabaseState = DatabaseStates.Stored;
-                        this.UpdateLockedBy(null);
-                        
-                        return true;
-                    }
-                    else
-                    {
-                        if (response.ErrorMessage.Equals("Aras.Server.Core.ItemIsNotLockedException"))
+                        if (!dbrels.ContainsKey((RelationshipType)reltype))
                         {
-                            // Not locked
-                            this.Action = Actions.Read;
-                            this.DatabaseState = DatabaseStates.Stored;
-                            this.UpdateLockedBy(null);
-                            return true;
+                            dbrels[(RelationshipType)reltype] = new List<IO.Item>();
                         }
-                        else
-                        {
-                            throw new Exceptions.ServerException(response);
-                        }
-                    }
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
 
-        internal virtual void UpdateProperties(IO.Item DBItem)
-        {
-            if (DBItem != null)
-            {
-                if (this.ID == DBItem.ID)
-                {
-                    this.IsCurrent = DBItem.GetProperty("is_current", "0").Equals("1");
-                    IEnumerable<String> dbpropnames = DBItem.PropertyNames;
-                    IEnumerable<PropertyType> proptypes = this.ItemType.PropertyTypes;
-
-                    foreach (PropertyType proptype in proptypes)
-                    {
-                        if (dbpropnames.Contains(proptype.Name))
-                        {
-                            if (proptype is PropertyTypes.Item)
-                            {
-                                IO.Item dbpropitem = DBItem.GetPropertyItem(proptype.Name);
-
-                                if (dbpropitem != null)
-                                {
-                                    Item propitem = this.Session.Get(((PropertyTypes.Item)proptype).ValueType, dbpropitem);
-                                    this.Property(proptype).DBValue = propitem.ID;
-                                }
-                                else
-                                {
-                                    this.Property(proptype).DBValue = DBItem.GetProperty(proptype.Name);
-                                }
-                            }
-                            else
-                            {
-                                this.Property(proptype).DBValue = DBItem.GetProperty(proptype.Name);
-                            }
-                        }
-                    }
-
-                    // Set Database State to Stored
-                    this.DatabaseState = DatabaseStates.Stored;
-
-                    // Update Action
-                    if (this.Action != Actions.Update)
-                    {
-                        this.Action = Actions.Read;
-                    }
-                }
-                else
-                {
-                    throw new Exceptions.ArgumentException("Invalid Item ID");
-                }
-            }
-        }
-
-        public Boolean IsManager
-        {
-            get
-            {
-                if (this.Session.Alias.Equals(this.ManagedBy))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
-        public Boolean IsOwner
-        {
-            get
-            {
-                if (this.Session.Alias.Equals(this.OwnedBy) || this.Session.User.Equals(this.CreatedBy))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }  
-            }
-        }
-
-        private List<Access> _itemAccess;
-        private IEnumerable<Access> ItemAccess
-        {
-            get
-            {
-                if (this._itemAccess == null)
-                {
-                    this._itemAccess = new List<Access>();
-
-                    if (this.Permission != null)
-                    {
-                        foreach (Access access in this.Permission.Access)
-                        {
-                            switch (access.Identity.Name)
-                            {
-                                case "Owner":
-
-                                    if (this.IsOwner)
-                                    {
-                                        this._itemAccess.Add(access);
-                                    }
-
-                                    break;
-                                case "Manager":
-
-                                    if (this.IsManager)
-                                    {
-                                        this._itemAccess.Add(access);
-                                    }
-
-                                    break;
-                                default:
-
-                                    if (this.Session.Identities.Contains(access.Identity))
-                                    {
-                                        this._itemAccess.Add(access);
-                                    }
-
-                                    break;
-                            }
-                        }
+                        dbrels[(RelationshipType)reltype].Add(dbrel);
                     }
                 }
 
-                return this._itemAccess;
-            }
-        }
-
-        private Boolean? _canGet;
-        public Boolean CanGet
-        {
-            get
-            {
-                if (this._canGet == null)
+                foreach(RelationshipType reltype in dbrels.Keys)
                 {
-                    this._canGet = false;
-
-                    foreach (Access access in this.ItemAccess)
-                    {
-                        if (access.IdentityCanGet)
-                        {
-                            this._canGet = true;
-                            break;
-                        }
-                    }
-                }
-
-                return (Boolean)this._canGet;
-            }
-        }
-
-        private Boolean? _canUpdate;
-        public Boolean CanUpdate
-        {
-            get
-            {
-                if (this._canUpdate == null)
-                {
-                    this._canUpdate = false;
-
-                    foreach (Access access in this.ItemAccess)
-                    {
-                        if (access.IdentityCanUpdate)
-                        {
-                            this._canUpdate = true;
-                            break;
-                        }
-                    }
-                }
-
-                return (Boolean)this._canUpdate;
-            }
-        }
-
-        private Boolean? _canDelete;
-        public Boolean CanDelete
-        {
-            get
-            {
-                if (this._canDelete == null)
-                {
-                    this._canDelete = false;
-
-                    foreach (Access access in this.ItemAccess)
-                    {
-                        if (access.IdentityCanDelete)
-                        {
-                            this._canDelete = true;
-                            break;
-                        }
-                    }
-                }
-
-                return (Boolean)this._canDelete;
-            }
-        }
-
-        private Boolean? _canDiscover;
-        public Boolean CanDiscover
-        {
-            get
-            {
-                if (this._canDiscover == null)
-                {
-                    this._canDiscover = false;
-
-                    foreach (Access access in this.ItemAccess)
-                    {
-                        if (access.IdentityCanDiscover)
-                        {
-                            this._canDiscover = true;
-                            break;
-                        }
-                    }
-                }
-
-                return (Boolean)this._canDiscover;
-            }
-        }
-
-        private Boolean? _canChangeAccess;
-        public Boolean CanChangeAccess
-        {
-            get
-            {
-                if (this._canChangeAccess == null)
-                {
-                    this._canChangeAccess = false;
-
-                    foreach (Access access in this.ItemAccess)
-                    {
-                        if (access.IdentityCanChangeAccess)
-                        {
-                            this._canChangeAccess = true;
-                            break;
-                        }
-                    }
-                }
-
-                return (Boolean)this._canChangeAccess;
-            }
-        }
-
-        private List<LifeCycleState> _nextstates;
-        public IEnumerable<LifeCycleState> NextStates
-        {
-            get
-            {
-                if (this.DatabaseState == DatabaseStates.Stored)
-                {
-                    if (this._nextstates == null)
-                    {
-                        IO.Request request = this.Session.IO.Request(IO.Request.Operations.GetItemNextStates);
-                        IO.Item item = request.NewItem(this.ItemType.Name, "get");
-                        item.ID = this.ID;
-                        IO.Response response = request.Execute();
-
-                        if (!response.IsError)
-                        {
-                            this._nextstates = new List<LifeCycleState>();
-
-                            if (response.Items.Count() > 0)
-                            {
-                                IO.Item lifecycletransisiton = response.Items.First();
-
-                                foreach (IO.Item dblifecyclestate in lifecycletransisiton.ToStates)
-                                {
-                                    LifeCycleState lifecyclestate = (LifeCycleState)this.Session.Get(this.Session.ItemType("Life Cycle State"), dblifecyclestate);
-                                    this._nextstates.Add(lifecyclestate);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            throw new Exceptions.ServerException(response);
-                        }
-                    }
-                }
-                else
-                {
-                    throw new Exceptions.ArgumentException("Item must be stored in Database before Promotion");
-                }
-
-                return this._nextstates;
-            }
-        }
-
-        public void Promote(LifeCycleState NewState)
-        {
-            if (this.NextStates.Contains(NewState))
-            {
-                IO.Request request = this.Session.IO.Request(IO.Request.Operations.PromoteItem);
-                IO.Item item = request.NewItem(this.ItemType.Name, "get");
-                item.ID = this.ID;
-                item.SetProperty("state", NewState.Name);
-                IO.Response response = request.Execute();
-
-                if (!response.IsError)
-                {
-                    // Update Current State
-                    this.Property("current_state").DBValue = NewState.ID;
-                    this.Property("state").DBValue = NewState.Name;
-
-                    // Reset New States
-                    this._nextstates = null;
-                }
-                else
-                {
-                    throw new Exceptions.ServerException(response);
+                    this.RelationshipsCache[reltype].Load(dbrels[reltype]);
                 }
             }
             else
             {
-                throw new Exceptions.ArgumentException("Invalid Promotion State: " + NewState.ToString());
+                throw new Exceptions.ArgumentException("Invalid Item ID: " + DBItem.ID);
             }
         }
 
-        private Dictionary<RelationshipType, Stores.Relationship> StoresCache;
-
-        public Stores.Relationship Store(RelationshipType RelationshipType)
-        {
-            if (!this.StoresCache.ContainsKey(RelationshipType))
-            {
-                this.StoresCache[RelationshipType] = new Stores.Relationship(RelationshipType, this);
-            }
-
-            return this.StoresCache[RelationshipType];
-        }
-
-        public Stores.Relationship Store(String RelationshipType)
-        {
-            return this.Store(this.ItemType.RelationshipType(RelationshipType));
-        }
-
-        public IEnumerable<Item> RecursiveRelated(RelationshipType RelationshipType)
-        {
-            List<Item> ret = new List<Item>();
-
-            foreach(Relationship relationship in this.Store(RelationshipType))
-            {
-                if (relationship.Related != null)
-                {
-                    if (!ret.Contains(relationship.Related))
-                    {
-                        ret.Add(relationship.Related);
-                 
-                        foreach(Item relatedrelated in relationship.Related.RecursiveRelated(RelationshipType))
-                        {
-                            if (!ret.Contains(relatedrelated))
-                            {
-                                ret.Add(relatedrelated);
-                            }
-                        }
-                    }
-                }
-            }
-
-            return ret;
-        }
-
-        public IEnumerable<Item> RecursiveRelated(String RelationshipType)
-        {
-            return this.RecursiveRelated(this.ItemType.RelationshipType(RelationshipType));
-        }
-
-        public IEnumerable<Relationship> RecursiveRelationship(RelationshipType RelationshipType)
-        {
-            List<Relationship> ret = new List<Relationship>();
-
-            foreach (Relationship relationship in this.Store(RelationshipType))
-            {
-                ret.Add(relationship);
-
-                if (relationship.Related != null)
-                {
-                    foreach (Relationship relatedrelationship in relationship.Related.RecursiveRelationship(RelationshipType))
-                    {
-                        ret.Add(relatedrelationship);
-                    }
-                }
-            }
-
-            return ret;
-        }
-
-        public IEnumerable<Relationship> RecursiveRelationship(String RelationshipType)
-        {
-            return this.RecursiveRelationship(this.ItemType.RelationshipType(RelationshipType));
-        }
-          
         public Boolean Equals(Item other)
         {
             if (other == null)
@@ -1191,38 +395,18 @@ namespace Aras.Model
             return this.ID.GetHashCode();
         }
 
-        private void Initialise(ItemType ItemType)
+        public Item(Store Store, Transaction Transaction)
         {
-            this.PropertyCache = new Dictionary<PropertyType, Property>();
-            this.StoresCache = new Dictionary<RelationshipType, Stores.Relationship>();
-            this.ItemType = ItemType;
+            this.Cache = Store.Session.GetItemCache(Store.ItemType);
+            this.Store = Store;
+            this.Initalise();
         }
 
-        public Item(ItemType ItemType, Transaction Transaction)
+        public Item(Store Store, IO.Item DBItem)
         {
-            this.Initialise(ItemType);
-            this.ID = IO.Server.NewID();
-            this.ConfigID = this.ID;
-            this.Generation = 1;
-            this.IsCurrent = true;
-            this._action = Actions.Create;
-
-            if (!(this is Relationship))
-            {
-                // Add to Transaction
-                Transaction.Add("add", this);
-            }
-        }
-
-        public Item(ItemType ItemType, IO.Item DBItem)
-        {
-            this.Initialise(ItemType);
-            this.ID = DBItem.ID;
-            this.ConfigID = DBItem.ConfigID;
-            this.Generation = DBItem.Generation;
-            this.IsCurrent = DBItem.IsCurrent;
-            this._action = Actions.Read;
-            this._databaseState = DatabaseStates.Stored;
+            this.Cache = Store.Session.GetItemCache(Store.ItemType, DBItem.ID, DBItem.ConfigID, DBItem.Generation, DBItem.IsCurrent);
+            this.Store = Store;
+            this.Initalise();
             this.UpdateProperties(DBItem);
         }
     }

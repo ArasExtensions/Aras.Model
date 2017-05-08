@@ -30,50 +30,20 @@ using System.Threading.Tasks;
 
 namespace Aras.Model
 {
-    public enum RelationshipGridViews { Left=1, Right=2, InterMix=3 };
+    public enum RelationshipGridViews { Left = 1, Right = 2, InterMix = 3 };
 
     public class RelationshipType : ItemType
     {
-        private static String[] _relationshipTypeSystemProperties = { "id", "config_id", "is_current", "generation", "source_id", "related_id" };
-        internal override IEnumerable<String> SystemProperties
+        public ItemType Source { get; internal set; }
+
+        public ItemType Related { get; internal set; }
+
+        public RelationshipGridViews RelationshipGridView { get; internal set; }
+
+        internal RelationshipType(Session Session, String ID, String Name, String SingularLabel, String PluralLabel, String ClassStructure)
+            :base(Session, ID, Name, SingularLabel, PluralLabel, ClassStructure)
         {
-            get
-            {
-                return _relationshipTypeSystemProperties;
-            }
-        }
 
-        internal override Type Class
-        {
-            get
-            {
-                if (this._class == null)
-                {
-                    this._class = this.Session.Database.Server.ItemTypeClass(this.Name);
-
-                    if (this._class == null)
-                    {
-                        this._class = typeof(Relationship);
-                    }
-                }
-
-                return this._class;
-            }
-        }
-
-        public ItemType SourceItemType { get; private set; }
-
-        public ItemType RelatedItemType { get; private set; }
-
-        public RelationshipGridViews RelationshipGridView { get; private set; }
-
-        internal RelationshipType(Session Session, String ID, String Name, String SingularLabel, String PluralLabel, String ClassStructure, ItemType SourceItemType, ItemType RelatedItemType, RelationshipGridViews RelationshipGridView)
-            : base(Session, ID, Name, SingularLabel, PluralLabel, ClassStructure)
-        {
-            this.SourceItemType = SourceItemType;
-            this.RelatedItemType = RelatedItemType;
-            this.SourceItemType.AddRelationshipType(this);
-            this.RelationshipGridView = RelationshipGridView;
         }
     }
 }

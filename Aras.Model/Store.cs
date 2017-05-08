@@ -31,8 +31,71 @@ using System.ComponentModel;
 
 namespace Aras.Model
 {
-    public abstract class Store<T> : System.Collections.Generic.IEnumerable<T> where T : Model.Item
+    public class Store : System.Collections.Generic.IEnumerable<Model.Item>, INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(String Name)
+        {
+            if (this.PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(Name));
+            }
+        }
+
+        public Boolean Paging
+        {
+            get
+            {
+                return this.Query.Paging;
+            }
+            set
+            {
+                this.Query.Paging = value;
+            }
+        }
+
+        public Int32 PageSize
+        {
+            get
+            {
+                return this.Query.PageSize;
+            }
+            set
+            {
+                this.Query.PageSize = value;
+            }
+        }
+
+        public Int32 Page
+        {
+            get
+            {
+                return this.Query.Page;
+            }
+            set
+            {
+                this.Query.Page = value;
+            }
+        }
+
+        private Int32 _noPages;
+        public Int32 NoPages
+        {
+            get
+            {
+                return this._noPages;
+            }
+            private set
+            {
+                if (this._noPages != value)
+                {
+                    this._noPages = value;
+                    this.OnPropertyChanged("NoPages");
+                }
+            }
+        }
+
         public Session Session
         {
             get
@@ -41,148 +104,62 @@ namespace Aras.Model
             }
         }
 
-        public ItemType ItemType { get; private set; }
-
-        internal abstract String Select { get; }
-
-        // Cache of all Items Read from Server and Created in Session
-        private Dictionary<String, T> ItemsCache;
-
-        protected Boolean InItemsCache(String ID)
+        public ItemType ItemType
         {
-            return this.ItemsCache.ContainsKey(ID);
-        }
-
-        protected void AddToItemsCache(T Item)
-        {
-            this.ItemsCache[Item.ID] = Item;
-        }
-
-        protected void RemoveFromItemsCache(T Item)
-        {
-            if (this.ItemsCache.ContainsKey(Item.ID))
+            get
             {
-                this.ItemsCache.Remove(Item.ID);
+                return this.Query.ItemType;
             }
         }
 
-        protected T GetFromItemsCache(String ID)
+        private Query _query;
+        public Query Query
         {
-            if (this.ItemsCache.ContainsKey(ID))
+            get
             {
-                return this.ItemsCache[ID];
+                return this._query;
             }
-            else
+            private set
             {
-                throw new Exceptions.ArgumentException("Invalid Items Cache ID: " + ID);
-            }
-        }
-
-        protected void ReplaceItemsCache(List<String> AllItems)
-        {
-            // Add Created Items
-            foreach(String createditemid in this.CreatedCache.Keys)
-            {
-                if (!AllItems.Contains(createditemid))
+                if (value != null)
                 {
-                    AllItems.Add(createditemid);
+                    this._query = value;
+                    this._query.PropertyChanged += Query_PropertyChanged;
                 }
-            }
-
-            // Build List of ID;s to be removed from Cache
-            List<String> toberemoved = new List<String>();
-
-            foreach(String key in this.ItemsCache.Keys)
-            {
-                if(!AllItems.Contains(key))
+                else
                 {
-                    toberemoved.Add(key);
-                }
-            }
-
-            // Remove Items from Cache
-            foreach(String key in toberemoved)
-            {
-                this.ItemsCache.Remove(key);
-            }
-        }
-
-        // Cache of all Created Items
-        private Dictionary<String, T> CreatedCache;
-
-        protected Boolean InCreatedCache(T Item)
-        {
-            return this.CreatedCache.ContainsKey(Item.ID);
-        }
-
-        protected void AddToCreatedCache(T Item)
-        {
-            this.CreatedCache[Item.ID] = Item;
-        }
-
-        protected void RemoveFromCreatedCache(T Item)
-        {
-            if (this.CreatedCache.ContainsKey(Item.ID))
-            {
-                this.CreatedCache.Remove(Item.ID);
-            }
-        }
-
-        protected T GetFromCreatedCache(String ID)
-        {
-            if (this.CreatedCache.ContainsKey(ID))
-            {
-                return this.CreatedCache[ID];
-            }
-            else
-            {
-                throw new Exceptions.ArgumentException("Invalid Created Cache ID: " + ID);
-            }
-        }
-
-        protected void RefreshCreatedCache()
-        {
-            // Remove any Items that are now in database from Created Cache
-            List<String> keys = this.CreatedCache.Keys.ToList();
-
-            foreach(String key in keys)
-            {
-                if (this.CreatedCache[key].Action != Item.Actions.Create)
-                {
-                    this.CreatedCache.Remove(key);
+                    throw new Exceptions.ArgumentException("Query must be specified");
                 }
             }
         }
 
-        public IEnumerable<T> CreatedItems()
+        void Query_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            this.RefreshCreatedCache();
-            return this.CreatedCache.Values;
-        }
-
-        public abstract T Get(String ID);
-
-        internal abstract T Get(IO.Item DBItem);
-
-        internal void Delete(T Item)
-        {
-            if (this.ItemsCache.ContainsKey(Item.ID))
+            switch(e.PropertyName)
             {
-                this.ItemsCache.Remove(Item.ID);
-            }
-            else
-            {
-                if (this.CreatedCache.ContainsKey(Item.ID))
-                {
-                    this.CreatedCache.Remove(Item.ID);
-                }
+                case "PageSize":
+                case "Paging":
+                    this.OnPropertyChanged(e.PropertyName);
+                    break;
+                default:
+                    break;
             }
         }
 
-        public System.Collections.Generic.IEnumerator<T> GetEnumerator()
+        private Dictionary<String, Model.Item> Cache;
+
+        private List<Model.Item> Items;
+
+        private List<Model.Item> CreatedItems;
+
+        public System.Collections.Generic.IEnumerator<Model.Item> GetEnumerator()
         {
-            this.Index();
-            return this.ItemsCache.Values.GetEnumerator();
+            if (this.Items == null)
+            {
+                this.Refresh();
+            }
+
+            return this.Items.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -190,51 +167,146 @@ namespace Aras.Model
             return this.GetEnumerator();
         }
 
-        private Boolean Indexed;
-
-        protected abstract void ReadAllItems();
-
-        private void Index()
+        public void Refresh()
         {
-            if (!this.Indexed)
-            {
-                this.ReadAllItems();
-                this.Indexed = true;
-            }
-        }
+            // Run Query
+            IO.Item dbquery = this.Query.DBQuery();
 
-        public void Refesh()
-        {
-            // Only Refresh if already Indexed
-            if (this.Indexed)
+            if (dbquery != null)
             {
-                this.ReadAllItems();
-            }
-        }
+                IO.Request request = this.ItemType.Session.IO.Request(IO.Request.Operations.ApplyItem, dbquery);
+                IO.Response response = request.Execute();
 
-        public IEnumerable<T> CurrentItems()
-        {
-            List<T> currentitems = new List<T>();
-
-            foreach (T item in this)
-            {
-                if (item.Action != Item.Actions.Delete)
+                if (!response.IsError)
                 {
-                    currentitems.Add(item);
+                    this.Load(response.Items);
+
+                    if (this.Paging)
+                    {
+                        if (response.Items.Count() > 0)
+                        {
+                            this.NoPages = response.Items.First().PageMax;
+                        }
+                        else
+                        {
+                            this.NoPages = 0;
+                        }
+                    }
+                    else
+                    {
+                        this.NoPages = 0;
+                    }
+                }
+                else
+                {
+                    if (!response.ErrorMessage.Equals("No items of type " + this.ItemType.Name + " found."))
+                    {
+                        throw new Exceptions.ServerException(response);
+                    }
+                    else
+                    {
+                        this.Load(null);
+                    }
+                }
+            }
+        }
+
+        internal void Load(IEnumerable<IO.Item> DBItems)
+        {
+            if (this.Items == null)
+            {
+                this.Items = new List<Item>();
+            }
+            else
+            {
+                this.Items.Clear();
+            }
+
+            if (DBItems != null)
+            {
+                foreach (IO.Item dbitem in DBItems)
+                {
+                    this.Items.Add(this.Create(dbitem));
                 }
             }
 
-            return currentitems;
+            // Add Created Items to end of Items
+            List<Item> newcreateditems = new List<Item>();
+
+            foreach(Item createditem in this.CreatedItems)
+            {
+                if (createditem.State == Item.States.New)
+                {
+                    this.Items.Add(createditem);
+                    newcreateditems.Add(createditem);
+                }
+            }
+
+            this.CreatedItems = newcreateditems;
         }
 
-        internal Store(ItemType ItemType)
+        public Model.Item Create(Transaction Transaction)
         {
-            this.ItemsCache = new Dictionary<String, T>();
-            this.CreatedCache = new Dictionary<String, T>();
-            this.Indexed = false;
-            this.ItemType = ItemType;
+            Model.Item item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(Store), typeof(Transaction) }).Invoke(new object[] { this, Transaction }); 
+            this.Cache[item.ID] = item;
+            this.CreatedItems.Add(item);
+            this.Items.Add(item);
+            return item;
         }
 
+        internal Model.Item Create(IO.Item DBItem)
+        {
+            Model.Item ret = null;
 
+            if (this.Cache.ContainsKey(DBItem.ID))
+            {
+                ret = this.Cache[DBItem.ID];
+                ret.UpdateProperties(DBItem);
+            }
+            else
+            {
+                ret = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(Store), typeof(IO.Item) }).Invoke(new object[] { this, DBItem }); 
+                this.Cache[ret.ID] = ret;
+            }
+
+            return ret;
+        }
+
+        public Item Get(String ID)
+        {
+            if (!this.Cache.ContainsKey(ID))
+            {
+                // Run Query
+                IO.Request request = this.ItemType.Session.IO.Request(IO.Request.Operations.ApplyItem, this.Query.DBQuery(ID));
+                IO.Response response = request.Execute();
+
+                if (!response.IsError)
+                {
+                    if (response.Items.Count() == 1)
+                    {
+                        // Add to Cache
+                        this.Create(response.Items.First());
+                    }
+                    else
+                    {
+                        throw new Exceptions.ServerException("Item ID not found: " + ID);
+                    }
+                }
+                else
+                {
+                    throw new Exceptions.ServerException(response);
+                }
+            }
+
+            return this.Cache[ID];
+        }
+
+        internal Store(Query Query)
+        {
+            this.Cache = new Dictionary<String, Item>();
+            this.CreatedItems = new List<Item>();
+            this.Query = Query;
+            this._noPages = 0;
+        }
     }
 }

@@ -37,16 +37,27 @@ namespace Aras.Model.Debug
             Server server = new Server("http://localhost/InnovatorServer100SP4");
             Database database = server.Database("CMB");
             Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
+            
+            Query orderquery = session.Query("v_Order");
+            orderquery.Paging = false;
+            orderquery.Select = "item_number,name,part";
+            orderquery.Condition = Aras.Conditions.Eq("item_number", "1");
+            orderquery.Property("part").Select = "item_number";
+            orderquery.Property("part").Relationship("Part BOM").Select = "quantity,related_id";
+            orderquery.Property("part").Relationship("Part BOM").Property("related_id").Select = "item_number";
 
-            session.ItemType("Part").AddToSelect("item_number");
+            Int32 test = orderquery.Store.Count();
+            Item order = orderquery.Store.First();
+            String testn = (String)order.Property("item_number").Value;
+            Int32 testnp = orderquery.Store.NoPages;
 
-            Queries.Item allparts = session.Store("Part").Query();
+            Item part = (Item)order.Property("part").Value;
 
-            foreach (Item parts in allparts)
+            foreach(Item partbom in part.Relationships("Part BOM"))
             {
-                String test = parts.KeyedName;
-                String test2 = (String)parts.Property("item_number").Value;
+                Double test3 = (Double)partbom.Property("quantity").Value;
             }
+
         }
     }
 }

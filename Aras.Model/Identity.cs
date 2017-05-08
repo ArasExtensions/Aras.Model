@@ -46,14 +46,14 @@ namespace Aras.Model
             return this.Name;
         }
 
-        public Identity(ItemType ItemType, Transaction Transaction)
-            : base(ItemType, Transaction)
+        public Identity(Store Store, Transaction Transaction)
+            : base(Store, Transaction)
         {
 
         }
 
-        public Identity(ItemType ItemType, IO.Item DBItem)
-            :base(ItemType, DBItem)
+        public Identity(Store Store, IO.Item DBItem)
+            :base(Store, DBItem)
         {
 
         }

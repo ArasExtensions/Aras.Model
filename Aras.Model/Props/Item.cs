@@ -47,23 +47,17 @@ namespace Aras.Model.Properties
                         base.Value = value;
                     }
                 }
-                else if (value is Aras.Model.Item)
+                else if (value is Model.Item)
                 {
                     if (base.Value == null)
                     {
                         base.Value = value;
-
-                        // Watch for Item Versioning
-                        ((Aras.Model.Item)value).Superceded += Item_Superceded;
                     }
                     else
                     {
-                        if (!((Aras.Model.Item)base.Value).Equals((Aras.Model.Item)value))
+                        if (!((Model.Item)base.Value).Equals((Model.Item)value))
                         {
                             base.Value = value;
-
-                            // Watch for Item Versioning
-                            ((Aras.Model.Item)value).Superceded += Item_Superceded;
                         }
                     }
                 }
@@ -74,67 +68,29 @@ namespace Aras.Model.Properties
             }
         }
 
-        void Item_Superceded(object sender, SupercededEventArgs e)
-        {
-            Model.Item CurrentGeneration = (Model.Item)sender;
-
-            // Stop watching current Related Item
-            CurrentGeneration.Superceded -= Item_Superceded;
-
-            // Set new Item
-            base.Value = e.NewGeneration;
-
-            // Watch for Related Item Versioning
-            e.NewGeneration.Superceded += Item_Superceded;
-        }
-
         internal override string DBValue
         {
             get
             {
-                if (this.Value == null)
-                {
-                    return null;
-                }
-                else
-                {
-                    return ((Model.Item)this.Value).ID;
-                }
+               if (this.Value == null)
+               {
+                   return null;
+               }
+               else
+               {
+                   return ((Model.Item)this.Value).ID;
+               }
             }
             set
             {
                 if (value == null)
                 {
-                    if (this.Loaded)
-                    {
-                        if (this.Value != null)
-                        {
-                            ((Model.Item)this.Value).Superceded -= Item_Superceded;
-                        }
-                    }
-
                     this.SetValue(null);
                 }
                 else
                 {
-                    if (this.Item.ID.Equals(value))
-                    {
-                        this.SetValue(this.Item);
-                    }
-                    else
-                    {
-                        if (this.Loaded)
-                        {
-                            if (this.Value != null)
-                            {
-                                ((Model.Item)this.Value).Superceded -= Item_Superceded;
-                            }
-                        }
-
-                        Model.Item thisitem = this.Item.ItemType.Session.Get(((PropertyTypes.Item)this.Type).ValueType, value);
-                        this.SetValue(thisitem);
-                        thisitem.Superceded += Item_Superceded;
-                    }
+                    Model.Item propitem = this.Item.Store.Query.Property((PropertyTypes.Item)this.Type).Store.Get(value);
+                    this.SetValue(propitem);
                 }
             }
         }

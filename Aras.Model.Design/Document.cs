@@ -69,14 +69,14 @@ namespace Aras.Model.Design
             }
         }
 
-        public Document(Model.ItemType ItemType, Transaction Transaction)
-            : base(ItemType, Transaction)
+        public Document(Model.Store Store, Transaction Transaction)
+            : base(Store, Transaction)
         {
  
         }
 
-        public Document(Model.ItemType ItemType, IO.Item DBItem)
-            : base(ItemType, DBItem)
+        public Document(Model.Store Store, IO.Item DBItem)
+            : base(Store, DBItem)
         {
 
         }

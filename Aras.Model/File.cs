@@ -28,12 +28,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using System.Net;
-using System.Web;
 
 namespace Aras.Model
 {
-    [Attributes.ItemType("File")]
     public class File : Item
     {
         const int bufferlength = 4096;
@@ -86,8 +83,7 @@ namespace Aras.Model
             }
         }
 
-
-
+        /*
         private Vault _userVault;
         private Vault UserVault
         {
@@ -95,7 +91,7 @@ namespace Aras.Model
             {
                 if (this._userVault == null)
                 {
-                    foreach(Located located in this.Store("Located"))
+                    foreach (Located located in this.Store("Located"))
                     {
                         if (this.ItemType.Session.User.Vault.Equals(located.Vault))
                         {
@@ -113,10 +109,11 @@ namespace Aras.Model
                 return this._userVault;
             }
         }
+        */
 
         public void Read(Stream Output)
         {
-            this.Session.IO.VaultRead(this.ID, this.VaultFilename, Output);
+            this.ItemType.Session.IO.VaultRead(this.ID, this.VaultFilename, Output);
         }
 
         private FileInfo _cacheFilename;
@@ -126,7 +123,7 @@ namespace Aras.Model
             {
                 if (this._cacheFilename == null)
                 {
-                    this._cacheFilename = new FileInfo(this.Session.CacheDirectory.FullName + "\\" + this.ID + ".dat");
+                    this._cacheFilename = new FileInfo(this.ItemType.Session.CacheDirectory.FullName + "\\" + this.ID + ".dat");
                 }
 
                 return this._cacheFilename;
@@ -152,19 +149,14 @@ namespace Aras.Model
             this.VaultFilename = Path.GetFileName(Filename);
         }
 
-        protected override void OnRefresh()
+        public File(Store Store, Transaction Transaction)
+            : base(Store, Transaction)
         {
-            base.OnRefresh();
+
         }
 
-        public File(ItemType ItemType, Transaction Transaction)
-            : base(ItemType, Transaction)
-        {
-           
-        }
-
-        public File(ItemType ItemType, IO.Item DBItem)
-            : base(ItemType, DBItem)
+        public File(Store Store, IO.Item DBItem)
+            : base(Store, DBItem)
         {
 
         }

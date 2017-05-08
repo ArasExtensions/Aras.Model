@@ -32,6 +32,17 @@ namespace Aras
 {
     public class Conditions
     {
+
+        public static Model.Conditions.None None()
+        {
+            return new Model.Conditions.None();
+        }
+
+        public static Model.Conditions.All All()
+        {
+            return new Model.Conditions.All();
+        }
+
         public static Model.Conditions.Property Eq(String Name, Object Value)
         {
             return new Model.Conditions.Property(Name, Model.Conditions.Operators.eq, Value);

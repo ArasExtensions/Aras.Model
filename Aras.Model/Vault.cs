@@ -59,14 +59,14 @@ namespace Aras.Model
             }
         }
 
-        public Vault(ItemType ItemType, Transaction Transaction)
-            : base(ItemType, Transaction)
+        public Vault(Store Store, Transaction Transaction)
+            : base(Store, Transaction)
         {
 
         }
 
-        public Vault(ItemType ItemType, IO.Item DBItem)
-            : base(ItemType, DBItem)
+        public Vault(Store Store, IO.Item DBItem)
+            : base(Store, DBItem)
         {
 
         }
