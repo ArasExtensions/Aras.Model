@@ -92,7 +92,37 @@ namespace Aras.Model.Cache
             }
         }
 
-        internal Boolean IsRelationship { get; private set; }
+        private Class _class;
+        internal Class Class
+        {
+            get
+            {
+                return this._class;
+            }
+            set
+            {
+                if (this._class != value)
+                {
+                    this._class = value;
+                    this._lifeCycleMap = null;
+                    this.OnPropertyChanged("Class");
+                }
+            }
+        }
+
+        private LifeCycleMap _lifeCycleMap;
+        public LifeCycleMap LifeCycleMap
+        {
+            get
+            {
+                if (this._lifeCycleMap == null)
+                {
+                    this._lifeCycleMap = this.ItemType.LifeCycleMap(this.Class);
+                }
+
+                return this._lifeCycleMap;
+            }
+        }
 
         private Model.Item.States _state;
         internal Model.Item.States State
@@ -294,6 +324,73 @@ namespace Aras.Model.Cache
             }
         }
 
+        public IEnumerable<LifeCycleState> NextStates()
+        {
+            if (this.State == Model.Item.States.Stored)
+            {
+                List<LifeCycleState> ret = new List<LifeCycleState>();
+
+                if (this.LifeCycleMap != null)
+                {
+                    IO.Request request = this.ItemType.Session.IO.Request(IO.Request.Operations.GetItemNextStates);
+                    IO.Item item = request.NewItem(this.ItemType.Name, "get");
+                    item.ID = this.ID;
+                    IO.Response response = request.Execute();
+
+                    if (!response.IsError)
+                    {
+                        if (response.Items.Count() > 0)
+                        {
+                            IO.Item lifecycletransisiton = response.Items.First();
+
+                            foreach (IO.Item dblifecyclestate in lifecycletransisiton.ToStates)
+                            {
+                                foreach(LifeCycleState lifecyclestate in this.LifeCycleMap.Relationships("Life Cycle State"))
+                                {
+                                    if (lifecyclestate.ID.Equals(dblifecyclestate.ID))
+                                    {
+                                        ret.Add(lifecyclestate);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        throw new Exceptions.ServerException(response);
+                    }
+                }
+
+                return ret;
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Item must be stored in Database before Promotion");
+            }
+        }
+
+        public void Promote(LifeCycleState NewState)
+        {
+            IO.Request request = this.ItemType.Session.IO.Request(IO.Request.Operations.PromoteItem);
+            IO.Item item = request.NewItem(this.ItemType.Name, "get");
+            item.ID = this.ID;
+            item.SetProperty("state", NewState.Name);
+            IO.Response response = request.Execute();
+
+            if (!response.IsError)
+            {
+                // Update Current State
+                PropertyType current_state = this.ItemType.PropertyType("current_state");
+                this.SetPropertyValue(current_state, NewState, true);
+                PropertyType state = this.ItemType.PropertyType("state");
+                this.SetPropertyValue(current_state, NewState.Name, true);         
+            }
+            else
+            {
+                throw new Exceptions.ServerException(response);
+            }
+        }
+
         internal void Update(Model.Item Item, Transaction Transaction)
         {
             if (Transaction != null)
@@ -421,7 +518,6 @@ namespace Aras.Model.Cache
             this.ConfigID = ConfigID;
             this.Generation = Generation;
             this.IsCurrent = IsCurrent;
-            this.IsRelationship = (ItemType is RelationshipType);
             this.State = Model.Item.States.Stored;
             this.Action = Model.Item.Actions.Read;
             this.PropertyCache = new Dictionary<PropertyType, object>();

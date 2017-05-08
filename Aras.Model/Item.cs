@@ -152,6 +152,26 @@ namespace Aras.Model
             }
         }
 
+        public Class Class
+        {
+            get
+            {
+                return this.Cache.Class;
+            }
+            set
+            {
+                this.Cache.Class = value;
+            }
+        }
+
+        public LifeCycleMap LifeCycleMap
+        {
+            get
+            {
+                return this.Cache.LifeCycleMap;
+            }
+        }
+
         public Locks Locked
         {
             get
@@ -308,6 +328,9 @@ namespace Aras.Model
 
         internal void UpdateProperties(IO.Item DBItem)
         {
+            // Update Classification
+            this.Class = this.ItemType.GetClassFullname(DBItem.GetProperty("classification"));
+
             if (this.ID.Equals(DBItem.ID))
             {
                 foreach(Property property in this.PropertyCache.Values)
@@ -357,6 +380,16 @@ namespace Aras.Model
             {
                 throw new Exceptions.ArgumentException("Invalid Item ID: " + DBItem.ID);
             }
+        }
+
+        public IEnumerable<LifeCycleState> NextStates()
+        {
+            return this.Cache.NextStates();
+        }
+
+        public void Promote(LifeCycleState NewState)
+        {
+            this.Cache.Promote(NewState);
         }
 
         public Boolean Equals(Item other)

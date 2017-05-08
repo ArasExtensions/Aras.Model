@@ -33,7 +33,7 @@ namespace Aras.Model
 {
     public class Query : INotifyPropertyChanged
     {
-        internal const String SystemProperties = "id,config_id,is_current,generation";
+        internal const String SystemProperties = "id,config_id,is_current,generation,classification";
         public const Int32 MinPageSize = 5;
         public const Int32 DefaultPageSize = 25;
         public const Int32 MaxPageSize = 100;

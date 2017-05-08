@@ -33,6 +33,19 @@ namespace Aras.Model
     [Attributes.ItemType("Life Cycle Map")]
     public class LifeCycleMap : Item
     {
+        public String Name
+        {
+            get
+            {
+                return (String)this.Property("name").Value;
+            }
+        }
+
+        public override string ToString()
+        {
+            return this.Name;
+        }
+
         public LifeCycleMap(Store Store, Transaction Transaction)
             : base(Store, Transaction)
         {

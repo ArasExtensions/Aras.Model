@@ -37,7 +37,7 @@ namespace Aras.Model.Debug
             Server server = new Server("http://localhost/InnovatorServer100SP4");
             Database database = server.Database("CMB");
             Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
-            
+
             Query orderquery = session.Query("v_Order");
             orderquery.Paging = false;
             orderquery.Select = "item_number,name,part";
@@ -52,6 +52,8 @@ namespace Aras.Model.Debug
             Int32 testnp = orderquery.Store.NoPages;
 
             Item part = (Item)order.Property("part").Value;
+
+            IEnumerable<LifeCycleState> nextstates = part.NextStates();
 
             foreach(Item partbom in part.Relationships("Part BOM"))
             {

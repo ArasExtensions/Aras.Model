@@ -33,14 +33,6 @@ namespace Aras.Model
     [Attributes.ItemType("Life Cycle State")]
     public class LifeCycleState : Relationship
     {
-        public LifeCycleMap LifeCycleMap
-        {
-            get
-            {
-                return (LifeCycleMap)this.Source;
-            }
-        }
-
         public String Name
         {
             get
@@ -60,7 +52,7 @@ namespace Aras.Model
       
         }
 
-        public LifeCycleState(Store Store, Item Source, IO.Item DBItem)
+        public LifeCycleState(Store Store, IO.Item DBItem)
             : base(Store, DBItem)
         {
 

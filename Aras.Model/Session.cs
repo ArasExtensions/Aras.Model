@@ -120,6 +120,11 @@ namespace Aras.Model
             IO.Request itemtyperequest = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
             IO.Item itemtypequery = itemtyperequest.NewItem("ItemType", "get");
             itemtypequery.Select = "id,name,is_relationship,class_structure,label,label_plural";
+
+            IO.Item lifecyclemapquery = itemtyperequest.NewItem("ItemType Life Cycle", "get");
+            lifecyclemapquery.Select = "class_path,related_id";
+            itemtypequery.AddRelationship(lifecyclemapquery);
+            
             IO.Response itemtyperesponse = itemtyperequest.Execute();
 
             if (!itemtyperesponse.IsError)
@@ -139,6 +144,11 @@ namespace Aras.Model
 
                     this.ItemTypeIDCache[itemtype.ID] = itemtype;
                     this.ItemTypeNameCache[itemtype.Name] = itemtype;
+
+                    foreach(IO.Item itemtypelifecyclemap in dbitem.Relationships)
+                    {
+                        itemtype.AddLifeCycleMap(itemtypelifecyclemap.GetProperty("class_path"), itemtypelifecyclemap.GetPropertyItem("related_id").ID);
+                    }
                 }
             }
             else
@@ -221,6 +231,9 @@ namespace Aras.Model
             {
                 throw new Exceptions.ServerException(listresponse);
             }
+
+            // Refresh Life Cycle Map Store
+            this.LifeCycleMaps.Store.Refresh();
         }
 
         public Query Query(ItemType ItemType)
@@ -231,6 +244,22 @@ namespace Aras.Model
         public Query Query(String ItemType)
         {
             return this.Query(this.ItemType(ItemType));
+        }
+
+        private Query _lifeCycleMaps;
+        public Query LifeCycleMaps
+        {
+            get
+            {
+                if (this._lifeCycleMaps == null)
+                {
+                    this._lifeCycleMaps = this.Query("Life Cycle Map");
+                    this._lifeCycleMaps.Select = "name";
+                    this._lifeCycleMaps.Relationship("Life Cycle State").Select = "name";
+                }
+
+                return this._lifeCycleMaps;
+            }
         }
 
         private Dictionary<String, Cache.Item> ItemCache;

@@ -261,8 +261,14 @@ namespace Aras.Model
 
                                         break;
                                     case "item":
-                                        ItemType valueitemtype = this.Session.ItemTypeByID(thisprop.GetProperty("data_source"));
-                                        this._propertyTypeCache[name] = new PropertyTypes.Item(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, valueitemtype);
+
+                                        String data_source = thisprop.GetProperty("data_source");
+
+                                        if (!String.IsNullOrEmpty(data_source))
+                                        {
+                                            ItemType valueitemtype = this.Session.ItemTypeByID(data_source);
+                                            this._propertyTypeCache[name] = new PropertyTypes.Item(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, valueitemtype);
+                                        }
 
                                         break;
                                     case "date":
@@ -378,6 +384,54 @@ namespace Aras.Model
             }
         }
 
+        private String DefaultLifeCycleMapCache;
+        private Dictionary<String, String> LifeCycleMapCache;
+
+        internal void AddLifeCycleMap(String Class, String ID)
+        {
+            if (String.IsNullOrEmpty(Class))
+            {
+                this.DefaultLifeCycleMapCache = ID;
+            }
+            else
+            {
+                this.LifeCycleMapCache[Class] = ID;
+            }
+        }
+
+        public LifeCycleMap LifeCycleMap(Class Class)
+        {
+            if (Class == null)
+            {
+                if (!String.IsNullOrEmpty(this.DefaultLifeCycleMapCache))
+                {
+                    return (LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.DefaultLifeCycleMapCache);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                if (this.LifeCycleMapCache.ContainsKey(Class.Fullname))
+                {
+                    return (LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.LifeCycleMapCache[Class.Fullname]);
+                }
+                else
+                {
+                    if (!String.IsNullOrEmpty(this.DefaultLifeCycleMapCache))
+                    {
+                        return (LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.DefaultLifeCycleMapCache);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+        }
+
         public bool Equals(ItemType other)
         {
             if (other != null)
@@ -415,6 +469,7 @@ namespace Aras.Model
         internal ItemType(Session Session, String ID, String Name, String SingularLabel, String PluralLabel, String ClassStructure)
         {
             this.RelationshipTypeNameCache = new Dictionary<string, RelationshipType>();
+            this.LifeCycleMapCache = new Dictionary<String, String>();
             this.Session = Session;
             this.ID = ID;
             this.Name = Name;
