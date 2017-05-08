@@ -384,6 +384,54 @@ namespace Aras.Model
             }
         }
 
+        private List<PropertyType> _searchPropertyTypes;
+        public IEnumerable<PropertyType> SearchPropertyTypes
+        {
+            get
+            {
+                if (this._searchPropertyTypes == null)
+                {
+                    this._searchPropertyTypes = new List<PropertyType>();
+
+                    foreach (PropertyType proptype in this.PropertyTypes)
+                    {
+                        if (proptype.InSearch)
+                        {
+                            this._searchPropertyTypes.Add(proptype);
+                        }
+                    }
+
+                    this._searchPropertyTypes.Sort();
+                }
+
+                return this._searchPropertyTypes;
+            }
+        }
+
+        private List<PropertyType> _relationshipGridPropertyTypes;
+        public IEnumerable<PropertyType> RelationshipGridPropertyTypes
+        {
+            get
+            {
+                if (this._relationshipGridPropertyTypes == null)
+                {
+                    this._relationshipGridPropertyTypes = new List<PropertyType>();
+
+                    foreach (PropertyType proptype in this.PropertyTypes)
+                    {
+                        if (proptype.InRelationshipGrid)
+                        {
+                            this._relationshipGridPropertyTypes.Add(proptype);
+                        }
+                    }
+
+                    this._relationshipGridPropertyTypes.Sort();
+                }
+
+                return this._relationshipGridPropertyTypes;
+            }
+        }
+
         private String DefaultLifeCycleMapCache;
         private Dictionary<String, String> LifeCycleMapCache;
 
