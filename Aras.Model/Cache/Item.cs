@@ -458,6 +458,24 @@ namespace Aras.Model.Cache
             }
         }
 
+        internal void Delete(Model.Item Item, Transaction Transaction)
+        {
+            if (Transaction != null)
+            {
+                if (this.State == Model.Item.States.Stored)
+                {
+                    // Add to Transaction
+                    Transaction.Add("delete", Item);
+                }
+                else
+                {
+                    Transaction.Remove(Item);
+                }
+            }
+
+            this.Action = Model.Item.Actions.Delete;
+        }
+
         private Dictionary<PropertyType, Object> PropertyCache;
 
         internal Object GetPropertyValue(PropertyType PropertyType)

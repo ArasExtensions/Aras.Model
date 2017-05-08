@@ -172,6 +172,78 @@ namespace Aras.Model
             }
         }
 
+        public String KeyedName
+        {
+            get
+            {
+                return (String)this.Property("keyed_name").Value;
+            }
+        }
+
+        public User CreatedBy
+        {
+            get
+            {
+                return (User)this.Property("created_by_id").Value;
+            }
+        }
+
+        public DateTime CreatedOn
+        {
+            get
+            {
+                return (DateTime)this.Property("created_on").Value;
+            }
+        }
+
+        public String MajorRev
+        {
+            get
+            {
+                return (String)this.Property("major_rev").Value;
+            }
+        }
+
+        public Identity ManagedBy
+        {
+            get
+            {
+                return (Identity)this.Property("managed_by_id").Value;
+            }
+        }
+
+        public String MinorRev
+        {
+            get
+            {
+                return (String)this.Property("minor_rev").Value;
+            }
+        }
+
+        public User ModifiedBy
+        {
+            get
+            {
+                return (User)this.Property("modified_by_id").Value;
+            }
+        }
+
+        public DateTime ModifiedOn
+        {
+            get
+            {
+                return (DateTime)this.Property("modified_on").Value;
+            }
+        }
+
+        public Identity OwnedBy
+        {
+            get
+            {
+                return (Identity)this.Property("owned_by_id").Value;
+            }
+        }
+
         public Locks Locked
         {
             get
@@ -185,6 +257,14 @@ namespace Aras.Model
             this.Cache.UnLock();
         }
 
+        public Boolean CanUpdate
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public void Update(Transaction Transaction)
         {
             this.Cache.Update(this, Transaction);
@@ -194,6 +274,11 @@ namespace Aras.Model
         protected virtual void OnUpdate(Transaction Transaction)
         {
 
+        }
+
+        public void Delete(Transaction Transaction)
+        {
+            this.Cache.Delete(this, Transaction);
         }
 
         private Dictionary<PropertyType, Property> PropertyCache;

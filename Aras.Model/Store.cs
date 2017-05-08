@@ -167,6 +167,19 @@ namespace Aras.Model
             return this.GetEnumerator();
         }
 
+        public Model.Item this[int Index]
+        {
+            get
+            {
+                if (this.Items == null)
+                {
+                    this.Refresh();
+                }
+
+                return this.Items[Index];
+            }
+        }
+
         public void Refresh()
         {
             // Run Query
