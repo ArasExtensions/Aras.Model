@@ -408,6 +408,27 @@ namespace Aras.Model
             }
         }
 
+        private String _searchSelect;
+        public String SearchSelect
+        {
+            get
+            {
+                if (this._searchSelect == null)
+                {
+                    List<String> names = new List<String>();
+
+                    foreach (PropertyType proptype in this.SearchPropertyTypes)
+                    {
+                        names.Add(proptype.Name);
+                    }
+
+                    this._searchSelect = String.Join(",", names);
+                }
+
+                return this._searchSelect;
+            }
+        }
+
         private List<PropertyType> _relationshipGridPropertyTypes;
         public IEnumerable<PropertyType> RelationshipGridPropertyTypes
         {
@@ -483,11 +504,7 @@ namespace Aras.Model
             }
             else
             {
-                if (this.LifeCycleMapCache.ContainsKey(Class.Fullname))
-                {
-                    return (Items.LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.LifeCycleMapCache[Class.Fullname]);
-                }
-                else
+                if (Class.Fullname == null)
                 {
                     if (!String.IsNullOrEmpty(this.DefaultLifeCycleMapCache))
                     {
@@ -496,6 +513,24 @@ namespace Aras.Model
                     else
                     {
                         return null;
+                    }
+                }
+                else
+                {
+                    if (this.LifeCycleMapCache.ContainsKey(Class.Fullname))
+                    {
+                        return (Items.LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.LifeCycleMapCache[Class.Fullname]);
+                    }
+                    else
+                    {
+                        if (!String.IsNullOrEmpty(this.DefaultLifeCycleMapCache))
+                        {
+                            return (Items.LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.DefaultLifeCycleMapCache);
+                        }
+                        else
+                        {
+                            return null;
+                        }
                     }
                 }
             }
