@@ -432,6 +432,27 @@ namespace Aras.Model
             }
         }
 
+        private String _relationshipGridSelect;
+        public String RelationshipGridSelect
+        {
+            get
+            {
+                if (this._relationshipGridPropertyTypes == null)
+                {
+                    List<String> names = new List<String>();
+
+                    foreach(PropertyType proptype in this.RelationshipGridPropertyTypes)
+                    {
+                        names.Add(proptype.Name);
+                    }
+
+                    this._relationshipGridSelect = String.Join(",", names);
+                }
+
+                return this._relationshipGridSelect;
+            }
+        }
+
         private String DefaultLifeCycleMapCache;
         private Dictionary<String, String> LifeCycleMapCache;
 
