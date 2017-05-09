@@ -33,7 +33,8 @@ namespace Aras.Model
 {
     public class Query : INotifyPropertyChanged
     {
-        internal const String SystemProperties = "id,config_id,is_current,generation,classification";
+        private const String SystemProperties = "id,config_id,is_current,generation,classification";
+
         public const Int32 MinPageSize = 5;
         public const Int32 DefaultPageSize = 25;
         public const Int32 MaxPageSize = 100;
@@ -351,7 +352,7 @@ namespace Aras.Model
             return this.ItemType.ToString();
         }
 
-        internal Query(ItemType ItemType)
+        public Query(ItemType ItemType)
         {
             this.SelectCache = new Dictionary<String, PropertyType>();
             this.SelectPropertyCache = new Dictionary<PropertyTypes.Item, Query>();
