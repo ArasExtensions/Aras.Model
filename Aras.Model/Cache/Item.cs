@@ -110,8 +110,8 @@ namespace Aras.Model.Cache
             }
         }
 
-        private LifeCycleMap _lifeCycleMap;
-        public LifeCycleMap LifeCycleMap
+        private Items.LifeCycleMap _lifeCycleMap;
+        public Items.LifeCycleMap LifeCycleMap
         {
             get
             {
@@ -297,7 +297,14 @@ namespace Aras.Model.Cache
                             }
                             else
                             {
-                                throw new Exceptions.ServerException(response);
+                                if (response.ErrorMessage == "Aras.Server.Core.ItemIsNotLockedException")
+                                {
+                                    this.Locked = Model.Item.Locks.None;
+                                }
+                                else
+                                {
+                                    throw new Exceptions.ServerException(response);
+                                }
                             }
 
                             break;
@@ -324,11 +331,11 @@ namespace Aras.Model.Cache
             }
         }
 
-        public IEnumerable<LifeCycleState> NextStates()
+        public IEnumerable<Relationships.LifeCycleState> NextStates()
         {
             if (this.State == Model.Item.States.Stored)
             {
-                List<LifeCycleState> ret = new List<LifeCycleState>();
+                List<Relationships.LifeCycleState> ret = new List<Relationships.LifeCycleState>();
 
                 if (this.LifeCycleMap != null)
                 {
@@ -345,7 +352,7 @@ namespace Aras.Model.Cache
 
                             foreach (IO.Item dblifecyclestate in lifecycletransisiton.ToStates)
                             {
-                                foreach(LifeCycleState lifecyclestate in this.LifeCycleMap.Relationships("Life Cycle State"))
+                                foreach (Relationships.LifeCycleState lifecyclestate in this.LifeCycleMap.Relationships("Life Cycle State"))
                                 {
                                     if (lifecyclestate.ID.Equals(dblifecyclestate.ID))
                                     {
@@ -369,7 +376,7 @@ namespace Aras.Model.Cache
             }
         }
 
-        public void Promote(LifeCycleState NewState)
+        public void Promote(Relationships.LifeCycleState NewState)
         {
             IO.Request request = this.ItemType.Session.IO.Request(IO.Request.Operations.PromoteItem);
             IO.Item item = request.NewItem(this.ItemType.Name, "get");

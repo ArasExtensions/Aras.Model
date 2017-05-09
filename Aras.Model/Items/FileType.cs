@@ -28,41 +28,54 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Items
 {
-    public class Relationship : Item
+    [Attributes.ItemType("FileType")]
+    public class FileType : Item
     {
-        public Item Source
+        public String Name
         {
             get
             {
-                return (Item)this.Property("source_id").Value;
-            }
-            internal set
-            {
-                this.Property("source_id").Value = value;
-            }
-        }
-
-        public Item Related
-        {
-            get
-            {
-                return (Item)this.Property("related_id").Value;
+                return (String)this.Property("name").Value;
             }
             set
             {
-                this.Property("related_id").Value = value;
+                this.Property("name").Value = value;
             }
         }
 
-        public Relationship(Store Store, Transaction Transaction)
+        public String Description
+        {
+            get
+            {
+                return (String)this.Property("description").Value;
+            }
+            set
+            {
+                this.Property("description").Value = value;
+            }
+        }
+
+        public String Extension
+        {
+            get
+            {
+                return (String)this.Property("extension").Value;
+            }
+            set
+            {
+                this.Property("extension").Value = value;
+            }
+        }
+
+        public FileType(Store Store, Transaction Transaction)
             : base(Store, Transaction)
         {
 
         }
 
-        public Relationship(Store Store, IO.Item DBItem)
+        public FileType(Store Store, IO.Item DBItem)
             : base(Store, DBItem)
         {
 

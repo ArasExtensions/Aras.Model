@@ -28,16 +28,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Relationships
 {
     [Attributes.ItemType("Access")]
     public class Access : Relationship
     {
-        public Identity Identity
+        public Items.Identity Identity
         {
             get
             {
-                return (Identity)this.Related;
+                return (Items.Identity)this.Related;
             }
         }
 

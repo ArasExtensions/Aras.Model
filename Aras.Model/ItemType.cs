@@ -447,13 +447,13 @@ namespace Aras.Model
             }
         }
 
-        public LifeCycleMap LifeCycleMap(Class Class)
+        public Items.LifeCycleMap LifeCycleMap(Class Class)
         {
             if (Class == null)
             {
                 if (!String.IsNullOrEmpty(this.DefaultLifeCycleMapCache))
                 {
-                    return (LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.DefaultLifeCycleMapCache);
+                    return (Items.LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.DefaultLifeCycleMapCache);
                 }
                 else
                 {
@@ -464,13 +464,13 @@ namespace Aras.Model
             {
                 if (this.LifeCycleMapCache.ContainsKey(Class.Fullname))
                 {
-                    return (LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.LifeCycleMapCache[Class.Fullname]);
+                    return (Items.LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.LifeCycleMapCache[Class.Fullname]);
                 }
                 else
                 {
                     if (!String.IsNullOrEmpty(this.DefaultLifeCycleMapCache))
                     {
-                        return (LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.DefaultLifeCycleMapCache);
+                        return (Items.LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.DefaultLifeCycleMapCache);
                     }
                     else
                     {

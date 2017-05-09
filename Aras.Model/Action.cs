@@ -101,7 +101,7 @@ namespace Aras.Model
             // Add Properties
             foreach (Property prop in this.Item.Properties)
             {
-                if (!prop.Type.ReadOnly && (prop.Modified))
+                if (!prop.Type.ReadOnly && (prop.Modified) && !prop.Type.Name.Equals("source_id"))
                 {
                     if (prop is Properties.Item)
                     {

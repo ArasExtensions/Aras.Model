@@ -246,16 +246,14 @@ namespace Aras.Model
             return this.Query(this.ItemType(ItemType));
         }
 
-        private Query _lifeCycleMaps;
-        public Query LifeCycleMaps
+        private Queries.LifeCycleMap _lifeCycleMaps;
+        public Queries.LifeCycleMap LifeCycleMaps
         {
             get
             {
                 if (this._lifeCycleMaps == null)
                 {
-                    this._lifeCycleMaps = this.Query("Life Cycle Map");
-                    this._lifeCycleMaps.Select = "name";
-                    this._lifeCycleMaps.Relationship("Life Cycle State").Select = "name";
+                    this._lifeCycleMaps = new Queries.LifeCycleMap(this);
                 }
 
                 return this._lifeCycleMaps;

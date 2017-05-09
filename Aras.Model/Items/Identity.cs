@@ -28,35 +28,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Items
 {
-    [Attributes.ItemType("Alias")]
-    public class Alias : Relationship
+    [Attributes.ItemType("Identity")]
+    public class Identity : Item
     {
-        public User User
+        public String Name
         {
             get
             {
-                return (User)this.Source;
+                return (String)this.Property("name").Value;
             }
         }
 
-        public Identity Identity
+        public override String ToString()
         {
-            get
-            {
-                return (Identity)this.Related;
-            }
+            return this.Name;
         }
 
-        public Alias(Store Store, Transaction Transaction)
-            :base(Store, Transaction)
+        public Identity(Store Store, Transaction Transaction)
+            : base(Store, Transaction)
         {
-      
+
         }
 
-        public Alias(Store Store, Item Source, IO.Item DBItem)
-            : base(Store, DBItem)
+        public Identity(Store Store, IO.Item DBItem)
+            :base(Store, DBItem)
         {
 
         }

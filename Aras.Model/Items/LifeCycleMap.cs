@@ -28,7 +28,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Items
 {
     [Attributes.ItemType("Life Cycle Map")]
     public class LifeCycleMap : Item

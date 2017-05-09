@@ -28,34 +28,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Queries
 {
-    [Attributes.ItemType("Identity")]
-    public class Identity : Item
+    public class LifeCycleMap : Query
     {
-        public String Name
+        public LifeCycleMap(Aras.Model.Session Session)
+            : base(Session.ItemType("Life Cycle Map"))
         {
-            get
-            {
-                return (String)this.Property("name").Value;
-            }
-        }
-
-        public override String ToString()
-        {
-            return this.Name;
-        }
-
-        public Identity(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
-        {
-
-        }
-
-        public Identity(Store Store, IO.Item DBItem)
-            :base(Store, DBItem)
-        {
-
+            this.Select = "name";
+            this.Relationship("Life Cycle State").Select = "name";
         }
     }
 }

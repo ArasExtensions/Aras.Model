@@ -28,7 +28,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Relationships
 {
     [Attributes.ItemType("Life Cycle State")]
     public class LifeCycleState : Relationship

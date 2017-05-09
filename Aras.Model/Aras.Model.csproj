@@ -40,12 +40,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Access.cs" />
+    <Compile Include="Queries\LifeCycleMap.cs" />
+    <Compile Include="Relationships\Access.cs" />
     <Compile Include="Action.cs" />
     <Compile Include="Actions\File.cs" />
     <Compile Include="Actions\Item.cs" />
     <Compile Include="Actions\Relationship.cs" />
-    <Compile Include="Alias.cs" />
+    <Compile Include="Relationships\Alias.cs" />
     <Compile Include="Attributes\Action.cs" />
     <Compile Include="Attributes\ItemType.cs" />
     <Compile Include="Cache\Item.cs" />
@@ -62,16 +63,16 @@
     <Compile Include="Exceptions\ReadOnlyException.cs" />
     <Compile Include="Exceptions\ServerException.cs" />
     <Compile Include="File.cs" />
-    <Compile Include="FileType.cs" />
-    <Compile Include="Identity.cs" />
+    <Compile Include="Items\FileType.cs" />
+    <Compile Include="Items\Identity.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="ItemType.cs" />
-    <Compile Include="LifeCycleMap.cs" />
-    <Compile Include="LifeCycleState.cs" />
+    <Compile Include="Items\LifeCycleMap.cs" />
+    <Compile Include="Relationships\LifeCycleState.cs" />
     <Compile Include="List.cs" />
-    <Compile Include="Located.cs" />
+    <Compile Include="Relationships\Located.cs" />
     <Compile Include="ObservableList.cs" />
-    <Compile Include="Permission.cs" />
+    <Compile Include="Items\Permission.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Property.cs" />
     <Compile Include="PropertyType.cs" />
@@ -114,9 +115,9 @@
     <Compile Include="Session.cs" />
     <Compile Include="ListValue.cs" />
     <Compile Include="Store.cs" />
-    <Compile Include="Team.cs" />
+    <Compile Include="Items\Team.cs" />
     <Compile Include="Transaction.cs" />
-    <Compile Include="User.cs" />
+    <Compile Include="Items\User.cs" />
     <Compile Include="Vault.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -125,6 +126,7 @@
       <Name>Aras.IO</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

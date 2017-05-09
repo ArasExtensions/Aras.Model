@@ -267,7 +267,13 @@ namespace Aras.Model
 
         public Model.Item Create(Transaction Transaction)
         {
-            Model.Item item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(Store), typeof(Transaction) }).Invoke(new object[] { this, Transaction }); 
+            Model.Item item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(Store), typeof(Transaction) }).Invoke(new object[] { this, Transaction });
+
+            if (this.ItemType is RelationshipType)
+            {
+                ((Relationship)item).Source = this.Source;
+            }
+
             this.Cache[item.ID] = item;
             this.CreatedItems.Add(item);
             this.Items.Add(item);

@@ -32,8 +32,32 @@ namespace Aras.Model.Debug
 {
     class Program
     {
+        public class Test
+        {
+            public void WalkPart(Item Part, Int32 Depth, Boolean Variant)
+            {
+                System.Console.WriteLine(Depth + " : " + Variant + " : " + Part.Property("item_number"));
+
+                foreach(Relationship rel in Part.Relationships("Part BOM"))
+                {
+                    this.WalkPart(rel.Related, Depth + 1, false);
+                }
+
+                foreach (Relationship rel in Part.Relationships("Part Variants"))
+                {
+                    this.WalkPart(rel.Related, Depth + 1, true);
+                }
+            }
+
+            public Test()
+            {
+
+            }
+        }
+
         static void Main(string[] args)
         {
+           
             Server server = new Server("http://localhost/InnovatorServer100SP4");
             Database database = server.Database("CMB");
             Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
@@ -45,12 +69,12 @@ namespace Aras.Model.Debug
             partquery.Relationship("Part BOM").Select = "quantity,related_id";
             partquery.Relationship("Part Variants").Select = "quantity,related_id";
 
-            Item part = partquery.Store.Get("0C694EB2E17FAF49879FE17C2D9A600F");
-            Relationship partbom = (Relationship)part.Relationships("Part BOM").First();
-            Item child1 = partbom.Related;
+            
+            //Item part = partquery.Store.Get("0C694EB2E17FAF49879FE17C2D9A600F");
+            Item part = partquery.Store.Get("6C260746B8804E62BE09F47D9D8D99E8");
 
-            Relationship partbom2 = (Relationship)child1.Relationships("Part BOM").First();
-            Item child2 = partbom2.Related;
+            Test test = new Test();
+            test.WalkPart(part, 1, false);
         }
     }
 }

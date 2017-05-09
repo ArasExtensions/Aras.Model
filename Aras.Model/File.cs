@@ -71,11 +71,11 @@ namespace Aras.Model
             }
         }
 
-        public FileType FileType
+        public Items.FileType FileType
         {
             get
             {
-                return (FileType)this.Property("file_type").Value;
+                return (Items.FileType)this.Property("file_type").Value;
             }
             set
             {

@@ -28,57 +28,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Items
 {
-    [Attributes.ItemType("FileType")]
-    public class FileType : Item
+    [Attributes.ItemType("User")]
+    public class User : Item
     {
-        public String Name
+        public Vault Vault
         {
             get
             {
-                return (String)this.Property("name").Value;
+                return (Vault)this.Property("default_vault").Value;
             }
             set
             {
-                this.Property("name").Value = value;
+                this.Property("default_vault").Value = value;
             }
         }
 
-        public String Description
-        {
-            get
-            {
-                return (String)this.Property("description").Value;
-            }
-            set
-            {
-                this.Property("description").Value = value;
-            }
-        }
-
-        public String Extension
-        {
-            get
-            {
-                return (String)this.Property("extension").Value;
-            }
-            set
-            {
-                this.Property("extension").Value = value;
-            }
-        }
-
-        public FileType(Store Store, Transaction Transaction)
+        public User(Store Store, Transaction Transaction)
             : base(Store, Transaction)
         {
-
+          
         }
 
-        public FileType(Store Store, IO.Item DBItem)
+        public User(Store Store, IO.Item DBItem)
             : base(Store, DBItem)
         {
-
+          
         }
     }
 }

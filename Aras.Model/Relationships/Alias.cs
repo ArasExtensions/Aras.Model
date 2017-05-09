@@ -28,33 +28,37 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Relationships
 {
-    [Attributes.ItemType("User")]
-    public class User : Item
+    [Attributes.ItemType("Alias")]
+    public class Alias : Relationship
     {
-        public Vault Vault
+        public Items.User User
         {
             get
             {
-                return (Vault)this.Property("default_vault").Value;
-            }
-            set
-            {
-                this.Property("default_vault").Value = value;
+                return (Items.User)this.Source;
             }
         }
 
-        public User(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public Items.Identity Identity
         {
-          
+            get
+            {
+                return (Items.Identity)this.Related;
+            }
         }
 
-        public User(Store Store, IO.Item DBItem)
+        public Alias(Store Store, Transaction Transaction)
+            :base(Store, Transaction)
+        {
+      
+        }
+
+        public Alias(Store Store, Item Source, IO.Item DBItem)
             : base(Store, DBItem)
         {
-          
+
         }
     }
 }

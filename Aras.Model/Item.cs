@@ -164,7 +164,7 @@ namespace Aras.Model
             }
         }
 
-        public LifeCycleMap LifeCycleMap
+        public Items.LifeCycleMap LifeCycleMap
         {
             get
             {
@@ -180,11 +180,11 @@ namespace Aras.Model
             }
         }
 
-        public User CreatedBy
+        public Items.User CreatedBy
         {
             get
             {
-                return (User)this.Property("created_by_id").Value;
+                return (Items.User)this.Property("created_by_id").Value;
             }
         }
 
@@ -204,11 +204,11 @@ namespace Aras.Model
             }
         }
 
-        public Identity ManagedBy
+        public Items.Identity ManagedBy
         {
             get
             {
-                return (Identity)this.Property("managed_by_id").Value;
+                return (Items.Identity)this.Property("managed_by_id").Value;
             }
         }
 
@@ -220,11 +220,11 @@ namespace Aras.Model
             }
         }
 
-        public User ModifiedBy
+        public Items.User ModifiedBy
         {
             get
             {
-                return (User)this.Property("modified_by_id").Value;
+                return (Items.User)this.Property("modified_by_id").Value;
             }
         }
 
@@ -236,11 +236,11 @@ namespace Aras.Model
             }
         }
 
-        public Identity OwnedBy
+        public Items.Identity OwnedBy
         {
             get
             {
-                return (Identity)this.Property("owned_by_id").Value;
+                return (Items.Identity)this.Property("owned_by_id").Value;
             }
         }
 
@@ -413,73 +413,76 @@ namespace Aras.Model
 
         internal void UpdateProperties(IO.Item DBItem)
         {
-            // Update Classification
-            this.Class = this.ItemType.GetClassFullname(DBItem.GetProperty("classification"));
-
-            if (this.ID.Equals(DBItem.ID))
+            if (DBItem != null)
             {
-                foreach(Property property in this.PropertyCache.Values)
-                {
-                    if (property is Properties.Item)
-                    {
-                        if (property.Type.Name.Equals("source_id"))
-                        {
-                            ((Properties.Item)property).SetDBValue(this.Store.Source);
-                        }
-                        else
-                        {
-                            IO.Item dbpropitem = DBItem.GetPropertyItem(property.Type.Name);
+                // Update Classification
+                this.Class = this.ItemType.GetClassFullname(DBItem.GetProperty("classification"));
 
-                            if (dbpropitem != null)
+                if (this.ID.Equals(DBItem.ID))
+                {
+                    foreach (Property property in this.PropertyCache.Values)
+                    {
+                        if (property is Properties.Item)
+                        {
+                            if (property.Type.Name.Equals("source_id"))
                             {
-                                property.DBValue = this.Store.Query.Property((PropertyTypes.Item)property.Type).Store.Create(dbpropitem).ID;
+                                ((Properties.Item)property).SetDBValue(this.Store.Source);
                             }
                             else
                             {
-                                property.DBValue = null;
+                                IO.Item dbpropitem = DBItem.GetPropertyItem(property.Type.Name);
+
+                                if (dbpropitem != null)
+                                {
+                                    property.DBValue = this.Store.Query.Property((PropertyTypes.Item)property.Type).Store.Create(dbpropitem).ID;
+                                }
+                                else
+                                {
+                                    property.DBValue = null;
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        property.DBValue = DBItem.GetProperty(property.Type.Name);
-                    }
-                }
-
-                Dictionary<RelationshipType, List<IO.Item>> dbrels = new Dictionary<RelationshipType, List<IO.Item>>();
-
-                foreach (IO.Item dbrel in DBItem.Relationships)
-                {
-                    ItemType reltype = this.Store.Session.ItemType(dbrel.ItemType);
-
-                    if (reltype is RelationshipType)
-                    {
-                        if (!dbrels.ContainsKey((RelationshipType)reltype))
+                        else
                         {
-                            dbrels[(RelationshipType)reltype] = new List<IO.Item>();
+                            property.DBValue = DBItem.GetProperty(property.Type.Name);
                         }
+                    }
 
-                        dbrels[(RelationshipType)reltype].Add(dbrel);
+                    Dictionary<RelationshipType, List<IO.Item>> dbrels = new Dictionary<RelationshipType, List<IO.Item>>();
+
+                    foreach (IO.Item dbrel in DBItem.Relationships)
+                    {
+                        ItemType reltype = this.Store.Session.ItemType(dbrel.ItemType);
+
+                        if (reltype is RelationshipType)
+                        {
+                            if (!dbrels.ContainsKey((RelationshipType)reltype))
+                            {
+                                dbrels[(RelationshipType)reltype] = new List<IO.Item>();
+                            }
+
+                            dbrels[(RelationshipType)reltype].Add(dbrel);
+                        }
+                    }
+
+                    foreach (RelationshipType reltype in dbrels.Keys)
+                    {
+                        this.RelationshipsCache[reltype].Load(dbrels[reltype]);
                     }
                 }
-
-                foreach(RelationshipType reltype in dbrels.Keys)
+                else
                 {
-                    this.RelationshipsCache[reltype].Load(dbrels[reltype]);
+                    throw new Exceptions.ArgumentException("Invalid Item ID: " + DBItem.ID);
                 }
-            }
-            else
-            {
-                throw new Exceptions.ArgumentException("Invalid Item ID: " + DBItem.ID);
             }
         }
 
-        public IEnumerable<LifeCycleState> NextStates()
+        public IEnumerable<Relationships.LifeCycleState> NextStates()
         {
             return this.Cache.NextStates();
         }
 
-        public void Promote(LifeCycleState NewState)
+        public void Promote(Relationships.LifeCycleState NewState)
         {
             this.Cache.Promote(NewState);
         }
