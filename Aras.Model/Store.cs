@@ -43,6 +43,8 @@ namespace Aras.Model
             }
         }
 
+        public Item Source { get; private set; }
+
         public Boolean Paging
         {
             get
@@ -315,10 +317,17 @@ namespace Aras.Model
         }
 
         internal Store(Query Query)
+            :this(Query, null)
+        {
+
+        }
+
+        internal Store(Query Query, Item Source)
         {
             this.Cache = new Dictionary<String, Item>();
             this.CreatedItems = new List<Item>();
             this.Query = Query;
+            this.Source = Source;
             this._noPages = 0;
         }
     }

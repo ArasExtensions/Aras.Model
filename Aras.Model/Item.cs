@@ -402,7 +402,7 @@ namespace Aras.Model
 
             foreach(Query relquery in this.Store.Query.Relationships)
             {
-                this.RelationshipsCache[(RelationshipType)relquery.ItemType] = new Store(relquery);
+                this.RelationshipsCache[(RelationshipType)relquery.ItemType] = new Store(relquery, this);
             }
         }
 
@@ -422,15 +422,22 @@ namespace Aras.Model
                 {
                     if (property is Properties.Item)
                     {
-                        IO.Item dbpropitem = DBItem.GetPropertyItem(property.Type.Name);
-
-                        if (dbpropitem != null)
+                        if (property.Type.Name.Equals("source_id"))
                         {
-                            property.DBValue = this.Store.Query.Property((PropertyTypes.Item)property.Type).Store.Create(dbpropitem).ID;
+                            ((Properties.Item)property).SetDBValue(this.Store.Source);
                         }
                         else
                         {
-                            property.DBValue = null;
+                            IO.Item dbpropitem = DBItem.GetPropertyItem(property.Type.Name);
+
+                            if (dbpropitem != null)
+                            {
+                                property.DBValue = this.Store.Query.Property((PropertyTypes.Item)property.Type).Store.Create(dbpropitem).ID;
+                            }
+                            else
+                            {
+                                property.DBValue = null;
+                            }
                         }
                     }
                     else

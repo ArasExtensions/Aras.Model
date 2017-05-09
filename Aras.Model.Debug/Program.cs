@@ -38,27 +38,16 @@ namespace Aras.Model.Debug
             Database database = server.Database("CMB");
             Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
-            Query orderquery = session.Query("v_Order");
-            orderquery.Paging = false;
-            orderquery.Select = "item_number,name,part";
-            orderquery.Condition = Aras.Conditions.Eq("item_number", "1");
-            orderquery.Property("part").Select = "item_number";
-            orderquery.Property("part").Relationship("Part BOM").Select = "quantity,related_id";
-            orderquery.Property("part").Relationship("Part BOM").Property("related_id").Select = "item_number";
+            Query partquery = session.Query("Part");
+            partquery.Paging = false;
+            partquery.Select = "item_number";
+            partquery.Relationship("Part BOM").Select = "quantity,related_id";
 
-            Int32 test = orderquery.Store.Count();
-            Item order = orderquery.Store.First();
-            String testn = (String)order.Property("item_number").Value;
-            Int32 testnp = orderquery.Store.NoPages;
+            Item part = partquery.Store.Get("0C694EB2E17FAF49879FE17C2D9A600F");
+            Relationship partbom = (Relationship)part.Relationships("Part BOM").First();
+            Item child1 = partbom.Related;
 
-            Item part = (Item)order.Property("part").Value;
 
-            IEnumerable<LifeCycleState> nextstates = part.NextStates();
-
-            foreach(Item partbom in part.Relationships("Part BOM"))
-            {
-                Double test3 = (Double)partbom.Property("quantity").Value;
-            }
 
         }
     }

@@ -49,6 +49,8 @@ namespace Aras.Model
             }
         }
 
+        public Query Parent { get; private set; }
+
         private Condition _condition;
         public Condition Condition
         {
@@ -123,6 +125,23 @@ namespace Aras.Model
             }
         }
 
+        private Boolean _recursive;
+        public Boolean Recursive
+        {
+            get
+            {
+                return this._recursive;
+            }
+            set
+            {
+                if (value != this._recursive)
+                {
+                    this._recursive = value;
+                    this.OnPropertyChanged("Recursive");
+                }
+            }
+        }
+
         public ItemType ItemType { get; private set; }
 
         private Dictionary<String, PropertyType> SelectCache;
@@ -148,7 +167,15 @@ namespace Aras.Model
 
                 if (!String.IsNullOrEmpty(value))
                 {
-                    foreach (String name in value.Split(new Char[] { ',' }))
+                    String select = value;
+
+                    // Ensure source_id selected for Relationships
+                    if (this.ItemType is RelationshipType)
+                    {
+                        select += ",source_id";
+                    }
+
+                    foreach (String name in select.Split(new Char[] { ',' }))
                     {
                         PropertyType proptype = this.ItemType.PropertyType(name);
 
@@ -158,7 +185,14 @@ namespace Aras.Model
 
                             if (proptype is PropertyTypes.Item)
                             {
-                                this.SelectPropertyCache[(PropertyTypes.Item)proptype] = new Query(((PropertyTypes.Item)proptype).ValueType);
+                                if (proptype.Name.Equals("source_id") && (this.Parent != null))
+                                {
+                                    this.SelectPropertyCache[(PropertyTypes.Item)proptype] = this.Parent;
+                                }
+                                else
+                                {
+                                    this.SelectPropertyCache[(PropertyTypes.Item)proptype] = new Query(this, ((PropertyTypes.Item)proptype).ValueType);
+                                }
                             }
                         }
                     }
@@ -233,7 +267,7 @@ namespace Aras.Model
             {
                 if (!this.RelationshipCache.ContainsKey(RelationshipType))
                 {
-                    this.RelationshipCache[RelationshipType] = new Query(RelationshipType);
+                    this.RelationshipCache[RelationshipType] = new Query(this, RelationshipType);
                 }
 
                 return this.RelationshipCache[RelationshipType];
@@ -309,8 +343,11 @@ namespace Aras.Model
 
                 foreach (PropertyTypes.Item proptype in this.SelectPropertyCache.Keys)
                 {
-                    IO.Item propquery = this.SelectPropertyCache[proptype].DBQuery();
-                    query.SetPropertyItem(proptype.Name, propquery);
+                    if (!proptype.Name.Equals("source_id"))
+                    {
+                        IO.Item propquery = this.SelectPropertyCache[proptype].DBQuery();
+                        query.SetPropertyItem(proptype.Name, propquery);
+                    }
                 }
 
                 foreach (Query relquery in this.Relationships)
@@ -353,10 +390,17 @@ namespace Aras.Model
         }
 
         public Query(ItemType ItemType)
+            :this(null, ItemType)
+        {
+
+        }
+
+        internal Query(Query Parent, ItemType ItemType)
         {
             this.SelectCache = new Dictionary<String, PropertyType>();
             this.SelectPropertyCache = new Dictionary<PropertyTypes.Item, Query>();
             this.RelationshipCache = new Dictionary<RelationshipType, Query>();
+            this.Parent = Parent;
             this.ItemType = ItemType;
             this._pageSize = DefaultPageSize;
             this._paging = false;

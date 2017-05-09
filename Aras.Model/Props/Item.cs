@@ -95,6 +95,11 @@ namespace Aras.Model.Properties
             }
         }
 
+        internal void SetDBValue(Model.Item Item)
+        {
+            this.SetValue(Item);
+        }
+
         internal Item(Model.Item Item, PropertyTypes.Item Type)
             :base(Item, Type)
         {
