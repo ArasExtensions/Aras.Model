@@ -295,6 +295,17 @@ namespace Aras.Model
             }
         }
 
+        public Boolean HasProperty(String PropertyName)
+        {
+            PropertyType proptype = this.ItemType.PropertyType(PropertyName);
+            return this.PropertyCache.ContainsKey(proptype);
+        }
+
+        public Boolean HasProperty(PropertyType PropertyType)
+        {
+            return this.PropertyCache.ContainsKey(PropertyType);
+        }
+
         public Property Property(String PropertyName)
         {
             PropertyType proptype = this.Store.Query.PropertyType(PropertyName);
