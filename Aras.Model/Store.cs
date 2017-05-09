@@ -189,6 +189,11 @@ namespace Aras.Model
 
             if (dbquery != null)
             {
+                if (this.Source != null)
+                {
+                    dbquery.SetProperty("source_id", this.Source.ID);
+                }
+
                 IO.Request request = this.ItemType.Session.IO.Request(IO.Request.Operations.ApplyItem, dbquery);
                 IO.Response response = request.Execute();
 

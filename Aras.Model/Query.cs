@@ -189,6 +189,10 @@ namespace Aras.Model
                                 {
                                     this.SelectPropertyCache[(PropertyTypes.Item)proptype] = this.Parent;
                                 }
+                                else if (proptype.Name.Equals("related_id") && (this.Parent != null) && this.Parent.Recursive && this.Parent.ItemType.Equals(((PropertyTypes.Item)proptype).ValueType))
+                                {
+                                    this.SelectPropertyCache[(PropertyTypes.Item)proptype] = this.Parent;
+                                }
                                 else
                                 {
                                     this.SelectPropertyCache[(PropertyTypes.Item)proptype] = new Query(this, ((PropertyTypes.Item)proptype).ValueType);
@@ -278,7 +282,6 @@ namespace Aras.Model
             }
         }
 
-
         public IEnumerable<Query> Relationships
         {
             get
@@ -334,7 +337,6 @@ namespace Aras.Model
                 query.Where = this.Condition.Where(this.ItemType);
 
                 // Set Paging
-
                 if (this.Paging)
                 {
                     query.PageSize = this.PageSize;
@@ -343,7 +345,7 @@ namespace Aras.Model
 
                 foreach (PropertyTypes.Item proptype in this.SelectPropertyCache.Keys)
                 {
-                    if (!proptype.Name.Equals("source_id"))
+                    if (!proptype.Name.Equals("source_id") && !proptype.Name.Equals("related_id"))
                     {
                         IO.Item propquery = this.SelectPropertyCache[proptype].DBQuery();
                         query.SetPropertyItem(proptype.Name, propquery);
@@ -405,6 +407,7 @@ namespace Aras.Model
             this._pageSize = DefaultPageSize;
             this._paging = false;
             this._page = 1;
+            this._recursive = false;
             this._condition = Aras.Conditions.All();
         }
     }

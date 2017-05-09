@@ -41,14 +41,16 @@ namespace Aras.Model.Debug
             Query partquery = session.Query("Part");
             partquery.Paging = false;
             partquery.Select = "item_number";
+            partquery.Recursive = true;
             partquery.Relationship("Part BOM").Select = "quantity,related_id";
+            partquery.Relationship("Part Variants").Select = "quantity,related_id";
 
             Item part = partquery.Store.Get("0C694EB2E17FAF49879FE17C2D9A600F");
             Relationship partbom = (Relationship)part.Relationships("Part BOM").First();
             Item child1 = partbom.Related;
 
-
-
+            Relationship partbom2 = (Relationship)child1.Relationships("Part BOM").First();
+            Item child2 = partbom2.Related;
         }
     }
 }
