@@ -109,6 +109,7 @@ namespace Aras.Model.Conditions
 
                     case "Integer":
                     case "Decimal":
+                    case "Boolean":
 
                         if (this.Value == null)
                         {

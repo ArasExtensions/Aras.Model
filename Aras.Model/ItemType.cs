@@ -367,7 +367,7 @@ namespace Aras.Model
             }
             else
             {
-                throw new Exceptions.ArgumentException("Invalid property name: " + Name);
+                throw new Exceptions.PropertyException(Name);
             }
         }
 

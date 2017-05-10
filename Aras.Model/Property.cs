@@ -43,24 +43,23 @@ namespace Aras.Model
             }
         }
 
+        internal Cache.Property Cache { get; private set; }
+
         public Item Item { get; private set; }
 
-        public PropertyType Type { get; private set; }
+        public PropertyType Type
+        {
+            get
+            {
+                return this.Cache.Type;
+            }
+        }
 
-        private Boolean _modified;
         public Boolean Modified 
         { 
             get
             {
-                return this._modified;
-            }
-            private set
-            {
-                if (this._modified != value)
-                {
-                    this._modified = value;
-                    this.OnPropertyChanged("Modified");
-                }
+                return this.Cache.Modified;
             }
         }
 
@@ -72,20 +71,11 @@ namespace Aras.Model
             }
         }
 
-        private Boolean _readOnly;
         public Boolean ReadOnly
         {
             get
             {
-                return this._readOnly;
-            }
-            private set
-            {
-                if (this._readOnly != value)
-                {
-                    this._readOnly = value;
-                    this.OnPropertyChanged("ReadOnly");
-                }
+                return this.Cache.ReadOnly;
             }
         }
 
@@ -93,25 +83,17 @@ namespace Aras.Model
         {
             get
             {
-                return this.Item.Cache.GetPropertyValue(this.Type);
+                return this.Cache.Value;
             }
             set
             {
-                if (!this.ReadOnly)
-                {
-                    this.Modified = this.Item.Cache.SetPropertyValue(this.Type, value, false);
-                }
-                else
-                {
-                    throw new Exceptions.ReadOnlyException();
-                }
+                this.Cache.Value = value;
             }
         }
 
         protected void SetValue(Object Value)
         {
-            this.Item.Cache.SetPropertyValue(this.Type, Value, true);
-            this.Modified = false;
+            this.Cache.SetValue(Value);
         }
 
         internal abstract String DBValue { get; set; }
@@ -128,20 +110,16 @@ namespace Aras.Model
             }
         }
 
-        private void Cache_PropertyValueChanged(object sender, Cache.PropertyValueChangedEventArgs e)
+        private void Cache_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyType.Equals(this.Type))
-            {
-                this.Modified = true;
-                this.OnPropertyChanged("Value");
-            }
+            this.OnPropertyChanged(e.PropertyName);
         }
 
         internal Property(Item Item, PropertyType Type)
         {
             this.Item = Item;
-            this.Type = Type;
-            this.Item.Cache.PropertyValueChanged += Cache_PropertyValueChanged;
+            this.Cache = this.Item.Cache.Property(Type);
+            this.Item.Cache.PropertyChanged += Cache_PropertyChanged;
         }
     }
 }

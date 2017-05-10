@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cache\Property.cs" />
+    <Compile Include="Exceptions\PropertyException.cs" />
     <Compile Include="Queries\LifeCycleMap.cs" />
     <Compile Include="Relationships\Access.cs" />
     <Compile Include="Action.cs" />

@@ -89,9 +89,17 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    Model.Item propitem = this.Item.Store.Query.Property((PropertyTypes.Item)this.Type).Store.Get(value);
+                    Model.Item propitem = this.Store.Get(value);
                     this.SetValue(propitem);
                 }
+            }
+        }
+
+        public Store Store
+        {
+            get
+            {
+                return this.Item.Store.Query.Property((PropertyTypes.Item)this.Type).Store;
             }
         }
 

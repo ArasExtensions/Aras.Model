@@ -56,8 +56,7 @@ namespace Aras.Model.Debug
         }
 
         static void Main(string[] args)
-        {
-           
+        {       
             Server server = new Server("http://localhost/InnovatorServer100SP4");
             Database database = server.Database("CMB");
             Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
@@ -73,8 +72,8 @@ namespace Aras.Model.Debug
             //Item part = partquery.Store.Get("0C694EB2E17FAF49879FE17C2D9A600F");
             Item part = partquery.Store.Get("6C260746B8804E62BE09F47D9D8D99E8");
 
-            Test test = new Test();
-            test.WalkPart(part, 1, false);
+            Boolean test = part.Property("item_number").ReadOnly;
+            Object test2 = part.Property("item_number").Value;  
         }
     }
 }

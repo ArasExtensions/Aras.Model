@@ -31,20 +31,6 @@ using System.ComponentModel;
 
 namespace Aras.Model.Cache
 {
-    public class PropertyValueChangedEventArgs : EventArgs
-    {
-        public PropertyType PropertyType { get; private set; }
-
-        public PropertyValueChangedEventArgs(PropertyType PropertyType)
-            : base()
-        {
-            this.PropertyType = PropertyType;
-        }
-    }
-
-    public delegate void PropertyValueChangedEventHandler(object sender, PropertyValueChangedEventArgs e);
-
-
     internal class Item : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -54,16 +40,6 @@ namespace Aras.Model.Cache
             if (this.PropertyChanged != null)
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(Name));
-            }
-        }
-
-        public event PropertyValueChangedEventHandler PropertyValueChanged;
-
-        private void OnPropertyValueChanged(PropertyType PropertyType)
-        {
-            if (this.PropertyValueChanged != null)
-            {
-                PropertyValueChanged(this, new PropertyValueChangedEventArgs(PropertyType));
             }
         }
 
@@ -242,6 +218,7 @@ namespace Aras.Model.Cache
                             if (!response.IsError)
                             {
                                 this.Locked = Model.Item.Locks.User;
+                                this.Action = Model.Item.Actions.Update;
                             }
                             else
                             {
@@ -253,6 +230,7 @@ namespace Aras.Model.Cache
                         case Model.Item.Locks.User:
 
                             // Already locked by User
+                            this.Action = Model.Item.Actions.Update;
 
                             break;
 
@@ -294,6 +272,7 @@ namespace Aras.Model.Cache
                             if (!response.IsError)
                             {
                                 this.Locked = Model.Item.Locks.None;
+                                this.Action = Model.Item.Actions.Read;
                             }
                             else
                             {
@@ -312,6 +291,7 @@ namespace Aras.Model.Cache
                         case Model.Item.Locks.None:
 
                             // Item not Locked
+                            this.Action = Model.Item.Actions.Read;
 
                             break;
                         case Model.Item.Locks.OtherUser:
@@ -387,10 +367,8 @@ namespace Aras.Model.Cache
             if (!response.IsError)
             {
                 // Update Current State
-                PropertyType current_state = this.ItemType.PropertyType("current_state");
-                this.SetPropertyValue(current_state, NewState, true);
-                PropertyType state = this.ItemType.PropertyType("state");
-                this.SetPropertyValue(current_state, NewState.Name, true);         
+                this.Property(this.ItemType.PropertyType("current_state")).SetValue(NewState);
+                this.Property(this.ItemType.PropertyType("state")).SetValue(NewState.Name);        
             }
             else
             {
@@ -483,57 +461,16 @@ namespace Aras.Model.Cache
             this.Action = Model.Item.Actions.Delete;
         }
 
-        private Dictionary<PropertyType, Object> PropertyCache;
+        private Dictionary<PropertyType, Property> PropertyCache;
 
-        internal Object GetPropertyValue(PropertyType PropertyType)
+        internal Property Property(PropertyType PropertyType)
         {
             if (!this.PropertyCache.ContainsKey(PropertyType))
             {
-                this.PropertyCache[PropertyType] = PropertyType.Default;
+                this.PropertyCache[PropertyType] = new Property(this, PropertyType);
             }
 
             return this.PropertyCache[PropertyType];
-        }
-
-        internal Boolean SetPropertyValue(PropertyType PropertyType, Object Value, Boolean FromDatabase)
-        {
-            Boolean ret = false;
-
-            if (!this.PropertyCache.ContainsKey(PropertyType))
-            {
-                this.PropertyCache[PropertyType] = PropertyType.Default;
-            }
-
-            if (this.PropertyCache[PropertyType] == null)
-            {
-                if (Value != null)
-                {
-                    this.PropertyCache[PropertyType] = Value;
-
-                    if (!FromDatabase)
-                    {
-                        this.OnPropertyValueChanged(PropertyType);
-                    }
-
-                    ret = true;
-                }
-            }
-            else
-            {
-                if (!this.PropertyCache[PropertyType].Equals(Value))
-                {
-                    this.PropertyCache[PropertyType] = Value;
-
-                    if (!FromDatabase)
-                    {
-                        this.OnPropertyValueChanged(PropertyType);
-                    }
-
-                    ret = true;
-                }
-            }
-
-            return ret;
         }
 
         internal Item(ItemType ItemType, String ID, String ConfigID, Int32 Generation, Boolean IsCurrent)
@@ -545,7 +482,7 @@ namespace Aras.Model.Cache
             this.IsCurrent = IsCurrent;
             this.State = Model.Item.States.Stored;
             this.Action = Model.Item.Actions.Read;
-            this.PropertyCache = new Dictionary<PropertyType, object>();
+            this.PropertyCache = new Dictionary<PropertyType, Property>();
             this._lockChecked = false;
         }
 
@@ -558,7 +495,7 @@ namespace Aras.Model.Cache
             this.IsCurrent = true;
             this.State = Model.Item.States.New;
             this.Action = Model.Item.Actions.Create;
-            this.PropertyCache = new Dictionary<PropertyType, object>();
+            this.PropertyCache = new Dictionary<PropertyType, Property>();
             this._lockChecked = false;
         }
     }
