@@ -80,10 +80,15 @@ namespace Aras.Model.Debug
 
                 part.Property("name").Value = "New Name 3";
 
-                trans.RollBack();
+                trans.Commit(true);
             }
 
             String test5 = (String)part.Property("name").Value;
+
+            part.Refresh();
+
+            String test6 = (String)part.Property("name").Value;
+            
         }
 
         static void part_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

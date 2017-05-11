@@ -265,6 +265,17 @@ namespace Aras.Model
             }
         }
 
+        public void Refresh()
+        {
+            this.Store.Refresh(this);
+            this.OnRefresh();
+        }
+
+        protected virtual void OnRefresh()
+        {
+
+        }
+
         public void Update(Transaction Transaction)
         {
             this.Cache.Update(this, Transaction);

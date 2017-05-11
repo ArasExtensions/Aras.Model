@@ -298,6 +298,37 @@ namespace Aras.Model
             return ret;
         }
 
+        internal void Refresh(Item Item)
+        {
+            if (this.Cache.ContainsKey(Item.ID))
+            {
+                // Run Query
+                IO.Request request = this.ItemType.Session.IO.Request(IO.Request.Operations.ApplyItem, this.Query.DBQuery(Item.ID));
+                IO.Response response = request.Execute();
+
+                if (!response.IsError)
+                {
+                    if (response.Items.Count() == 1)
+                    {
+                        // Update Item
+                        this.Cache[Item.ID].UpdateProperties(response.Items.First());
+                    }
+                    else
+                    {
+                        throw new Exceptions.ServerException("Item ID not found: " + Item.ID);
+                    }
+                }
+                else
+                {
+                    throw new Exceptions.ServerException(response);
+                }
+            }
+            else
+            {
+                throw new Exceptions.ServerException("Item ID not found: " + Item.ID);
+            }
+        }
+
         public Item Get(String ID)
         {
             if (!this.Cache.ContainsKey(ID))
