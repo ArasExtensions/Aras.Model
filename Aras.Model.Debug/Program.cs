@@ -63,17 +63,41 @@ namespace Aras.Model.Debug
 
             Query partquery = session.Query("Part");
             partquery.Paging = false;
+            partquery.Condition = Aras.Conditions.Eq("item_number", "2474M_Test_001");
             partquery.Select = "item_number";
             partquery.Recursive = true;
             partquery.Relationship("Part BOM").Select = "quantity,related_id";
             partquery.Relationship("Part Variants").Select = "quantity,related_id";
 
-            
-            //Item part = partquery.Store.Get("0C694EB2E17FAF49879FE17C2D9A600F");
-            Item part = partquery.Store.Get("6C260746B8804E62BE09F47D9D8D99E8");
 
-            Boolean test = part.Property("item_number").ReadOnly;
-            Object test2 = part.Property("item_number").Value;  
+            Item part = partquery.Store.First();
+            part.PropertyChanged += part_PropertyChanged;
+            part.Property("item_number").PropertyChanged += Program_PropertyChanged;
+
+            Model.Item.Locks locked = part.Locked;
+            Boolean testreadonly = part.Property("item_number").ReadOnly;
+            Model.Item.Actions testaction = part.Action;
+
+            using (Transaction trans = session.BeginTransaction())
+            {
+                part.Update(trans);
+
+                locked = part.Locked;
+                testreadonly = part.Property("item_number").ReadOnly;
+                testaction = part.Action;
+
+                trans.Commit(true);
+            }
+        }
+
+        static void part_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            String test = e.PropertyName;
+        }
+
+        static void Program_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            String test = e.PropertyName;
         }
     }
 }

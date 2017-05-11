@@ -534,15 +534,9 @@ namespace Aras.Model
             return this.ID.GetHashCode();
         }
 
-        private void Cache_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            this.OnPropertyChanged(e.PropertyName);
-        }
-
         public Item(Store Store, Transaction Transaction)
         {
             this.Cache = Store.Session.GetItemCache(Store.ItemType);
-            this.Cache.PropertyChanged += Cache_PropertyChanged;
             this.Store = Store;
             this.Initalise();
         }
@@ -550,7 +544,6 @@ namespace Aras.Model
         public Item(Store Store, IO.Item DBItem)
         {
             this.Cache = Store.Session.GetItemCache(Store.ItemType, DBItem.ID, DBItem.ConfigID, DBItem.Generation, DBItem.IsCurrent);
-            this.Cache.PropertyChanged += Cache_PropertyChanged;
             this.Store = Store;
             this.Initalise();
             this.UpdateProperties(DBItem);

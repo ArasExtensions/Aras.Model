@@ -482,8 +482,8 @@ namespace Aras.Model.Cache
             this.IsCurrent = IsCurrent;
             this.State = Model.Item.States.Stored;
             this.Action = Model.Item.Actions.Read;
-            this.PropertyCache = new Dictionary<PropertyType, Property>();
             this._lockChecked = false;
+            this.PropertyCache = new Dictionary<PropertyType, Property>();
         }
 
         internal Item(ItemType ItemType)
@@ -495,8 +495,8 @@ namespace Aras.Model.Cache
             this.IsCurrent = true;
             this.State = Model.Item.States.New;
             this.Action = Model.Item.Actions.Create;
-            this.PropertyCache = new Dictionary<PropertyType, Property>();
             this._lockChecked = false;
+            this.PropertyCache = new Dictionary<PropertyType, Property>();
         }
     }
 }

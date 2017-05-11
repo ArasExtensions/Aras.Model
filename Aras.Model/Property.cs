@@ -119,7 +119,7 @@ namespace Aras.Model
         {
             this.Item = Item;
             this.Cache = this.Item.Cache.Property(Type);
-            this.Item.Cache.PropertyChanged += Cache_PropertyChanged;
+            this.Cache.PropertyChanged += Cache_PropertyChanged;
         }
     }
 }
