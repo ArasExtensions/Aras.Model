@@ -64,7 +64,7 @@ namespace Aras.Model.Debug
             Query partquery = session.Query("Part");
             partquery.Paging = false;
             partquery.Condition = Aras.Conditions.Eq("item_number", "2474M_Test_001");
-            partquery.Select = "item_number";
+            partquery.Select = "item_number,name";
             partquery.Recursive = true;
             partquery.Relationship("Part BOM").Select = "quantity,related_id";
             partquery.Relationship("Part Variants").Select = "quantity,related_id";
@@ -72,22 +72,18 @@ namespace Aras.Model.Debug
 
             Item part = partquery.Store.First();
             part.PropertyChanged += part_PropertyChanged;
-            part.Property("item_number").PropertyChanged += Program_PropertyChanged;
-
-            Model.Item.Locks locked = part.Locked;
-            Boolean testreadonly = part.Property("item_number").ReadOnly;
-            Model.Item.Actions testaction = part.Action;
+            part.Property("name").PropertyChanged += Program_PropertyChanged;
 
             using (Transaction trans = session.BeginTransaction())
             {
                 part.Update(trans);
 
-                locked = part.Locked;
-                testreadonly = part.Property("item_number").ReadOnly;
-                testaction = part.Action;
+                part.Property("name").Value = "New Name 3";
 
-                trans.Commit(true);
+                trans.RollBack();
             }
+
+            String test5 = (String)part.Property("name").Value;
         }
 
         static void part_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -97,7 +93,14 @@ namespace Aras.Model.Debug
 
         static void Program_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            Property part = (Property)sender;
             String test = e.PropertyName;
+            String test2 = null;
+            
+            if (test == "Value")
+            {
+                test2 = (String)part.Value;
+            }
         }
     }
 }
