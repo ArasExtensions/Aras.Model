@@ -32,7 +32,7 @@ namespace Aras.Model.Properties
 {
     public class List : Property
     {
-        public Model.List Values
+        public Model.Items.List Values
         {
             get
             {
@@ -55,7 +55,7 @@ namespace Aras.Model.Properties
                         base.Value = value;
                     }
                 }
-                else if (value is Aras.Model.ListValue)
+                else if (value is Aras.Model.Relationships.Value)
                 {
                     if (base.Value == null)
                     {
@@ -63,7 +63,7 @@ namespace Aras.Model.Properties
                     }
                     else
                     {
-                        if (!((Aras.Model.ListValue)base.Value).Equals((Aras.Model.ListValue)value))
+                        if (!((Aras.Model.Relationships.Value)base.Value).Equals((Aras.Model.Relationships.Value)value))
                         {
                             base.Value = value;
                         }
@@ -71,7 +71,7 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    throw new Exceptions.ArgumentException("Value must be a Aras.Model.ListValue");
+                    throw new Exceptions.ArgumentException("Value must be a Aras.Model.Relationships.Value");
                 }
             }
         }
@@ -86,7 +86,7 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    return this.Values.Values.ToList().IndexOf((ListValue)this.Value);
+                    return this.Values.Relationships("Value").ToList().IndexOf((Relationships.Value)this.Value);
                 }
             }
             set
@@ -97,9 +97,9 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    if (value >= 0 && value < this.Values.Values.Count())
+                    if (value >= 0 && value < this.Values.Relationships("Value").Count())
                     {
-                        this.Value = this.Values.Values.ToList()[value];
+                        this.Value = this.Values.Relationships("Value").ToList()[value];
                     }
                     else
                     {
@@ -119,7 +119,7 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    return ((Model.ListValue)this.Value).Value;
+                    return (string)((Model.Relationships.Value)this.Value).Property("value").Value;
                 }
             }
             set
@@ -130,7 +130,7 @@ namespace Aras.Model.Properties
                 }
                 else
                 {
-                    this.SetValue(((PropertyTypes.List)this.Type).Values.ListValue(value));
+                    this.SetValue(((PropertyTypes.List)this.Type).Values.Value(value));
                 }
             }
         }

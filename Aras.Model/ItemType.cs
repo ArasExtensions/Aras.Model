@@ -286,8 +286,7 @@ namespace Aras.Model
 
                                         break;
                                     case "list":
-                                        List valuelist = (List)this.Session.ListByID(thisprop.GetProperty("data_source"));
-                                        this._propertyTypeCache[name] = new PropertyTypes.List(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, valuelist);
+                                        this._propertyTypeCache[name] = new PropertyTypes.List(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, thisprop.GetProperty("data_source"));
                                         break;
                                     case "decimal":
 
@@ -340,7 +339,7 @@ namespace Aras.Model
                                         this._propertyTypeCache[name] = new PropertyTypes.Sequence(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
                                         break;
                                     case "filter list":
-                                        List valuefilterlist = (List)this.Session.ListByID(thisprop.GetProperty("data_source"));
+                                        Items.List valuefilterlist = (Items.List)this.Session.Lists.Store.Get(thisprop.GetProperty("data_source"));
                                         this._propertyTypeCache[name] = new PropertyTypes.FilterList(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, valuefilterlist);
                                         break;
                                     default:

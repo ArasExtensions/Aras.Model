@@ -28,26 +28,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model
+namespace Aras.Model.Relationships
 {
-    public class ListValue
+    [Attributes.ItemType("Value")]
+    public class Value : Relationship
     {
-        public List List { get; private set; }
 
-        public String Value { get; private set; }
-
-        public String Label { get; private set; }
-
-        public override string ToString()
+        public Value(Store Store, Transaction Transaction)
+            : base(Store, Transaction)
         {
-            return this.Value;
+
         }
 
-        internal ListValue(List List, String Value, String Label)
+        public Value(Store Store, IO.Item DBItem)
+            : base(Store, DBItem)
         {
-            this.List = List;
-            this.Value = Value;
-            this.Label = Label;
+
         }
     }
 }

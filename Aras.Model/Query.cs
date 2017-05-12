@@ -144,6 +144,8 @@ namespace Aras.Model
 
         public ItemType ItemType { get; private set; }
 
+        public String OrderBy { get; set; }
+
         private Dictionary<String, PropertyType> SelectCache;
         private Dictionary<PropertyTypes.Item, Query> SelectPropertyCache;
 
@@ -330,6 +332,8 @@ namespace Aras.Model
                     // Use default selection
                     this.Select = "keyed_name";
                 }
+
+                query.OrderBy = this.OrderBy;
 
                 query.Select = SystemProperties + "," + this.Select;
 

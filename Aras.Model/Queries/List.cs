@@ -28,24 +28,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model.PropertyTypes
+namespace Aras.Model.Queries
 {
-    public class List : PropertyType
+    public class List : Query
     {
-        public System.String ListID { get; private set; }
-
-        public Model.Items.List Values
+        public List(Aras.Model.Session Session)
+            : base(Session.ItemType("List"))
         {
-            get
-            {
-                return (Model.Items.List)this.Type.Session.Lists.Store.Get(this.ListID);
-            }
-        }
-
-        internal List(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.Int32 SortOrder, System.Boolean InSearch, System.Boolean InRelationshipGrid, System.Int32 ColumnWidth, System.String ListID)
-            :base(Type, Name, Label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null)
-        {
-            this.ListID = ListID;
+            this.Select = "name";
+            this.Relationship("Value").Select = "value,label";
+            this.Relationship("Value").OrderBy = "sort_order";
         }
     }
 }

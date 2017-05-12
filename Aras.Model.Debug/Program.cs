@@ -34,77 +34,25 @@ namespace Aras.Model.Debug
     {
         public class Test
         {
-            public void WalkPart(Item Part, Int32 Depth, Boolean Variant)
-            {
-                System.Console.WriteLine(Depth + " : " + Variant + " : " + Part.Property("item_number"));
 
-                foreach(Relationship rel in Part.Relationships("Part BOM"))
+
+            static void Main(string[] args)
+            {
+                Server server = new Server("http://localhost/InnovatorServer100SP4");
+                Database database = server.Database("CMB");
+                Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
+
+                Query query = session.Query("Variant Context");
+                query.Select = "name,list";
+                query.Property("list").Select = "name";
+                query.Property("list").Relationship("Value").Select = "value,label";
+                query.Property("list").Relationship("Value").OrderBy = "sort_order";
+
+
+                foreach(Item item in query.Store)
                 {
-                    this.WalkPart(rel.Related, Depth + 1, false);
+                    Item list = (Item)item.Property("list").Value;
                 }
-
-                foreach (Relationship rel in Part.Relationships("Part Variants"))
-                {
-                    this.WalkPart(rel.Related, Depth + 1, true);
-                }
-            }
-
-            public Test()
-            {
-
-            }
-        }
-
-        static void Main(string[] args)
-        {       
-            Server server = new Server("http://localhost/InnovatorServer100SP4");
-            Database database = server.Database("CMB");
-            Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
-
-            Query partquery = session.Query("Part");
-            partquery.Paging = false;
-            partquery.Condition = Aras.Conditions.Eq("item_number", "2474M_Test_001");
-            partquery.Select = "item_number,name";
-            partquery.Recursive = true;
-            partquery.Relationship("Part BOM").Select = "quantity,related_id";
-            partquery.Relationship("Part Variants").Select = "quantity,related_id";
-
-
-            Item part = partquery.Store.First();
-            part.PropertyChanged += part_PropertyChanged;
-            part.Property("name").PropertyChanged += Program_PropertyChanged;
-
-            using (Transaction trans = session.BeginTransaction())
-            {
-                part.Update(trans);
-
-                part.Property("name").Value = "New Name 3";
-
-                trans.Commit(true);
-            }
-
-            String test5 = (String)part.Property("name").Value;
-
-            part.Refresh();
-
-            String test6 = (String)part.Property("name").Value;
-            
-        }
-
-        static void part_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            String test = e.PropertyName;
-        }
-
-        static void Program_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            Property part = (Property)sender;
-            String test = e.PropertyName;
-            String test2 = null;
-            
-            if (test == "Value")
-            {
-                test2 = (String)part.Value;
             }
         }
     }

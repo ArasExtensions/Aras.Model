@@ -32,9 +32,9 @@ namespace Aras.Model.PropertyTypes
 {
     public class FilterList : PropertyType
     {
-        public Model.List Values { get; private set; }
+        public Model.Items.List Values { get; private set; }
 
-        internal FilterList(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.Int32 SortOrder, System.Boolean InSearch, System.Boolean InRelationshipGrid, System.Int32 ColumnWidth, Model.List Values)
+        internal FilterList(ItemType Type, System.String Name, System.String Label, System.Boolean ReadOnly, System.Boolean Required, System.Int32 SortOrder, System.Boolean InSearch, System.Boolean InRelationshipGrid, System.Int32 ColumnWidth, Model.Items.List Values)
             :base(Type, Name, Label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null)
         {
             this.Values = Values;

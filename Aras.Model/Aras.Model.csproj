@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Cache\Property.cs" />
     <Compile Include="Exceptions\PropertyException.cs" />
+    <Compile Include="Queries\List.cs" />
     <Compile Include="Queries\LifeCycleMap.cs" />
     <Compile Include="Relationships\Access.cs" />
     <Compile Include="Action.cs" />
@@ -71,7 +72,7 @@
     <Compile Include="ItemType.cs" />
     <Compile Include="Items\LifeCycleMap.cs" />
     <Compile Include="Relationships\LifeCycleState.cs" />
-    <Compile Include="List.cs" />
+    <Compile Include="Items\List.cs" />
     <Compile Include="Relationships\Located.cs" />
     <Compile Include="ObservableList.cs" />
     <Compile Include="Items\Permission.cs" />
@@ -115,7 +116,7 @@
     <Compile Include="RelationshipType.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="Session.cs" />
-    <Compile Include="ListValue.cs" />
+    <Compile Include="Relationships\Value.cs" />
     <Compile Include="Store.cs" />
     <Compile Include="Items\Team.cs" />
     <Compile Include="Transaction.cs" />

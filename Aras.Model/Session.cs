@@ -72,7 +72,6 @@ namespace Aras.Model
 
         private Dictionary<String, ItemType> ItemTypeNameCache;
         private Dictionary<String, ItemType> ItemTypeIDCache;
-        private Dictionary<String, List> ListIDCache;
 
         public ItemType ItemType(String Name)
         {
@@ -98,23 +97,10 @@ namespace Aras.Model
             }
         }
 
-        public List ListByID(String ID)
-        {
-            if (this.ListIDCache.ContainsKey(ID))
-            {
-                return this.ListIDCache[ID];
-            }
-            else
-            {
-                throw new Exceptions.ArgumentException("Invalid List ID: " + ID);
-            }
-        }
-
         private void BuildCaches()
         {
             this.ItemTypeNameCache = new Dictionary<String, ItemType>();
             this.ItemTypeIDCache = new Dictionary<String, ItemType>();
-            this.ListIDCache = new Dictionary<String, List>();
 
             // Build ItemType Cache
             IO.Request itemtyperequest = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
@@ -201,39 +187,6 @@ namespace Aras.Model
             {
                 throw new Exceptions.ServerException(relationshiptyperesponse);
             }
-
-            // Build List Cache
-            IO.Request listrequest = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
-            IO.Item listquery = listrequest.NewItem("List", "get");
-            listquery.Select = "id,name";
-            listquery.OrderBy = "sort_order";
-            IO.Item valuequery = listrequest.NewItem("Value", "get");
-            valuequery.Select = "value,label";
-            listquery.AddRelationship(valuequery);
-            IO.Response listresponse = listrequest.Execute();
-
-            if (!listresponse.IsError)
-            {
-                foreach(IO.Item dbitem in listresponse.Items)
-                {
-                    List list = new List(this, dbitem.ID, dbitem.GetProperty("name"));
-
-                    foreach(IO.Item dbvalue in dbitem.Relationships)
-                    {
-                        ListValue listvalue = new ListValue(list, dbvalue.GetProperty("value"), dbvalue.GetProperty("label"));
-                        list.AddListValue(listvalue);
-                    }
-
-                    this.ListIDCache[list.ID] = list;
-                }
-            }
-            else
-            {
-                throw new Exceptions.ServerException(listresponse);
-            }
-
-            // Refresh Life Cycle Map Store
-            this.LifeCycleMaps.Store.Refresh();
         }
 
         public Query Query(ItemType ItemType)
@@ -257,6 +210,20 @@ namespace Aras.Model
                 }
 
                 return this._lifeCycleMaps;
+            }
+        }
+
+        private Queries.List _lists;
+        public Queries.List Lists
+        {
+            get
+            {
+                if (this._lists == null)
+                {
+                    this._lists = new Queries.List(this);
+                }
+
+                return this._lists;
             }
         }
 
