@@ -460,7 +460,17 @@ namespace Aras.Model
                                 }
                                 else
                                 {
-                                    property.DBValue = null;
+                                    // Check if just ID Specified
+                                    String itemid = DBItem.GetProperty(property.Type.Name);
+
+                                    if (!String.IsNullOrEmpty(itemid))
+                                    {
+                                        property.DBValue = itemid;
+                                    }
+                                    else
+                                    {
+                                        property.DBValue = null;
+                                    }
                                 }
                             }
                         }

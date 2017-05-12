@@ -64,8 +64,8 @@ namespace Aras.Model.Actions
 
         void Source_Superceded(object sender, SupercededEventArgs e)
         {
-            //((Model.Relationship)this.Item).Source.Superceded -= Source_Superceded;
-            //((Model.Relationship)this.Item).Source = e.NewGeneration;
+            ((Model.Relationship)this.Item).Source.Superceded -= Source_Superceded;
+            ((Model.Relationship)this.Item).Source = e.NewGeneration;
         }
 
         internal override void Rollback()
