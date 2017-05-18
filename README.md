@@ -9,7 +9,7 @@ Aras Model provides a .NET client library for [Aras Innovator](http://www.aras.c
 ## Prerequisites
 
  * [Aras.Common](https://github.com/ArasExtensions/Aras.Common)
- * [ArasExtensions/Aras.IO](https://github.com/ArasExtensions/Aras.IO)
+ * [Aras.IO](https://github.com/ArasExtensions/Aras.IO)
  
 ## Licence
 
