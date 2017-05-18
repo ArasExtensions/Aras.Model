@@ -121,7 +121,7 @@
     <Compile Include="Items\Team.cs" />
     <Compile Include="Transaction.cs" />
     <Compile Include="Items\User.cs" />
-    <Compile Include="Vault.cs" />
+    <Compile Include="Items\Vault.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Aras.IO\Aras.IO\Aras.IO.csproj">
