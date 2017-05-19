@@ -93,9 +93,6 @@ namespace Aras.Model.Actions
                 {
                     case Model.Item.Actions.Create:
 
-                        // Remove from Cache
-                        //this.Item.Session.Store(this.Item.ItemType).Delete(this.Item);
-
                         break;
                     
                     case Model.Item.Actions.Update:
@@ -119,9 +116,6 @@ namespace Aras.Model.Actions
             {
                 // Trigger Deleted Event
                 this.Item.OnDeleted();
-
-                // Remove from Cache
-                //this.Item.Session.Store(this.Item.ItemType).Delete(this.Item);
             }
         }
 

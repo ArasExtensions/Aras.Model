@@ -274,7 +274,17 @@ namespace Aras.Model
 
             this.Cache[item.ID] = item;
             this.CreatedItems.Add(item);
+
+            if (this.Items == null)
+            {
+                this.Items = new List<Item>();
+            }
+
             this.Items.Add(item);
+
+            // Add to Transaction
+            Transaction.Add("add", item);
+
             return item;
         }
 

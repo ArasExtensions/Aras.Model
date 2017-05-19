@@ -100,9 +100,6 @@ namespace Aras.Model.Actions
             {
                 // Trigger Deleted Event
                 this.Item.OnDeleted();
-
-                // Remove from Parent Cache
-                //((Model.Relationship)this.Item).Source.Store(((Model.Relationship)this.Item).RelationshipType).Delete((Model.Relationship)this.Item);
             }
         }
 

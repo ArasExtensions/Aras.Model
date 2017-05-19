@@ -433,6 +433,8 @@ namespace Aras.Model
 
         internal void UpdateProperties(IO.Item DBItem)
         {
+            this.Cache.UpdateProperties(DBItem);
+
             if (DBItem != null)
             {
                 // Update Classification
@@ -440,6 +442,7 @@ namespace Aras.Model
 
                 if (this.ID.Equals(DBItem.ID))
                 {
+                    // Update Properties
                     foreach (Property property in this.PropertyCache.Values)
                     {
                         if (property is Properties.Item)

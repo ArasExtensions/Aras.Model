@@ -132,6 +132,27 @@ namespace Aras.Model.Cache
             }
         }
 
+        internal void UpdateProperties(IO.Item DBItem)
+        {
+            switch(this.Action)
+            {
+                case Model.Item.Actions.Create:
+                case Model.Item.Actions.Read:
+                case Model.Item.Actions.Update:
+
+                    this.State = Model.Item.States.Stored;
+                    this.Action = Model.Item.Actions.Read;
+
+                    break;
+
+                case Model.Item.Actions.Delete:
+
+                    this.State = Model.Item.States.Deleted;
+
+                    break;
+            }
+        }
+
         private Model.Item.Locks _locked;
         private Boolean _lockChecked;
         internal Model.Item.Locks Locked
@@ -277,6 +298,7 @@ namespace Aras.Model.Cache
                                 if (response.ErrorMessage == "Aras.Server.Core.ItemIsNotLockedException")
                                 {
                                     this.Locked = Model.Item.Locks.None;
+                                    this.Action = Model.Item.Actions.Read;
                                 }
                                 else
                                 {

@@ -173,7 +173,7 @@ namespace Aras.Model
                     }
                 }
 
-                if (!found && !relation.Name.Equals("delete"))
+                if (!found)
                 {
                     relation.Item.UpdateProperties(null);
                 }

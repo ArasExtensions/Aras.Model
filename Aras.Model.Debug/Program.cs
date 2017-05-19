@@ -40,17 +40,45 @@ namespace Aras.Model.Debug
                 Database database = server.Database("CMB");
                 Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
-                Query query = session.Query("Variant Context");
-                query.Select = "name,list";
-                query.Property("list").Select = "name";
-                query.Property("list").Relationship("Value").Select = "value,label";
-                query.Property("list").Relationship("Value").OrderBy = "sort_order";
+                Query query = session.Query("Part");
+                query.Select = "item_number,name";
+                query.Relationship("Part BOM").Select = "quantity,related_id";
 
+                Item part1 = null;
+                Item part2 = null;
+                Relationship rel = null;
 
-                foreach(Item item in query.Store)
+                using(Transaction trans = session.BeginTransaction())
                 {
-                    Item list = (Item)item.Property("list").Value;
+                    part1 = query.Store.Create(trans);
+                    part1.Property("item_number").Value = "TEST001";
+
+                    part2 = query.Store.Create(trans);
+                    part2.Property("item_number").Value = "TEST002";
+
+                    rel = (Relationship)part1.Relationships("Part BOM").Create(trans);
+                    rel.Property("quantity").Value = 1.0;
+                    rel.Related = part2;
+
+                    trans.Commit(true);
                 }
+
+                using (Transaction trans = session.BeginTransaction())
+                {
+                    part1.Update(trans);
+                    rel.Delete(trans);
+                    trans.Commit(true);
+                }
+
+                using (Transaction trans = session.BeginTransaction())
+                {
+                    part1.Update(trans);
+                    rel = (Relationship)part1.Relationships("Part BOM").Create(trans);
+                    rel.Property("quantity").Value = 2.0;
+                    rel.Related = part2;
+                    trans.Commit(true);
+                }
+                
             }
         }
     }
