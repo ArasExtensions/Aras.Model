@@ -57,7 +57,7 @@ namespace Aras.Model
         public Relationship(Store Store, Transaction Transaction)
             : base(Store, Transaction)
         {
-
+            this.Source = this.Store.Source;
         }
 
         public Relationship(Store Store, IO.Item DBItem)
