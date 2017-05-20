@@ -161,47 +161,63 @@ namespace Aras.Model.Cache
             {
                 if (!this._lockChecked)
                 {
-                    IO.Item checklockitem = new IO.Item(this.ItemType.Name, "get");
-                    checklockitem.ID = this.ID;
-                    checklockitem.Select = "locked_by_id";
-                    IO.Request request = this.ItemType.Session.IO.Request(IO.Request.Operations.ApplyItem, checklockitem);
-                    IO.Response response = request.Execute();
-
-                    if (!response.IsError)
+                    switch (this.State)
                     {
-                        if (response.Items.Count() == 1)
-                        {
-                            String locked_by_id = response.Items.First().GetProperty("locked_by_id");
+                        case Model.Item.States.Stored:
+                            IO.Item checklockitem = new IO.Item(this.ItemType.Name, "get");
+                            checklockitem.ID = this.ID;
+                            checklockitem.Select = "locked_by_id";
+                            IO.Request request = this.ItemType.Session.IO.Request(IO.Request.Operations.ApplyItem, checklockitem);
+                            IO.Response response = request.Execute();
 
-                            if (String.IsNullOrEmpty(locked_by_id))
+                            if (!response.IsError)
                             {
-                                this._locked = Model.Item.Locks.None;
-                            }
-                            else
-                            {
-                                if (locked_by_id.Equals(this.ItemType.Session.IO.UserID))
+                                if (response.Items.Count() == 1)
                                 {
-                                    this._locked = Model.Item.Locks.User;
+                                    String locked_by_id = response.Items.First().GetProperty("locked_by_id");
+
+                                    if (String.IsNullOrEmpty(locked_by_id))
+                                    {
+                                        this._locked = Model.Item.Locks.None;
+                                    }
+                                    else
+                                    {
+                                        if (locked_by_id.Equals(this.ItemType.Session.IO.UserID))
+                                        {
+                                            this._locked = Model.Item.Locks.User;
+                                        }
+                                        else
+                                        {
+                                            this._locked = Model.Item.Locks.OtherUser;
+                                        }
+                                    }
+
+
                                 }
                                 else
                                 {
-                                    this._locked = Model.Item.Locks.OtherUser;
+                                    throw new Exceptions.ServerException("Failed to check lock status");
                                 }
                             }
+                            else
+                            {
+                                throw new Exceptions.ServerException(response);
+                            }
 
-                            this._lockChecked = true;
-                        }
-                        else
-                        {
-                            throw new Exceptions.ServerException("Failed to check lock status");
-                        }
+                            break;
 
-                        
+                        case Model.Item.States.New:
+
+                            this._locked = Model.Item.Locks.User;
+
+                            break;
+
+                        case Model.Item.States.Deleted:
+
+                            throw new Exceptions.ArgumentException("Item is Deleted");
                     }
-                    else
-                    {
-                        throw new Exceptions.ServerException(response);
-                    }  
+
+                    this._lockChecked = true;
                 }
 
                 return this._locked;
