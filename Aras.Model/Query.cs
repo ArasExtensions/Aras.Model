@@ -220,7 +220,7 @@ namespace Aras.Model
             }
             else
             {
-                throw new Exceptions.PropertyException(PropertyName);
+                throw new Exceptions.PropertyException(this.ItemType, PropertyName);
             }
         }
 

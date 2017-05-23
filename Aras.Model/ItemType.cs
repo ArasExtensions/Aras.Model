@@ -364,7 +364,7 @@ namespace Aras.Model
             }
             else
             {
-                throw new Exceptions.PropertyException(Name);
+                throw new Exceptions.PropertyException(this, Name);
             }
         }
 

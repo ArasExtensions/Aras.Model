@@ -29,17 +29,21 @@ namespace Aras.Model.Exceptions
 {
     public class PropertyException : Exception
     {
+        public ItemType ItemType { get; private set; }
+
         public String Name { get; private set; }
 
-        public PropertyException(String Name)
-            : base("Property not loaded: " + Name)
+        public PropertyException(ItemType ItemType, String Name)
+            : base("Property not loaded: " + ItemType.Name + "(" + Name + ")")
         {
+            this.ItemType = ItemType;
             this.Name = Name;
         }
 
-        public PropertyException(String Name, Exception innerException)
-            : base("Property not loaded: " + Name, innerException)
+        public PropertyException(ItemType ItemType, String Name, Exception innerException)
+            : base("Property not loaded: " + ItemType.Name + "(" +  Name + ")", innerException)
         {
+            this.ItemType = ItemType;
             this.Name = Name;
         }
     }
