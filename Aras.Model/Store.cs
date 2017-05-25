@@ -304,16 +304,7 @@ namespace Aras.Model
                 this.Items.Clear();
             }
 
-            // Load Items from Server
-            if (DBItems != null)
-            {
-                foreach (IO.Item dbitem in DBItems)
-                {
-                    this.Items.Add(this.Create(dbitem));
-                }
-            }
-
-            // Add Created Items to end of Items
+            // Add Created Items to start of Items
             List<Item> newcreateditems = new List<Item>();
 
             foreach (Item createditem in this.CreatedItems)
@@ -326,6 +317,15 @@ namespace Aras.Model
             }
 
             this.CreatedItems = newcreateditems;
+
+            // Load Items from Server
+            if (DBItems != null)
+            {
+                foreach (IO.Item dbitem in DBItems)
+                {
+                    this.Items.Add(this.Create(dbitem));
+                }
+            }
 
             // Trigger Changed Event
             this.OnChanged();
@@ -340,14 +340,14 @@ namespace Aras.Model
             this.AddToCache(item);
 
             // Add to Created Items
-            this.CreatedItems.Add(item);
+            this.CreatedItems.Insert(0, item);
 
             if (this.Items == null)
             {
                 this.Items = new List<Item>();
             }
 
-            this.Items.Add(item);
+            this.Items.Insert(0, item);
 
             // Add to Transaction
             Transaction.Add("add", item);
@@ -380,7 +380,7 @@ namespace Aras.Model
                                 this.AddToCache(newitem);
 
                                 // Add to Create Items
-                                this.CreatedItems.Add(newitem);
+                                this.CreatedItems.Insert(0, newitem);
 
                                 break;
 
@@ -398,7 +398,7 @@ namespace Aras.Model
                             this.Items = new List<Item>();
                         }
 
-                        this.Items.Add(newitem);
+                        this.Items.Insert(0, newitem);
 
                         // Trigger Changed Event
                         this.OnChanged();
