@@ -111,9 +111,6 @@ namespace Aras.Model.Actions
             {
                 // Trigger Deleted Event
                 this.Item.OnDeleted();
-
-                // Remove from Cache
-                //this.Item.Session.Store(this.Item.ItemType).Delete(this.Item);
             }
         }
 

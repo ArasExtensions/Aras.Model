@@ -43,7 +43,7 @@ namespace Aras.Model.Debug
                 Query query = session.Query("Part");
                 query.Select = "item_number,name";
                 query.Relationship("Part BOM").Select = "quantity,related_id";
-
+              
                 Item part1 = null;
                 Item part2 = null;
                 Relationship rel = null;
@@ -57,11 +57,16 @@ namespace Aras.Model.Debug
                     part2.Property("item_number").Value = "TEST002";
 
                     rel = (Relationship)part1.Relationships("Part BOM").Create(trans);
+
+                    part1.Relationships("Part BOM").Changed += Test_Changed;
+
                     rel.Property("quantity").Value = 1.0;
                     rel.Related = part2;
 
                     trans.Commit(true);
                 }
+
+                List<Item> rels = part1.Relationships("Part BOM").ToList();
 
                 using (Transaction trans = session.BeginTransaction())
                 {
@@ -70,16 +75,29 @@ namespace Aras.Model.Debug
                     trans.Commit(true);
                 }
 
+                rels = part1.Relationships("Part BOM").ToList();
+
                 using (Transaction trans = session.BeginTransaction())
                 {
                     part1.Update(trans);
                     rel = (Relationship)part1.Relationships("Part BOM").Create(trans);
                     rel.Property("quantity").Value = 2.0;
                     rel.Related = part2;
+
+                    rels = part1.Relationships("Part BOM").ToList();
+
                     trans.Commit(true);
                 }
-                
+
+                rels = part1.Relationships("Part BOM").ToList();
             }
+
+            static void Test_Changed(object sender, ChangedEventArgs e)
+            {
+                Store store = (Store)sender;
+                List<Item> items = store.ToList();
+            }
+
         }
     }
 }

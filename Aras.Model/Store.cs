@@ -29,6 +29,17 @@ using System.ComponentModel;
 
 namespace Aras.Model
 {
+    public class ChangedEventArgs : EventArgs
+    {
+        public ChangedEventArgs()
+            : base()
+        {
+      
+        }
+    }
+
+    public delegate void ChangedEventHandler(object sender, ChangedEventArgs e);
+
     public class Store : System.Collections.Generic.IEnumerable<Model.Item>, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -38,6 +49,16 @@ namespace Aras.Model
             if (this.PropertyChanged != null)
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(Name));
+            }
+        }
+
+        public event ChangedEventHandler Changed;
+
+        internal void OnChanged()
+        {
+            if (this.Changed != null)
+            {
+                Changed(this, new ChangedEventArgs());
             }
         }
 
@@ -148,6 +169,33 @@ namespace Aras.Model
 
         private Dictionary<String, Model.Item> Cache;
 
+        private void AddToCache(Model.Item Item)
+        {
+            if (!this.Cache.ContainsKey(Item.ID))
+            {
+                this.Cache[Item.ID] = Item;
+
+                Item.Deleted += Item_Deleted;
+            }
+        }
+
+        private void Item_Deleted(object sender, DeletedEventArgs e)
+        {
+            Model.Item item = (Model.Item)sender;
+
+            // Remove Item from List if Present
+            if (this.Items.Remove(item))
+            {
+                this.OnChanged();
+            }
+
+            // Remove from Cache if Present
+            if (this.Cache.ContainsKey(item.ID))
+            {
+                this.Cache.Remove(item.ID);
+            }
+        }
+
         private List<Model.Item> Items;
 
         private List<Model.Item> CreatedItems;
@@ -178,6 +226,21 @@ namespace Aras.Model
 
                 return this.Items[Index];
             }
+        }
+
+        public List<Model.Item> CurrentItems()
+        {
+            List<Model.Item> items = new List<Model.Item>();
+
+            foreach(Model.Item item in this)
+            {
+                if (item.Action != Item.Actions.Delete)
+                {
+                    items.Add(item);
+                }
+            }
+
+            return items;
         }
 
         public void Refresh()
@@ -231,6 +294,7 @@ namespace Aras.Model
 
         internal void Load(IEnumerable<IO.Item> DBItems)
         {
+            // Clear Items
             if (this.Items == null)
             {
                 this.Items = new List<Item>();
@@ -240,18 +304,10 @@ namespace Aras.Model
                 this.Items.Clear();
             }
 
-            if (DBItems != null)
-            {
-                foreach (IO.Item dbitem in DBItems)
-                {
-                    this.Items.Add(this.Create(dbitem));
-                }
-            }
-
-            // Add Created Items to end of Items
+            // Add Created Items to start of Items
             List<Item> newcreateditems = new List<Item>();
 
-            foreach(Item createditem in this.CreatedItems)
+            foreach (Item createditem in this.CreatedItems)
             {
                 if (createditem.State == Item.States.New)
                 {
@@ -261,13 +317,28 @@ namespace Aras.Model
             }
 
             this.CreatedItems = newcreateditems;
+
+            // Load Items from Server
+            if (DBItems != null)
+            {
+                foreach (IO.Item dbitem in DBItems)
+                {
+                    this.Items.Add(this.Create(dbitem));
+                }
+            }
+
+            // Trigger Changed Event
+            this.OnChanged();
         }
 
         public Model.Item Create(Transaction Transaction)
         {
             Model.Item item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(Store), typeof(Transaction) }).Invoke(new object[] { this, Transaction });
 
-            this.Cache[item.ID] = item;
+            // Add to Cache
+            this.AddToCache(item);
+
+            // Add to Created Items
             this.CreatedItems.Add(item);
 
             if (this.Items == null)
@@ -279,6 +350,9 @@ namespace Aras.Model
 
             // Add to Transaction
             Transaction.Add("add", item);
+
+            // Trigger Changed Event
+            this.OnChanged();
 
             return item;
         }
@@ -294,8 +368,11 @@ namespace Aras.Model
             }
             else
             {
-                ret = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(Store), typeof(IO.Item) }).Invoke(new object[] { this, DBItem }); 
-                this.Cache[ret.ID] = ret;
+                // Create Item
+                ret = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(Store), typeof(IO.Item) }).Invoke(new object[] { this, DBItem });
+ 
+                // Add to Cache
+                this.AddToCache(ret);
             }
 
             return ret;
