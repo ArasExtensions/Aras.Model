@@ -44,8 +44,8 @@ namespace Aras.Model.Relationships
             return this.Name;
         }
 
-        public LifeCycleState(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public LifeCycleState(Store Store)
+            : base(Store)
         {
       
         }

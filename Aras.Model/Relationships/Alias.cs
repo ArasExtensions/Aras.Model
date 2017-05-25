@@ -47,8 +47,8 @@ namespace Aras.Model.Relationships
             }
         }
 
-        public Alias(Store Store, Transaction Transaction)
-            :base(Store, Transaction)
+        public Alias(Store Store)
+            :base(Store)
         {
       
         }

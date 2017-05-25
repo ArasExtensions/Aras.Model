@@ -32,8 +32,8 @@ namespace Aras.Model.Items
     public class Team : Item
     {
 
-        public Team(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public Team(Store Store)
+            : base(Store)
         {
 
         }

@@ -47,8 +47,8 @@ namespace Aras.Model.Relationships
             }
         }
 
-        public Located(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public Located(Store Store)
+            : base(Store)
         {
       
         }

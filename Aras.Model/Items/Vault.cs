@@ -57,8 +57,8 @@ namespace Aras.Model.Items
             }
         }
 
-        public Vault(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public Vault(Store Store)
+            : base(Store)
         {
 
         }

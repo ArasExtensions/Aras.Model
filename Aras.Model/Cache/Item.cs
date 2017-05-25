@@ -349,10 +349,10 @@ namespace Aras.Model.Cache
 
         public IEnumerable<Relationships.LifeCycleState> NextStates()
         {
+            List<Relationships.LifeCycleState> ret = new List<Relationships.LifeCycleState>();
+
             if (this.State == Model.Item.States.Stored)
             {
-                List<Relationships.LifeCycleState> ret = new List<Relationships.LifeCycleState>();
-
                 if (this.LifeCycleMap != null)
                 {
                     IO.Request request = this.ItemType.Session.IO.Request(IO.Request.Operations.GetItemNextStates);
@@ -382,14 +382,10 @@ namespace Aras.Model.Cache
                     {
                         throw new Exceptions.ServerException(response);
                     }
-                }
+                }    
+            }
 
-                return ret;
-            }
-            else
-            {
-                throw new Exceptions.ArgumentException("Item must be stored in Database before Promotion");
-            }
+            return ret;
         }
 
         public void Promote(Relationships.LifeCycleState NewState)

@@ -44,8 +44,8 @@ namespace Aras.Model.Items
             return this.Name;
         }
 
-        public Identity(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public Identity(Store Store)
+            : base(Store)
         {
 
         }

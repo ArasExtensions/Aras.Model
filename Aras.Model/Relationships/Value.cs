@@ -32,8 +32,8 @@ namespace Aras.Model.Relationships
     public class Value : Relationship
     {
 
-        public Value(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public Value(Store Store)
+            : base(Store)
         {
 
         }

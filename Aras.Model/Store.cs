@@ -304,7 +304,16 @@ namespace Aras.Model
                 this.Items.Clear();
             }
 
-            // Add Created Items to start of Items
+            // Load Items from Server
+            if (DBItems != null)
+            {
+                foreach (IO.Item dbitem in DBItems)
+                {
+                    this.Items.Add(this.Create(dbitem));
+                }
+            }
+
+            // Add Created Items to end of Items
             List<Item> newcreateditems = new List<Item>();
 
             foreach (Item createditem in this.CreatedItems)
@@ -318,22 +327,14 @@ namespace Aras.Model
 
             this.CreatedItems = newcreateditems;
 
-            // Load Items from Server
-            if (DBItems != null)
-            {
-                foreach (IO.Item dbitem in DBItems)
-                {
-                    this.Items.Add(this.Create(dbitem));
-                }
-            }
-
             // Trigger Changed Event
             this.OnChanged();
         }
 
         public Model.Item Create(Transaction Transaction)
         {
-            Model.Item item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(Store), typeof(Transaction) }).Invoke(new object[] { this, Transaction });
+            // Create Item
+            Model.Item item = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(Store) }).Invoke(new object[] { this });
 
             // Add to Cache
             this.AddToCache(item);
@@ -355,6 +356,69 @@ namespace Aras.Model
             this.OnChanged();
 
             return item;
+        }
+
+        public Model.Item Add (Model.Item Item)
+        {
+            if (Item != null)
+            {
+                if (Item.ItemType.Equals(this.Query.ItemType))
+                {
+                    if (!this.Cache.ContainsKey(Item.ID))
+                    {
+                        Model.Item newitem = null;
+
+                        switch (Item.State)
+                        {
+                            case Model.Item.States.New:
+
+                                // Create Item
+                                newitem = (Model.Item)this.ItemType.Class.GetConstructor(new Type[] { typeof(Store) }).Invoke(new object[] { this });
+                                newitem.Copy(Item);
+
+                                // Add to Cache
+                                this.AddToCache(newitem);
+
+                                // Add to Create Items
+                                this.CreatedItems.Add(newitem);
+
+                                break;
+
+                            case Model.Item.States.Stored:
+
+                                newitem = this.Get(Item.ID);
+                                break;
+
+                            case Model.Item.States.Deleted:
+                                throw new Exceptions.ArgumentException("Item is Deleted");
+                        }
+
+                        if (this.Items == null)
+                        {
+                            this.Items = new List<Item>();
+                        }
+
+                        this.Items.Add(newitem);
+
+                        // Trigger Changed Event
+                        this.OnChanged();
+
+                        return newitem;
+                    }
+                    else
+                    {
+                        return this.Cache[Item.ID];
+                    }
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("ItemTypes do not match");
+                }
+            }
+            else
+            {
+                throw new Exceptions.ArgumentException("Null Item");
+            }
         }
 
         internal Model.Item Create(IO.Item DBItem)

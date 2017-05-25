@@ -43,8 +43,8 @@ namespace Aras.Model.Items
             }
         }
 
-        public User(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public User(Store Store)
+            : base(Store)
         {
           
         }

@@ -67,8 +67,8 @@ namespace Aras.Model.Items
             }
         }
 
-        public FileType(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public FileType(Store Store)
+            : base(Store)
         {
 
         }

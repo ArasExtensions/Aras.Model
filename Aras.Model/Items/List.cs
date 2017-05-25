@@ -46,8 +46,8 @@ namespace Aras.Model.Items
             return null;
         }
 
-        public List(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public List(Store Store)
+            : base(Store)
         {
 
         }

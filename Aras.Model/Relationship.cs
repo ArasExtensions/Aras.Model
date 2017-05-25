@@ -54,8 +54,8 @@ namespace Aras.Model
             }
         }
 
-        public Relationship(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public Relationship(Store Store)
+            : base(Store)
         {
             this.Source = this.Store.Source;
         }

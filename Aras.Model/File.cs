@@ -147,8 +147,8 @@ namespace Aras.Model
             this.VaultFilename = Path.GetFileName(Filename);
         }
 
-        public File(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public File(Store Store)
+            : base(Store)
         {
 
         }

@@ -520,6 +520,15 @@ namespace Aras.Model
             this.Cache.Promote(NewState);
         }
 
+        internal void Copy(Model.Item Item)
+        {
+            // Set Cache
+            this.Cache = Item.Cache;
+
+            // Initalise
+            this.Initalise();
+        }
+
         public Boolean Equals(Item other)
         {
             if (other == null)
@@ -556,7 +565,7 @@ namespace Aras.Model
             return this.ID.GetHashCode();
         }
 
-        public Item(Store Store, Transaction Transaction)
+        public Item(Store Store)
         {
             this.Cache = Store.Session.GetItemCache(Store.ItemType);
             this.Store = Store;

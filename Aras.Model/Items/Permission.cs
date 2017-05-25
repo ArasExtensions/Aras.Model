@@ -71,8 +71,8 @@ namespace Aras.Model.Items
         }
         */
 
-        public Permission(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public Permission(Store Store)
+            : base(Store)
         {
 
         }

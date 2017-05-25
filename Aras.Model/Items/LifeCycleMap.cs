@@ -44,8 +44,8 @@ namespace Aras.Model.Items
             return this.Name;
         }
 
-        public LifeCycleMap(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public LifeCycleMap(Store Store)
+            : base(Store)
         {
 
         }

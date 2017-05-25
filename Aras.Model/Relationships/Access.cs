@@ -114,8 +114,8 @@ namespace Aras.Model.Relationships
             }
         }
 
-        public Access(Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public Access(Store Store)
+            : base(Store)
         {
       
         }
