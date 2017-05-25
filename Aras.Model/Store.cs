@@ -29,16 +29,16 @@ using System.ComponentModel;
 
 namespace Aras.Model
 {
-    public class ChangedEventArgs : EventArgs
+    public class StoreChangedEventArgs : EventArgs
     {
-        public ChangedEventArgs()
+        public StoreChangedEventArgs()
             : base()
         {
       
         }
     }
 
-    public delegate void ChangedEventHandler(object sender, ChangedEventArgs e);
+    public delegate void StoreChangedEventHandler(object sender, StoreChangedEventArgs e);
 
     public class Store : System.Collections.Generic.IEnumerable<Model.Item>, INotifyPropertyChanged
     {
@@ -52,13 +52,13 @@ namespace Aras.Model
             }
         }
 
-        public event ChangedEventHandler Changed;
+        public event StoreChangedEventHandler Changed;
 
         internal void OnChanged()
         {
             if (this.Changed != null)
             {
-                Changed(this, new ChangedEventArgs());
+                Changed(this, new StoreChangedEventArgs());
             }
         }
 
