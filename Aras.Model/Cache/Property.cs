@@ -123,7 +123,23 @@ namespace Aras.Model.Cache
 
         internal void SetValue(Object Value)
         {
-            this._value = Value;
+            if (this._value == null)
+            {
+                if (Value != null)
+                {
+                    this._value = Value;
+                    this.OnPropertyChanged("Value");
+                }
+            }
+            else
+            {
+                if (!this._value.Equals(Value))
+                {
+                    this._value = Value;
+                    this.OnPropertyChanged("Value");
+                }
+            }
+
             this.Modified = false;
         }
 
