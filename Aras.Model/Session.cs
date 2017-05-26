@@ -225,6 +225,20 @@ namespace Aras.Model
             }
         }
 
+        private Queries.User _users;
+        public Queries.User Users
+        {
+            get
+            {
+                if (this._users == null)
+                {
+                    this._users = new Queries.User(this);
+                }
+
+                return this._users;
+            }
+        }
+
         private Dictionary<String, Cache.Item> ItemCache;
 
         internal Cache.Item GetItemCache(ItemType ItemType)

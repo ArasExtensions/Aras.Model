@@ -242,6 +242,21 @@ namespace Aras.Model
             }
         }
 
+        public Items.User LockedBy
+        {
+            get
+            {
+                if (this.Cache.LockedByID != null)
+                {
+                    return (Items.User)this.ItemType.Session.Users.Store.Get(this.Cache.LockedByID);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         public Locks Locked
         {
             get

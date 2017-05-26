@@ -49,6 +49,83 @@ namespace Aras.Model.Cache
 
         internal Int32 Generation { get; private set; }
 
+        private String _lockedByID;
+        internal String LockedByID 
+        {
+            get
+            {
+                return this._lockedByID;
+            }
+            private set
+            {
+                if (this._lockedByID == null)
+                {
+                    if (value != null)
+                    {
+                        this._lockedByID = value;
+
+                        if (this._lockedByID.Equals(this.ItemType.Session.ID))
+                        {
+                            this.Locked = Model.Item.Locks.User;
+                        }
+                        else
+                        {
+                            this.Locked = Model.Item.Locks.OtherUser;
+                        }
+                    }
+                }
+                else
+                {
+                    if (!this._lockedByID.Equals(value))
+                    {
+                        this._lockedByID = value;
+
+                        if (this._lockedByID == null)
+                        {
+                            this.Locked = Model.Item.Locks.None;
+                        }
+                        else
+                        {
+                            if (this._lockedByID.Equals(this.ItemType.Session.ID))
+                            {
+                                this.Locked = Model.Item.Locks.User;
+                            }
+                            else
+                            {
+                                this.Locked = Model.Item.Locks.OtherUser;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private String _permissionID;
+        internal String PermissionID
+        {
+            get
+            {
+                return this._permissionID;
+            }
+            private set
+            {
+                if (this._permissionID == null)
+                {
+                    if (value != null)
+                    {
+                        this._permissionID = value;
+                    }
+                }
+                else
+                {
+                    if (!this._permissionID.Equals(value))
+                    {
+                        this._permissionID = value;
+                    }
+                }
+            }
+        } 
+
         private Boolean _isCurrent;
         internal Boolean IsCurrent
         {
@@ -134,6 +211,7 @@ namespace Aras.Model.Cache
 
         internal void UpdateProperties(IO.Item DBItem)
         {
+            // Set State and Action
             switch(this.Action)
             {
                 case Model.Item.Actions.Create:
@@ -151,75 +229,22 @@ namespace Aras.Model.Cache
 
                     break;
             }
+
+            if (DBItem != null)
+            {
+                // Set PermissionID
+                this.PermissionID = DBItem.GetProperty("permission_id");
+            
+                // Set LockedByID
+                this.LockedByID = DBItem.GetProperty("locked_by_id");
+            }
         }
 
         private Model.Item.Locks _locked;
-        private Boolean _lockChecked;
         internal Model.Item.Locks Locked
         {
             get
             {
-                if (!this._lockChecked)
-                {
-                    switch (this.State)
-                    {
-                        case Model.Item.States.Stored:
-                            IO.Item checklockitem = new IO.Item(this.ItemType.Name, "get");
-                            checklockitem.ID = this.ID;
-                            checklockitem.Select = "locked_by_id";
-                            IO.Request request = this.ItemType.Session.IO.Request(IO.Request.Operations.ApplyItem, checklockitem);
-                            IO.Response response = request.Execute();
-
-                            if (!response.IsError)
-                            {
-                                if (response.Items.Count() == 1)
-                                {
-                                    String locked_by_id = response.Items.First().GetProperty("locked_by_id");
-
-                                    if (String.IsNullOrEmpty(locked_by_id))
-                                    {
-                                        this._locked = Model.Item.Locks.None;
-                                    }
-                                    else
-                                    {
-                                        if (locked_by_id.Equals(this.ItemType.Session.IO.UserID))
-                                        {
-                                            this._locked = Model.Item.Locks.User;
-                                        }
-                                        else
-                                        {
-                                            this._locked = Model.Item.Locks.OtherUser;
-                                        }
-                                    }
-
-
-                                }
-                                else
-                                {
-                                    throw new Exceptions.ServerException("Failed to check lock status");
-                                }
-                            }
-                            else
-                            {
-                                throw new Exceptions.ServerException(response);
-                            }
-
-                            break;
-
-                        case Model.Item.States.New:
-
-                            this._locked = Model.Item.Locks.User;
-
-                            break;
-
-                        case Model.Item.States.Deleted:
-
-                            throw new Exceptions.ArgumentException("Item is Deleted");
-                    }
-
-                    this._lockChecked = true;
-                }
-
                 return this._locked;
             }
             private set
@@ -523,7 +548,6 @@ namespace Aras.Model.Cache
             this.IsCurrent = IsCurrent;
             this.State = Model.Item.States.Stored;
             this.Action = Model.Item.Actions.Read;
-            this._lockChecked = false;
             this.PropertyCache = new Dictionary<PropertyType, Property>();
         }
 
@@ -536,7 +560,6 @@ namespace Aras.Model.Cache
             this.IsCurrent = true;
             this.State = Model.Item.States.New;
             this.Action = Model.Item.Actions.Create;
-            this._lockChecked = false;
             this.PropertyCache = new Dictionary<PropertyType, Property>();
         }
     }

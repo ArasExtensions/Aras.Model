@@ -46,7 +46,16 @@ namespace Aras.Model.Debug
 
                 Query query2 = session.Query("Part");
                 query2.Select = "item_number,name";
+                query.Condition = Aras.Conditions.Eq("item_number", "2397794");
 
+                Model.Item part1 = query.Store.First();
+
+                String test = (String)part1.Property("item_number").Value;
+
+                Items.User lockedby = part1.LockedBy;
+
+                int a = 1;
+                /*
                 Item part1 = null;
                 Item part2 = null;
                 Relationship rel = null;
@@ -72,6 +81,7 @@ namespace Aras.Model.Debug
                 Model.Item part3 = query2.Store.Add(part1);
 
                 String test = (String)part3.Property("item_number").Value;
+                */
 
                 /*
                 List<Item> rels = part1.Relationships("Part BOM").ToList();

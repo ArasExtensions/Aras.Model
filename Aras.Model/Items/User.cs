@@ -31,6 +31,50 @@ namespace Aras.Model.Items
     [Attributes.ItemType("User")]
     public class User : Item
     {
+        public String LoginName
+        {
+            get
+            {
+                return (String)this.Property("login_name").Value;
+            }
+            set
+            {
+                this.Property("login_name").Value = value;
+            }
+        }
+
+        public String FirstName
+        {
+            get
+            {
+                return (String)this.Property("first_name").Value;
+            }
+            set
+            {
+                this.Property("first_name").Value = value;
+            }
+        }
+
+        public String LastName
+        {
+            get
+            {
+                return (String)this.Property("last_name").Value;
+            }
+            set
+            {
+                this.Property("last_name").Value = value;
+            }
+        }
+
+        public String FullName
+        {
+            get
+            {
+                return this.FirstName + " " + this.LastName;
+            }
+        }
+
         public Vault Vault
         {
             get
