@@ -257,7 +257,16 @@ namespace Aras.Model.Cache
                             }
                             else
                             {
-                                throw new Exceptions.ServerException(response);
+                                if ((response.ErrorMessage != null) && response.ErrorMessage.Equals("Aras.Server.Core.ItemIsAlreadyLockedException"))
+                                {
+                                    // Already Locked
+                                    this.Locked = Model.Item.Locks.User;
+                                    this.Action = Model.Item.Actions.Update;
+                                }
+                                else
+                                {
+                                    throw new Exceptions.ServerException(response);
+                                }
                             }
 
                             break;
