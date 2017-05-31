@@ -560,6 +560,7 @@ namespace Aras.Model.Cache
             this.IsCurrent = true;
             this.State = Model.Item.States.New;
             this.Action = Model.Item.Actions.Create;
+            this.Locked = Model.Item.Locks.User;
             this.PropertyCache = new Dictionary<PropertyType, Property>();
         }
     }
