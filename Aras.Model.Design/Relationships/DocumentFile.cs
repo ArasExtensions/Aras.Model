@@ -26,54 +26,34 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model.Design
+namespace Aras.Model.Design.Relationships
 {
-    [Model.Attributes.ItemType("Document")]
-    public class Document : Model.Item
+    [Model.Attributes.ItemType("Document File")]
+    public class DocumentFile : Model.Relationship
     {
-        public String ItemNumber
+        public Items.Document Document
         {
             get
             {
-                return (String)this.Property("item_number").Value;
-            }
-            set
-            {
-                this.Property("item_number").Value = value;
+                return (Items.Document)this.Source;
             }
         }
 
-        public String Name
+        public File File
         {
             get
             {
-                return (String)this.Property("name").Value;
-            }
-            set
-            {
-                this.Property("name").Value = value;
+                return (File)this.Related;
             }
         }
 
-        public String Description
+        public DocumentFile(Model.Store Store)
+            : base(Store)
         {
-            get
-            {
-                return (String)this.Property("description").Value;
-            }
-            set
-            {
-                this.Property("description").Value = value;
-            }
+
         }
 
-        public Document(Model.Store Store, Transaction Transaction)
-            : base(Store, Transaction)
-        {
- 
-        }
-
-        public Document(Model.Store Store, IO.Item DBItem)
+        public DocumentFile(Model.Store Store, IO.Item DBItem)
             : base(Store, DBItem)
         {
 

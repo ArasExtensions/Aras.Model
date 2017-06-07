@@ -49,7 +49,7 @@ namespace Aras.Model.Design.Debug
             // Find Document
             Model.Query docquery = session.Query("Document");
             docquery.Select = "item_number,name,description";
-            Model.Design.Document document = (Model.Design.Document)docquery.Store.Get("994DE0C5BCEA480B807B752C6103D7FE");
+            Model.Design.Document document = (Model.Design.Document)docquery.Store.First();
 
             using (Transaction trans = session.BeginTransaction())
             {

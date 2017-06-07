@@ -26,7 +26,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model.Design
+namespace Aras.Model.Design.Items
 {
     [Model.Attributes.ItemType("CAD")]
     public class CAD : Model.Item
@@ -79,8 +79,8 @@ namespace Aras.Model.Design
             }
         }
 
-        public CAD(Model.Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public CAD(Model.Store Store)
+            : base(Store)
         {
  
         }

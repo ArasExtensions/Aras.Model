@@ -57,9 +57,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Document.cs" />
-    <Compile Include="CAD.cs" />
-    <Compile Include="DocumentFile.cs" />
+    <Compile Include="Items\Part.cs" />
+    <Compile Include="Items\Document.cs" />
+    <Compile Include="Items\CAD.cs" />
+    <Compile Include="Queries\Searches\Part.cs" />
+    <Compile Include="Queries\Trees\Part.cs" />
+    <Compile Include="Relationships\CADStructure.cs" />
+    <Compile Include="Relationships\PartCAD.cs" />
+    <Compile Include="Relationships\PartBOM.cs" />
+    <Compile Include="Relationships\DocumentFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -71,6 +77,9 @@
       <Project>{20fea736-01a1-49a3-a61f-43cad00d9717}</Project>
       <Name>Aras.Model</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Queries\Forms\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

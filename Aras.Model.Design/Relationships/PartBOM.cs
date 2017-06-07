@@ -26,34 +26,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Model.Design
+namespace Aras.Model.Design.Relationships
 {
-    [Model.Attributes.ItemType("Document File")]
-    public class DocumentFile : Model.Relationship
+    [Model.Attributes.ItemType("Part BOM")]
+    public class PartBOM : Model.Relationship
     {
-        public Document Document
-        {
-            get
-            {
-                return (Document)this.Source;
-            }
-        }
 
-        public File File
-        {
-            get
-            {
-                return (File)this.Related;
-            }
-        }
-
-        public DocumentFile(Model.Store Store, Transaction Transaction)
-            : base(Store, Transaction)
+        public PartBOM(Model.Store Store)
+            : base(Store)
         {
 
         }
 
-        public DocumentFile(Model.Store Store, IO.Item DBItem)
+        public PartBOM(Model.Store Store, IO.Item DBItem)
             : base(Store, DBItem)
         {
 
