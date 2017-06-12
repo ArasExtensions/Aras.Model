@@ -372,19 +372,12 @@ namespace Aras.Model
         {
             get
             {
-                if (this.ItemType is RelationshipType)
+                if (this._store == null)
                 {
-                    throw new Exceptions.ArgumentException("Store not valid for Relationship Query: " + this.ItemType.Name);
+                    this._store = new Store(this);
                 }
-                else
-                {
-                    if (this._store == null)
-                    {
-                        this._store = new Store(this);
-                    }
 
-                    return this._store;
-                }
+                return this._store;
             }
         }
 
