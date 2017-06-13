@@ -96,6 +96,17 @@ namespace Aras.Model
             IO.Item dbitem = new IO.Item(this.Item.ItemType.Name, this.Name);
             dbitem.ID = this.Item.ID;
 
+            // Add Classification
+
+            if (this.Item.Class == null)
+            {
+                dbitem.SetProperty("classification", null);
+            }
+            else
+            {
+                dbitem.SetProperty("classification", this.Item.Class.Fullname);
+            }
+
             // Add Properties
             foreach (Property prop in this.Item.Properties)
             {
