@@ -65,9 +65,9 @@ namespace Aras.Model.Design.Queries.Trees
         {
             this.Paging = false;
             this.Condition = Aras.Conditions.None();
-            this.Select = "item_number,name";
+            this.Select = "item_number,major_rev,name";
             this.Relationship("Part BOM").Select = "quantity,related_id";
-            this.Relationship("Part BOM").Property("related_id").Select = "item_number,name";
+            this.Relationship("Part BOM").Property("related_id").Select = "item_number,major_rev,name";
             this.Relationship("Part BOM").Property("related_id").Recursive = true;
         }
     }
