@@ -37,24 +37,31 @@ namespace Aras.Model.Debug
             static void Main(string[] args)
             {
                 Server server = new Server("http://localhost/InnovatorServer100SP4");
-                Database database = server.Database("CMB");
+                Database database = server.Database("CMB1");
                 Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
                 Query query = session.Query("Part");
                 query.Select = "item_number,name";
-                query.Relationship("Part BOM").Select = "quantity,related_id";
 
-                Query query2 = session.Query("Part");
-                query2.Select = "item_number,name";
-                query.Condition = Aras.Conditions.Eq("item_number", "2397794");
+                Model.Item part1 = null;
 
-                Model.Item part1 = query.Store.First();
+                using(Transaction trans1 = session.BeginTransaction())
+                {
+                    part1 = query.Store.Create(trans1);
+                    part1.Property("item_number").Value = "12345683";
+                    part1.Property("name").Value = "Change 1";
+                    trans1.Commit(false);
+                }
 
-                String test = (String)part1.Property("item_number").Value;
-
-                Items.User lockedby = part1.LockedBy;
+                using (Transaction trans2 = session.BeginTransaction())
+                {
+                    part1.Update(trans2);
+                    part1.Property("name").Value = "Change 2";
+                    trans2.Commit(false);
+                }
 
                 int a = 1;
+
                 /*
                 Item part1 = null;
                 Item part2 = null;

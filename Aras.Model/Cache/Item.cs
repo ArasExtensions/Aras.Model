@@ -50,7 +50,7 @@ namespace Aras.Model.Cache
         internal Int32 Generation { get; private set; }
 
         private String _lockedByID;
-        internal String LockedByID 
+        internal String LockedByID
         {
             get
             {
@@ -72,6 +72,10 @@ namespace Aras.Model.Cache
                         {
                             this.Locked = Model.Item.Locks.OtherUser;
                         }
+                    }
+                    else
+                    {
+                        this.Locked = Model.Item.Locks.None;
                     }
                 }
                 else
