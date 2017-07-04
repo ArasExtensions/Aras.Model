@@ -137,14 +137,13 @@ namespace Aras.Model.Properties
         {
             if (this.Value == null)
             {
-                return "null";
+                return this.Type.Name + ": null";
             }
             else
             {
-                return this.Value.ToString();
+                return this.Type.Name + ": " + ((Relationship)this.Value).Property("value").Value;
             }
         }
-
 
         void List_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
