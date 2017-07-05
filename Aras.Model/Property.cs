@@ -108,7 +108,7 @@ namespace Aras.Model
             }
         }
 
-        private void Cache_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        protected virtual void Cache_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             this.OnPropertyChanged(e.PropertyName);
         }

@@ -476,7 +476,7 @@ namespace Aras.Model
         public Item Get(String ID)
         {
             if (!this.Cache.ContainsKey(ID))
-            {
+            {   
                 // Run Query
                 IO.Request request = this.ItemType.Session.IO.Request(IO.Request.Operations.ApplyItem, this.Query.DBQuery(ID));
                 IO.Response response = request.Execute();

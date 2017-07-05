@@ -30,11 +30,13 @@ namespace Aras.Model.Properties
 {
     public class Item : Property
     {
+        private Model.Item _propertyItem;
+
         public override Object Value
         {
             get
             {
-                return base.Value;
+                return this._propertyItem;
             }
             set
             {
@@ -42,20 +44,23 @@ namespace Aras.Model.Properties
                 {
                     if (base.Value != null)
                     {
-                        base.Value = value;
+                        this._propertyItem = null;
+                        base.Value = null;
                     }
                 }
                 else if (value is Model.Item)
                 {
-                    if (base.Value == null)
+                    if (this._propertyItem == null)
                     {
-                        base.Value = value;
+                        this._propertyItem = (Model.Item)value;
+                        base.Value = this._propertyItem.Cache;
                     }
                     else
                     {
-                        if (!((Model.Item)base.Value).Equals((Model.Item)value))
+                        if (!this._propertyItem.Equals((Model.Item)value))
                         {
-                            base.Value = value;
+                            this._propertyItem = (Model.Item)value;
+                            base.Value = this._propertyItem.Cache;
                         }
                     }
                 }
@@ -70,25 +75,34 @@ namespace Aras.Model.Properties
         {
             get
             {
-               if (this.Value == null)
+               if (this._propertyItem == null)
                {
                    return null;
                }
                else
                {
-                   return ((Model.Item)this.Value).ID;
+                   return this._propertyItem.ID;
                }
             }
             set
             {
                 if (value == null)
                 {
+                    this._propertyItem = null;
                     this.SetValue(null);
                 }
                 else
                 {
-                    Model.Item propitem = this.Store.Get(value);
-                    this.SetValue(propitem);
+                    this._propertyItem = this.Store.Get(value);
+
+                    if (this._propertyItem != null)
+                    {
+                        this.SetValue(this._propertyItem.Cache);
+                    }
+                    else
+                    {
+                        this.SetValue(null);
+                    }
                 }
             }
         }
@@ -103,7 +117,43 @@ namespace Aras.Model.Properties
 
         internal void SetDBValue(Model.Item Item)
         {
-            this.SetValue(Item);
+            this._propertyItem = Item;
+
+            if (Item != null)
+            {
+                this.SetValue(Item.Cache);
+            }
+            else
+            {
+                this.SetValue(null);
+            }
+        }
+
+        protected override void Cache_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals("Value"))
+            {
+                if (this.Cache.Value == null)
+                {
+                    this._propertyItem = null;
+                }
+                else
+                {
+                    if (this._propertyItem != null)
+                    {
+                        if (!((Cache.Item)this.Cache.Value).ID.Equals(this._propertyItem.ID))
+                        {
+                            this._propertyItem = this.Store.Get(((Cache.Item)this.Cache.Value).ID);
+                        }
+                    }
+                    else
+                    {
+                        this._propertyItem = this.Store.Get(((Cache.Item)this.Cache.Value).ID);
+                    }
+                }
+            }
+
+            base.Cache_PropertyChanged(sender, e);
         }
 
         internal Item(Model.Item Item, PropertyTypes.Item Type)

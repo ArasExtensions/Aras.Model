@@ -40,15 +40,15 @@ namespace Aras.Model.Debug
                 Database database = server.Database("CMB");
                 Session session = database.Login("admin", IO.Server.PasswordHash("innovator"));
 
-                Query query = session.Query("Part");
-                query.Select = "item_number,name,cmb_name,description,major_rev,keyed_name,state,cmb_ibs_transfer_lock,cmb_ibs_commodity_code,cmb_ibs_eng_order_no,cmb_ibs_field19,cmb_ibs_lead_time,cmb_ibs_mat_move_code,cmb_ibs_part_type,cmb_ibs_planner_code,cmb_ibs_product_code,cmb_ibs_product_group,cmb_name_no_cr,make_buy,unit";
-                query.Condition = Aras.Conditions.Eq("item_number", "2317M");
-                Model.Item part1 = query.Store.First();
+                Query query = session.Query("v_Order");
+                query.Select = "part";
+                query.Property("part").Select = "item_number,name,cmb_name,description,major_rev,keyed_name,state,cmb_ibs_transfer_lock,cmb_ibs_commodity_code,cmb_ibs_eng_order_no,cmb_ibs_field19,cmb_ibs_lead_time,cmb_ibs_mat_move_code,cmb_ibs_part_type,cmb_ibs_planner_code,cmb_ibs_product_code,cmb_ibs_product_group,cmb_name_no_cr,make_buy,unit";
 
-                foreach(Property prop in part1.Properties)
-                {
-                    String test = prop.ToString();
-                }
+
+                Model.Item order = query.Store.Get("7BDC68F4B7BB49F8BC124E56246939BC");
+
+                Model.Item part = (Model.Item)order.Property("part").Value;
+
             }
         }
     }
