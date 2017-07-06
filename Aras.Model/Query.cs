@@ -306,8 +306,11 @@ namespace Aras.Model
 
             foreach (PropertyTypes.Item proptype in this.SelectPropertyCache.Keys)
             {
-                IO.Item propquery = this.SelectPropertyCache[proptype].DBQuery();
-                query.SetPropertyItem(proptype.Name, propquery);
+                if (!proptype.Name.Equals("source_id"))
+                {
+                    IO.Item propquery = this.SelectPropertyCache[proptype].DBQuery();
+                    query.SetPropertyItem(proptype.Name, propquery);
+                }
             }
 
             foreach (Query relquery in this.Relationships)
