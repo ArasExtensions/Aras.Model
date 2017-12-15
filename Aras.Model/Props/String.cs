@@ -71,13 +71,13 @@ namespace Aras.Model.Properties
         {
             get
             {
-                if (this.Value == null)
+                if (this.Value != null)
                 {
-                    return null;
+                    return this.Value.ToString();
                 }
                 else
                 {
-                    return this.Value.ToString();
+                    return null;
                 }
             }
             set

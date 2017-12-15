@@ -69,7 +69,14 @@ namespace Aras.Model.Properties
         {
             get
             {
-                return this.Value.ToString();
+                if (this.Value != null)
+                {
+                    return this.Value.ToString();
+                }
+                else
+                {
+                    return null;
+                }
             }
             set
             {

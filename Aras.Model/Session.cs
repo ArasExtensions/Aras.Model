@@ -34,6 +34,8 @@ namespace Aras.Model
     {
         public Database Database { get; private set; }
 
+        public Boolean OptimiseAML { get; set; }
+
         public IO.Session IO { get; private set; }
 
         public String ID
@@ -261,6 +263,7 @@ namespace Aras.Model
         internal Session(Database Database, IO.Session IO)
         {
             this.ItemCache = new Dictionary<String, Cache.Item>();
+            this.OptimiseAML = true;
             this.Database = Database;
             this.IO = IO;
             this.BuildCaches();

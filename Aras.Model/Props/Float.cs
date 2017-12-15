@@ -77,17 +77,24 @@ namespace Aras.Model.Properties
         {
             get
             {
-                return this.Value.ToString();
-            }
-            set
-            {
-                if (value == null)
+                if (this.Value != null)
                 {
-                    this.SetValue(null);
+                    return this.Value.ToString();
                 }
                 else
                 {
+                    return null;
+                }
+            }
+            set
+            {
+                if (value != null)
+                {
                     this.SetValue(System.Double.Parse(value));
+                }
+                else
+                {
+                    this.SetValue(null);
                 }
             }
         }

@@ -111,13 +111,13 @@ namespace Aras.Model.Properties
         {
             get
             {
-                if (this.Value == null)
+                if (this.Value != null)
                 {
-                    return null;
+                    return (string)((Model.Relationships.Value)this.Value).Property("value").Value;
                 }
                 else
                 {
-                    return (string)((Model.Relationships.Value)this.Value).Property("value").Value;
+                    return null;
                 }
             }
             set

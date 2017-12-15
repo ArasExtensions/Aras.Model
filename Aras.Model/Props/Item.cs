@@ -75,13 +75,13 @@ namespace Aras.Model.Properties
         {
             get
             {
-               if (this._propertyItem == null)
+               if (this._propertyItem != null)
                {
-                   return null;
+                   return this._propertyItem.ID;
                }
                else
                {
-                   return this._propertyItem.ID;
+                   return null;
                }
             }
             set

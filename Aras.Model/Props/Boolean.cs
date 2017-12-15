@@ -70,11 +70,7 @@ namespace Aras.Model.Properties
         {
             get
             {
-                if (this.Value == null)
-                {
-                    return null;
-                }
-                else
+                if (this.Value != null)
                 {
                     if ((System.Boolean)this.Value)
                     {
@@ -84,6 +80,10 @@ namespace Aras.Model.Properties
                     {
                         return "0";
                     }
+                }
+                else
+                {
+                    return null;
                 }
             }
             set
