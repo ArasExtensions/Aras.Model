@@ -48,13 +48,13 @@ namespace Aras.Model
         private object SessionCacheLock = new object();
         private Dictionary<String, Session> SessionCache;
 
-        public Session Login(String Username, String Password)
+        public Session Login(String Username, String AccessToken)
         {
             lock (this.SessionCacheLock)
             {
                 if (!this.SessionCache.ContainsKey(Username))
                 {
-                    IO.Session iosession = this.IO.Login(Username, Password);
+                    IO.Session iosession = this.IO.Login(Username, AccessToken);
                     this.SessionCache[Username] = new Session(this, iosession);
                 }
 
