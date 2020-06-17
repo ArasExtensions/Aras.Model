@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Aras.Model</RootNamespace>
     <AssemblyName>Aras.Model</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,6 +43,8 @@
   <ItemGroup>
     <Compile Include="Cache\Property.cs" />
     <Compile Include="Exceptions\PropertyException.cs" />
+    <Compile Include="PropertyTypes\GlobalVersion.cs" />
+    <Compile Include="Props\GlobalVersion.cs" />
     <Compile Include="Queries\User.cs" />
     <Compile Include="Queries\List.cs" />
     <Compile Include="Queries\LifeCycleMap.cs" />

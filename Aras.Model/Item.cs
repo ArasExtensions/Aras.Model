@@ -428,8 +428,11 @@ namespace Aras.Model
                     case "Foreign":
                         this.PropertyCache[proptype] = new Properties.Foreign(this, (PropertyTypes.Foreign)proptype);
                         break;
+                    case "GlobalVersion":
+                        this.PropertyCache[proptype] = new Properties.GlobalVersion(this, (PropertyTypes.GlobalVersion)proptype);
+                        break;
                     default:
-                        throw new NotImplementedException("Property Type not implmented: " + proptype.GetType().Name);
+                        throw new NotImplementedException("Property Type not implemented: " + proptype.GetType().Name);
                 }
             }
 

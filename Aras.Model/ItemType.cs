@@ -103,47 +103,55 @@ namespace Aras.Model
             }
         }
 
+        private readonly object _classLock = new object();
         protected Type _class;
         internal virtual Type Class
         {
             get
             {
-                if (this._class == null)
+                lock (this._classLock)
                 {
-                    this._class = this.Session.Database.Server.ItemTypeClass(this.Name);
-
                     if (this._class == null)
                     {
-                        if (this.Name.Equals("File"))
+                        this._class = this.Session.Database.Server.ItemTypeClass(this.Name);
+
+                        if (this._class == null)
                         {
-                            this._class = typeof(File);
-                        }
-                        else if (this is RelationshipType)
-                        {
-                            this._class = typeof(Relationship);
-                        }
-                        else
-                        {
-                            this._class = typeof(Item);
+                            if (this.Name.Equals("File"))
+                            {
+                                this._class = typeof(File);
+                            }
+                            else if (this is RelationshipType)
+                            {
+                                this._class = typeof(Relationship);
+                            }
+                            else
+                            {
+                                this._class = typeof(Item);
+                            }
                         }
                     }
-                }
 
-                return this._class;
+                    return this._class;
+                }
             }
         }
 
+        private readonly object RelationshipTypeNameCacheLock = new object();
         private Dictionary<String, RelationshipType> RelationshipTypeNameCache;
 
         internal void AddRelationshipType(RelationshipType RelationshipType)
         {
-            if (this.Equals(RelationshipType.Source))
+            lock (this.RelationshipTypeNameCacheLock)
             {
-                this.RelationshipTypeNameCache[RelationshipType.Name] = RelationshipType;
-            }
-            else
-            {
-                throw new Exceptions.ArgumentException("Invalid RelationshipType Source");
+                if (this.Equals(RelationshipType.Source))
+                {
+                    this.RelationshipTypeNameCache[RelationshipType.Name] = RelationshipType;
+                }
+                else
+                {
+                    throw new Exceptions.ArgumentException("Invalid RelationshipType Source");
+                }
             }
         }
 
@@ -160,199 +168,210 @@ namespace Aras.Model
             return this.RelationshipTypeNameCache[Name];
         }
 
+        private readonly object _tableNameLock = new object();
         private String _tableName;
         internal String TableName
         {
             get
             {
-                if (this._tableName == null)
+                lock (this._tableNameLock)
                 {
-                    this._tableName = "[" + this.Name.ToLower().Replace(' ', '_') + "]";
-                }
+                    if (this._tableName == null)
+                    {
+                        this._tableName = "[" + this.Name.ToLower().Replace(' ', '_') + "]";
+                    }
 
-                return this._tableName;
+                    return this._tableName;
+                }
             }
         }
 
+        private readonly object _propertyTypeCacheLock = new object();
         private Dictionary<String, PropertyType> _propertyTypeCache;
         private Dictionary<String, PropertyType> PropertyTypeCache
         {
             get
             {
-                if (this._propertyTypeCache == null)
+                lock (this._propertyTypeCacheLock)
                 {
-                    this._propertyTypeCache = new Dictionary<String, PropertyType>();
-
-                    IO.Item props = new IO.Item("Property", "get");
-                    props.Select = "name,label,data_type,stored_length,readonly,default_value,data_source,is_required,sort_order,is_hidden,is_hidden2,column_width";
-                    props.SetProperty("source_id", this.ID);
-                    IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, props);
-                    IO.Response response = request.Execute();
-
-                    if (!response.IsError)
+                    if (this._propertyTypeCache == null)
                     {
-                        foreach (IO.Item thisprop in response.Items)
+                        this._propertyTypeCache = new Dictionary<String, PropertyType>();
+
+                        IO.Item props = new IO.Item("Property", "get");
+                        props.Select = "name,label,data_type,stored_length,readonly,default_value,data_source,is_required,sort_order,is_hidden,is_hidden2,column_width";
+                        props.SetProperty("source_id", this.ID);
+                        IO.Request request = this.Session.IO.Request(IO.Request.Operations.ApplyItem, props);
+                        IO.Response response = request.Execute();
+
+                        if (!response.IsError)
                         {
-                            String name = thisprop.GetProperty("name");
-                            String label = thisprop.GetProperty("label");
-                            Boolean ReadOnly = "1".Equals(thisprop.GetProperty("readonly"));
-                            Boolean Required = "1".Equals(thisprop.GetProperty("is_required"));
-                            String DefaultString = thisprop.GetProperty("default_value");
-
-                            // Sort Order
-                            Int32 SortOrder = 0;
-
-                            if (!Int32.TryParse(thisprop.GetProperty("sort_order"), out SortOrder))
+                            foreach (IO.Item thisprop in response.Items)
                             {
-                                SortOrder = 0;
-                            }
+                                String name = thisprop.GetProperty("name");
+                                String label = thisprop.GetProperty("label");
+                                Boolean ReadOnly = "1".Equals(thisprop.GetProperty("readonly"));
+                                Boolean Required = "1".Equals(thisprop.GetProperty("is_required"));
+                                String DefaultString = thisprop.GetProperty("default_value");
 
-                            Boolean InSearch = !("1".Equals(thisprop.GetProperty("is_hidden")));
-                            Boolean InRelationshipGrid = !("1".Equals(thisprop.GetProperty("is_hidden2")));
+                                // Sort Order
+                                Int32 SortOrder = 0;
 
-                            // Column Width
-                            Int32 ColumnWidth = 0;
-
-                            if (!Int32.TryParse(thisprop.GetProperty("column_width"), out ColumnWidth))
-                            {
-                                ColumnWidth = DefaultColumnWidth;
-                            }
-
-                            if (!SystemProperties.Contains(name))
-                            {
-                                switch (thisprop.GetProperty("data_type"))
+                                if (!Int32.TryParse(thisprop.GetProperty("sort_order"), out SortOrder))
                                 {
-                                    case "string":
-                                        Int32 length = 32;
-                                        Int32.TryParse(thisprop.GetProperty("stored_length"), out length);
-                                        this._propertyTypeCache[name] = new PropertyTypes.String(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString, length);
-                                        break;
-                                    case "ml_string":
-                                        Int32 ml_length = 32;
-                                        Int32.TryParse(thisprop.GetProperty("stored_length"), out ml_length);
-                                        this._propertyTypeCache[name] = new PropertyTypes.MultilingualString(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString, ml_length);
-                                        break;
-                                    case "text":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Text(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
-                                        break;
-                                    case "formatted text":
-                                        this._propertyTypeCache[name] = new PropertyTypes.FormattedText(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
-                                        break;
-                                    case "md5":
-                                        this._propertyTypeCache[name] = new PropertyTypes.MD5(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
-                                        break;
-                                    case "image":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Image(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
-                                        break;
-                                    case "integer":
+                                    SortOrder = 0;
+                                }
 
-                                        if (DefaultString != null)
-                                        {
-                                            Int32 DefaultInteger = 0;
-                                            Int32.TryParse(DefaultString, out DefaultInteger);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultInteger);
-                                        }
-                                        else
-                                        {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
-                                        }
+                                Boolean InSearch = !("1".Equals(thisprop.GetProperty("is_hidden")));
+                                Boolean InRelationshipGrid = !("1".Equals(thisprop.GetProperty("is_hidden2")));
 
-                                        break;
-                                    case "item":
+                                // Column Width
+                                Int32 ColumnWidth = 0;
 
-                                        String data_source = thisprop.GetProperty("data_source");
+                                if (!Int32.TryParse(thisprop.GetProperty("column_width"), out ColumnWidth))
+                                {
+                                    ColumnWidth = DefaultColumnWidth;
+                                }
 
-                                        if (!String.IsNullOrEmpty(data_source))
-                                        {
-                                            ItemType valueitemtype = this.Session.ItemTypeByID(data_source);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Item(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, valueitemtype);
-                                        }
+                                if (!SystemProperties.Contains(name))
+                                {
+                                    switch (thisprop.GetProperty("data_type"))
+                                    {
+                                        case "string":
+                                            Int32 length = 32;
+                                            Int32.TryParse(thisprop.GetProperty("stored_length"), out length);
+                                            this._propertyTypeCache[name] = new PropertyTypes.String(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString, length);
+                                            break;
+                                        case "ml_string":
+                                            Int32 ml_length = 32;
+                                            Int32.TryParse(thisprop.GetProperty("stored_length"), out ml_length);
+                                            this._propertyTypeCache[name] = new PropertyTypes.MultilingualString(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString, ml_length);
+                                            break;
+                                        case "text":
+                                            this._propertyTypeCache[name] = new PropertyTypes.Text(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
+                                            break;
+                                        case "formatted text":
+                                            this._propertyTypeCache[name] = new PropertyTypes.FormattedText(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
+                                            break;
+                                        case "md5":
+                                            this._propertyTypeCache[name] = new PropertyTypes.MD5(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
+                                            break;
+                                        case "image":
+                                            this._propertyTypeCache[name] = new PropertyTypes.Image(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
+                                            break;
+                                        case "integer":
 
-                                        break;
-                                    case "date":
+                                            if (DefaultString != null)
+                                            {
+                                                Int32 DefaultInteger = 0;
+                                                Int32.TryParse(DefaultString, out DefaultInteger);
+                                                this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultInteger);
+                                            }
+                                            else
+                                            {
+                                                this._propertyTypeCache[name] = new PropertyTypes.Integer(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
+                                            }
 
-                                        if (DefaultString != null)
-                                        {
-                                            DateTime DefaultDate;
-                                            DateTime.TryParse(DefaultString, out DefaultDate);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultDate);
-                                        }
-                                        else
-                                        {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
-                                        }
+                                            break;
+                                        case "item":
 
-                                        break;
-                                    case "list":
-                                        this._propertyTypeCache[name] = new PropertyTypes.List(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, thisprop.GetProperty("data_source"));
-                                        break;
-                                    case "decimal":
+                                            String data_source = thisprop.GetProperty("data_source");
 
-                                        if (DefaultString != null)
-                                        {
-                                            Decimal DefaultDecimal = 0;
-                                            Decimal.TryParse(DefaultString, out DefaultDecimal);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultDecimal);
-                                        }
-                                        else
-                                        {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
-                                        }
+                                            if (!String.IsNullOrEmpty(data_source))
+                                            {
+                                                ItemType valueitemtype = this.Session.ItemTypeByID(data_source);
+                                                this._propertyTypeCache[name] = new PropertyTypes.Item(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, valueitemtype);
+                                            }
 
-                                        break;
-                                    case "float":
+                                            break;
+                                        case "date":
 
-                                        if (DefaultString != null)
-                                        {
-                                            Double DefaultDouble = 0;
-                                            Double.TryParse(DefaultString, out DefaultDouble);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Float(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultDouble);
-                                        }
-                                        else
-                                        {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
-                                        }
+                                            if (DefaultString != null)
+                                            {
+                                                DateTime DefaultDate;
+                                                DateTime.TryParse(DefaultString, out DefaultDate);
+                                                this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultDate);
+                                            }
+                                            else
+                                            {
+                                                this._propertyTypeCache[name] = new PropertyTypes.Date(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
+                                            }
 
-                                        break;
-                                    case "boolean":
+                                            break;
+                                        case "list":
+                                            this._propertyTypeCache[name] = new PropertyTypes.List(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, thisprop.GetProperty("data_source"));
+                                            break;
+                                        case "decimal":
 
-                                        if (DefaultString != null)
-                                        {
-                                            Boolean DefaultBoolean = "1".Equals(DefaultString);
-                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultBoolean);
-                                        }
-                                        else
-                                        {
-                                            this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
-                                        }
+                                            if (DefaultString != null)
+                                            {
+                                                Decimal DefaultDecimal = 0;
+                                                Decimal.TryParse(DefaultString, out DefaultDecimal);
+                                                this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultDecimal);
+                                            }
+                                            else
+                                            {
+                                                this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
+                                            }
 
-                                        break;
-                                    case "foreign":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Foreign(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
-                                        break;
-                                    case "federated":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Federated(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
-                                        break;
-                                    case "sequence":
-                                        this._propertyTypeCache[name] = new PropertyTypes.Sequence(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
-                                        break;
-                                    case "filter list":
-                                        Items.List valuefilterlist = (Items.List)this.Session.Lists.Store.Get(thisprop.GetProperty("data_source"));
-                                        this._propertyTypeCache[name] = new PropertyTypes.FilterList(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, valuefilterlist);
-                                        break;
-                                    default:
-                                        throw new NotImplementedException("Property Type not implmented: " + thisprop.GetProperty("data_type"));
+                                            break;
+                                        case "float":
+
+                                            if (DefaultString != null)
+                                            {
+                                                Double DefaultDouble = 0;
+                                                Double.TryParse(DefaultString, out DefaultDouble);
+                                                this._propertyTypeCache[name] = new PropertyTypes.Float(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultDouble);
+                                            }
+                                            else
+                                            {
+                                                this._propertyTypeCache[name] = new PropertyTypes.Decimal(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
+                                            }
+
+                                            break;
+                                        case "boolean":
+
+                                            if (DefaultString != null)
+                                            {
+                                                Boolean DefaultBoolean = "1".Equals(DefaultString);
+                                                this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultBoolean);
+                                            }
+                                            else
+                                            {
+                                                this._propertyTypeCache[name] = new PropertyTypes.Boolean(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, null);
+                                            }
+
+                                            break;
+                                        case "foreign":
+                                            this._propertyTypeCache[name] = new PropertyTypes.Foreign(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
+                                            break;
+                                        case "federated":
+                                            this._propertyTypeCache[name] = new PropertyTypes.Federated(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
+                                            break;
+                                        case "sequence":
+                                            this._propertyTypeCache[name] = new PropertyTypes.Sequence(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
+                                            break;
+                                        case "filter list":
+                                            Items.List valuefilterlist = (Items.List)this.Session.Lists.Store.Get(thisprop.GetProperty("data_source"));
+                                            this._propertyTypeCache[name] = new PropertyTypes.FilterList(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, valuefilterlist);
+                                            break;
+                                        case "global_version":
+                                            this._propertyTypeCache[name] = new PropertyTypes.GlobalVersion(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
+                                            break;
+                                        default:
+                                            throw new NotImplementedException("Property Type not implemented: " + thisprop.GetProperty("data_type"));
+                                    }
                                 }
                             }
                         }
+                        else
+                        {
+                            throw new Exceptions.ServerException(response);
+                        }
                     }
-                    else
-                    {
-                        throw new Exceptions.ServerException(response);
-                    }
-                }
 
-                return this._propertyTypeCache;
+                    return this._propertyTypeCache;
+                }
             }
         }
 
@@ -381,127 +400,136 @@ namespace Aras.Model
             }
         }
 
+        private readonly object _searchPropertyTypesLock = new object();
         private List<PropertyType> _searchPropertyTypes;
         public IEnumerable<PropertyType> SearchPropertyTypes
         {
             get
             {
-                if (this._searchPropertyTypes == null)
+                lock (this._searchPropertyTypesLock)
                 {
-                    this._searchPropertyTypes = new List<PropertyType>();
-
-                    foreach (PropertyType proptype in this.PropertyTypes)
+                    if (this._searchPropertyTypes == null)
                     {
-                        if (proptype.InSearch)
+                        this._searchPropertyTypes = new List<PropertyType>();
+
+                        foreach (PropertyType proptype in this.PropertyTypes)
                         {
-                            this._searchPropertyTypes.Add(proptype);
+                            if (proptype.InSearch)
+                            {
+                                this._searchPropertyTypes.Add(proptype);
+                            }
                         }
+
+                        this._searchPropertyTypes.Sort();
                     }
 
-                    this._searchPropertyTypes.Sort();
+                    return this._searchPropertyTypes;
                 }
-
-                return this._searchPropertyTypes;
             }
         }
 
+        private readonly object _searchSelectLock = new object();
         private String _searchSelect;
         public String SearchSelect
         {
             get
             {
-                if (this._searchSelect == null)
+                lock (this._searchSelectLock)
                 {
-                    List<String> names = new List<String>();
-
-                    foreach (PropertyType proptype in this.SearchPropertyTypes)
+                    if (this._searchSelect == null)
                     {
-                        names.Add(proptype.Name);
+                        List<String> names = new List<String>();
+
+                        foreach (PropertyType proptype in this.SearchPropertyTypes)
+                        {
+                            names.Add(proptype.Name);
+                        }
+
+                        this._searchSelect = String.Join(",", names);
                     }
 
-                    this._searchSelect = String.Join(",", names);
+                    return this._searchSelect;
                 }
-
-                return this._searchSelect;
             }
         }
 
+        private readonly object _relationshipGridPropertyTypesLock = new object();
         private List<PropertyType> _relationshipGridPropertyTypes;
         public IEnumerable<PropertyType> RelationshipGridPropertyTypes
         {
             get
             {
-                if (this._relationshipGridPropertyTypes == null)
+                lock (this._relationshipGridPropertyTypesLock)
                 {
-                    this._relationshipGridPropertyTypes = new List<PropertyType>();
-
-                    foreach (PropertyType proptype in this.PropertyTypes)
+                    if (this._relationshipGridPropertyTypes == null)
                     {
-                        if (proptype.InRelationshipGrid)
+                        this._relationshipGridPropertyTypes = new List<PropertyType>();
+
+                        foreach (PropertyType proptype in this.PropertyTypes)
                         {
-                            this._relationshipGridPropertyTypes.Add(proptype);
+                            if (proptype.InRelationshipGrid)
+                            {
+                                this._relationshipGridPropertyTypes.Add(proptype);
+                            }
                         }
+
+                        this._relationshipGridPropertyTypes.Sort();
                     }
 
-                    this._relationshipGridPropertyTypes.Sort();
+                    return this._relationshipGridPropertyTypes;
                 }
-
-                return this._relationshipGridPropertyTypes;
             }
         }
 
+        private readonly object _relationshipGridSelectLock = new object();
         private String _relationshipGridSelect;
         public String RelationshipGridSelect
         {
             get
             {
-                if (this._relationshipGridPropertyTypes == null)
+                lock (this._relationshipGridSelectLock)
                 {
-                    List<String> names = new List<String>();
-
-                    foreach(PropertyType proptype in this.RelationshipGridPropertyTypes)
+                    if (this._relationshipGridPropertyTypes == null)
                     {
-                        names.Add(proptype.Name);
+                        List<String> names = new List<String>();
+
+                        foreach (PropertyType proptype in this.RelationshipGridPropertyTypes)
+                        {
+                            names.Add(proptype.Name);
+                        }
+
+                        this._relationshipGridSelect = String.Join(",", names);
                     }
 
-                    this._relationshipGridSelect = String.Join(",", names);
+                    return this._relationshipGridSelect;
                 }
-
-                return this._relationshipGridSelect;
             }
         }
 
+        private readonly object DefaultLifeCycleMapCacheLock = new object();
         private String DefaultLifeCycleMapCache;
         private Dictionary<String, String> LifeCycleMapCache;
 
         internal void AddLifeCycleMap(String Class, String ID)
         {
-            if (String.IsNullOrEmpty(Class))
+            lock (this.DefaultLifeCycleMapCacheLock)
             {
-                this.DefaultLifeCycleMapCache = ID;
-            }
-            else
-            {
-                this.LifeCycleMapCache[Class] = ID;
+                if (String.IsNullOrEmpty(Class))
+                {
+                    this.DefaultLifeCycleMapCache = ID;
+                }
+                else
+                {
+                    this.LifeCycleMapCache[Class] = ID;
+                }
             }
         }
 
         public Items.LifeCycleMap LifeCycleMap(Class Class)
         {
-            if (Class == null)
+            lock (this.DefaultLifeCycleMapCacheLock)
             {
-                if (!String.IsNullOrEmpty(this.DefaultLifeCycleMapCache))
-                {
-                    return (Items.LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.DefaultLifeCycleMapCache);
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                if (Class.Fullname == null)
+                if (Class == null)
                 {
                     if (!String.IsNullOrEmpty(this.DefaultLifeCycleMapCache))
                     {
@@ -514,11 +542,7 @@ namespace Aras.Model
                 }
                 else
                 {
-                    if (this.LifeCycleMapCache.ContainsKey(Class.Fullname))
-                    {
-                        return (Items.LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.LifeCycleMapCache[Class.Fullname]);
-                    }
-                    else
+                    if (Class.Fullname == null)
                     {
                         if (!String.IsNullOrEmpty(this.DefaultLifeCycleMapCache))
                         {
@@ -527,6 +551,24 @@ namespace Aras.Model
                         else
                         {
                             return null;
+                        }
+                    }
+                    else
+                    {
+                        if (this.LifeCycleMapCache.ContainsKey(Class.Fullname))
+                        {
+                            return (Items.LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.LifeCycleMapCache[Class.Fullname]);
+                        }
+                        else
+                        {
+                            if (!String.IsNullOrEmpty(this.DefaultLifeCycleMapCache))
+                            {
+                                return (Items.LifeCycleMap)this.Session.LifeCycleMaps.Store.Get(this.DefaultLifeCycleMapCache);
+                            }
+                            else
+                            {
+                                return null;
+                            }
                         }
                     }
                 }
