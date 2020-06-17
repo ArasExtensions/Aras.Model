@@ -46,22 +46,26 @@ namespace Aras.Model
             }
         }
 
+        private readonly object _cacheDirectoryLock = new object();
         private DirectoryInfo _cacheDirectory;
         internal DirectoryInfo CacheDirectory
         {
             get
             {
-                if (this._cacheDirectory == null)
+                lock (this._cacheDirectory)
                 {
-                    this._cacheDirectory = new DirectoryInfo(Path.GetTempPath() + "\\Aras\\Session\\Cache\\" + this.ID);
-
-                    if (!this._cacheDirectory.Exists)
+                    if (this._cacheDirectory == null)
                     {
-                        this._cacheDirectory.Create();
-                    }
-                }
+                        this._cacheDirectory = new DirectoryInfo(Path.GetTempPath() + "\\Aras\\Session\\Cache\\" + this.ID);
 
-                return this._cacheDirectory;
+                        if (!this._cacheDirectory.Exists)
+                        {
+                            this._cacheDirectory.Create();
+                        }
+                    }
+
+                    return this._cacheDirectory;
+                }
             }
         }
 
@@ -97,95 +101,99 @@ namespace Aras.Model
             }
         }
 
+        private readonly object ItemTypeCacheLock = new object();
         private void BuildCaches()
         {
-            this.ItemTypeNameCache = new Dictionary<String, ItemType>();
-            this.ItemTypeIDCache = new Dictionary<String, ItemType>();
-
-            // Build ItemType Cache
-            IO.Request itemtyperequest = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
-            IO.Item itemtypequery = itemtyperequest.NewItem("ItemType", "get");
-            itemtypequery.Select = "id,name,is_relationship,class_structure,label,label_plural";
-
-            IO.Item lifecyclemapquery = itemtyperequest.NewItem("ItemType Life Cycle", "get");
-            lifecyclemapquery.Select = "class_path,related_id";
-            itemtypequery.AddRelationship(lifecyclemapquery);
-            
-            IO.Response itemtyperesponse = itemtyperequest.Execute();
-
-            if (!itemtyperesponse.IsError)
+            lock (this.ItemTypeCacheLock)
             {
-                foreach (IO.Item dbitem in itemtyperesponse.Items)
+                this.ItemTypeNameCache = new Dictionary<String, ItemType>();
+                this.ItemTypeIDCache = new Dictionary<String, ItemType>();
+
+                // Build ItemType Cache
+                IO.Request itemtyperequest = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
+                IO.Item itemtypequery = itemtyperequest.NewItem("ItemType", "get");
+                itemtypequery.Select = "id,name,is_relationship,class_structure,label,label_plural";
+
+                IO.Item lifecyclemapquery = itemtyperequest.NewItem("ItemType Life Cycle", "get");
+                lifecyclemapquery.Select = "class_path,related_id";
+                itemtypequery.AddRelationship(lifecyclemapquery);
+
+                IO.Response itemtyperesponse = itemtyperequest.Execute();
+
+                if (!itemtyperesponse.IsError)
                 {
-                    ItemType itemtype = null;
-
-                    if (dbitem.GetProperty("is_relationship").Equals("1"))
+                    foreach (IO.Item dbitem in itemtyperesponse.Items)
                     {
-                        itemtype = new RelationshipType(this, dbitem.ID, dbitem.GetProperty("name"), dbitem.GetProperty("label"), dbitem.GetProperty("label_plural"), dbitem.GetProperty("class_structure"));
-                    }
-                    else
-                    {
-                        itemtype = new ItemType(this, dbitem.ID, dbitem.GetProperty("name"), dbitem.GetProperty("label"), dbitem.GetProperty("label_plural"), dbitem.GetProperty("class_structure"));
-                    }
+                        ItemType itemtype = null;
 
-                    this.ItemTypeIDCache[itemtype.ID] = itemtype;
-                    this.ItemTypeNameCache[itemtype.Name] = itemtype;
+                        if (dbitem.GetProperty("is_relationship").Equals("1"))
+                        {
+                            itemtype = new RelationshipType(this, dbitem.ID, dbitem.GetProperty("name"), dbitem.GetProperty("label"), dbitem.GetProperty("label_plural"), dbitem.GetProperty("class_structure"));
+                        }
+                        else
+                        {
+                            itemtype = new ItemType(this, dbitem.ID, dbitem.GetProperty("name"), dbitem.GetProperty("label"), dbitem.GetProperty("label_plural"), dbitem.GetProperty("class_structure"));
+                        }
 
-                    foreach(IO.Item itemtypelifecyclemap in dbitem.Relationships)
-                    {
-                        itemtype.AddLifeCycleMap(itemtypelifecyclemap.GetProperty("class_path"), itemtypelifecyclemap.GetPropertyItem("related_id").ID);
+                        this.ItemTypeIDCache[itemtype.ID] = itemtype;
+                        this.ItemTypeNameCache[itemtype.Name] = itemtype;
+
+                        foreach (IO.Item itemtypelifecyclemap in dbitem.Relationships)
+                        {
+                            itemtype.AddLifeCycleMap(itemtypelifecyclemap.GetProperty("class_path"), itemtypelifecyclemap.GetPropertyItem("related_id").ID);
+                        }
                     }
                 }
-            }
-            else
-            {
-                throw new Exceptions.ServerException(itemtyperesponse);
-            }
-
-            // Build RelationshipType Cache
-            IO.Request relationshiptyperequest = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
-            IO.Item relationshiptypequery = relationshiptyperequest.NewItem("RelationshipType", "get");
-            relationshiptypequery.Select = "relationship_id,source_id(id),related_id(id),grid_view";
-            IO.Response relationshiptyperesponse = relationshiptyperequest.Execute();
-
-            if (!relationshiptyperesponse.IsError)
-            {
-                foreach (IO.Item dbitem in relationshiptyperesponse.Items)
+                else
                 {
-                    RelationshipType relationshiptype = (RelationshipType)this.ItemTypeIDCache[dbitem.GetProperty("relationship_id")];
-
-                    String source_id = dbitem.GetProperty("source_id");
-
-                    if (!String.IsNullOrEmpty(source_id))
-                    {
-                        relationshiptype.Source = this.ItemTypeIDCache[source_id];
-                        relationshiptype.Source.AddRelationshipType(relationshiptype);
-                    }
-
-                    String related_id = dbitem.GetProperty("related_id");
-
-                    if (!String.IsNullOrEmpty(related_id))
-                    {
-                        relationshiptype.Related = this.ItemTypeIDCache[related_id];
-                    }
-
-                    switch (dbitem.GetProperty("grid_view"))
-                    {
-                        case "right":
-                            relationshiptype.RelationshipGridView = RelationshipGridViews.Right;
-                            break;
-                        case "intermix":
-                            relationshiptype.RelationshipGridView = RelationshipGridViews.InterMix;
-                            break;
-                        default:
-                            relationshiptype.RelationshipGridView = RelationshipGridViews.Left;
-                            break;
-                    } 
+                    throw new Exceptions.ServerException(itemtyperesponse);
                 }
-            }
-            else
-            {
-                throw new Exceptions.ServerException(relationshiptyperesponse);
+
+                // Build RelationshipType Cache
+                IO.Request relationshiptyperequest = this.IO.Request(Aras.IO.Request.Operations.ApplyItem);
+                IO.Item relationshiptypequery = relationshiptyperequest.NewItem("RelationshipType", "get");
+                relationshiptypequery.Select = "relationship_id,source_id(id),related_id(id),grid_view";
+                IO.Response relationshiptyperesponse = relationshiptyperequest.Execute();
+
+                if (!relationshiptyperesponse.IsError)
+                {
+                    foreach (IO.Item dbitem in relationshiptyperesponse.Items)
+                    {
+                        RelationshipType relationshiptype = (RelationshipType)this.ItemTypeIDCache[dbitem.GetProperty("relationship_id")];
+
+                        String source_id = dbitem.GetProperty("source_id");
+
+                        if (!String.IsNullOrEmpty(source_id))
+                        {
+                            relationshiptype.Source = this.ItemTypeIDCache[source_id];
+                            relationshiptype.Source.AddRelationshipType(relationshiptype);
+                        }
+
+                        String related_id = dbitem.GetProperty("related_id");
+
+                        if (!String.IsNullOrEmpty(related_id))
+                        {
+                            relationshiptype.Related = this.ItemTypeIDCache[related_id];
+                        }
+
+                        switch (dbitem.GetProperty("grid_view"))
+                        {
+                            case "right":
+                                relationshiptype.RelationshipGridView = RelationshipGridViews.Right;
+                                break;
+                            case "intermix":
+                                relationshiptype.RelationshipGridView = RelationshipGridViews.InterMix;
+                                break;
+                            default:
+                                relationshiptype.RelationshipGridView = RelationshipGridViews.Left;
+                                break;
+                        }
+                    }
+                }
+                else
+                {
+                    throw new Exceptions.ServerException(relationshiptyperesponse);
+                }
             }
         }
 
@@ -199,65 +207,84 @@ namespace Aras.Model
             return this.Query(this.ItemType(ItemType));
         }
 
+        private readonly object _lifeCycleMapsLock = new object();
         private Queries.LifeCycleMap _lifeCycleMaps;
         public Queries.LifeCycleMap LifeCycleMaps
         {
             get
             {
-                if (this._lifeCycleMaps == null)
+                lock (this._lifeCycleMapsLock)
                 {
-                    this._lifeCycleMaps = new Queries.LifeCycleMap(this);
-                }
+                    if (this._lifeCycleMaps == null)
+                    {
+                        this._lifeCycleMaps = new Queries.LifeCycleMap(this);
+                    }
 
-                return this._lifeCycleMaps;
+                    return this._lifeCycleMaps;
+                }
             }
         }
 
+        private readonly object _listsLock = new object();
         private Queries.List _lists;
         public Queries.List Lists
         {
             get
             {
-                if (this._lists == null)
+                lock (this._listsLock)
                 {
-                    this._lists = new Queries.List(this);
-                }
+                    if (this._lists == null)
+                    {
+                        this._lists = new Queries.List(this);
+                    }
 
-                return this._lists;
+                    return this._lists;
+                }
             }
         }
 
+        private readonly object _usersLock = new object();
         private Queries.User _users;
         public Queries.User Users
         {
             get
             {
-                if (this._users == null)
+                lock (this._usersLock)
                 {
-                    this._users = new Queries.User(this);
-                }
+                    if (this._users == null)
+                    {
+                        this._users = new Queries.User(this);
+                    }
 
-                return this._users;
+                    return this._users;
+                }
             }
         }
 
+        private readonly object ItemCacheLock = new object();
         private Dictionary<String, Cache.Item> ItemCache;
 
         internal Cache.Item GetItemCache(ItemType ItemType)
         {
-            Cache.Item cacheitem = new Cache.Item(ItemType);
-            this.ItemCache[cacheitem.ID] = cacheitem;
-            return cacheitem;
+            lock (this.ItemCacheLock)
+            {
+                Cache.Item cacheitem = new Cache.Item(ItemType);
+                this.ItemCache[cacheitem.ID] = cacheitem;
+                return cacheitem;
+            }
         }
 
         internal Cache.Item GetItemCache(ItemType ItemType, String ID, String ConfigID, Int32 Generation, Boolean IsCurrent)
         {
-            if (!this.ItemCache.ContainsKey(ID))
+            lock (this.ItemCacheLock)
             {
-                this.ItemCache[ID] = new Cache.Item(ItemType, ID, ConfigID, Generation, IsCurrent);
-            }
+                if (!this.ItemCache.ContainsKey(ID))
+                {
+                    this.ItemCache[ID] = new Cache.Item(ItemType, ID, ConfigID, Generation, IsCurrent);
+                }
 
-            return this.ItemCache[ID];
+                return this.ItemCache[ID];
+            }
         }
 
         internal Session(Database Database, IO.Session IO)

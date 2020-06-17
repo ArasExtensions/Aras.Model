@@ -45,7 +45,7 @@ namespace Aras.Model
             }
         }
 
-        private object SessionCacheLock = new object();
+        private readonly object SessionCacheLock = new object();
         private Dictionary<String, Session> SessionCache;
 
         public Session Login(String Username, String AccessToken)

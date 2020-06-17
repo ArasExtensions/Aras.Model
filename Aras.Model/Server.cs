@@ -38,9 +38,13 @@ namespace Aras.Model
 
         public DirectoryInfo AssemblyDirectory { get; set; }
 
+        private readonly object LoadAssemblyLock = new object();
         public void LoadAssembly(String AssemblyFile)
         {
-            this.LoadAssembly(new FileInfo(this.AssemblyDirectory.FullName + "\\" + AssemblyFile + ".dll"));
+            lock (this.LoadAssemblyLock)
+            {
+                this.LoadAssembly(new FileInfo(this.AssemblyDirectory.FullName + "\\" + AssemblyFile + ".dll"));
+            }
         }
 
         private List<Assembly> AssmeblyCache;
@@ -65,6 +69,7 @@ namespace Aras.Model
                 return null;
             }
         }
+
 
         private void LoadAssembly(FileInfo AssemblyFile)
         {
@@ -103,7 +108,7 @@ namespace Aras.Model
             }
         }
 
-        private object _databasesCacheLock = new object();
+        private readonly object _databasesCacheLock = new object();
         private Dictionary<String, Database> _databasesCache;
         private Dictionary<String, Database> DatabaseCache
         {
