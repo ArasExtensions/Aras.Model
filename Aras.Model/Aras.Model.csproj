@@ -43,6 +43,8 @@
   <ItemGroup>
     <Compile Include="Cache\Property.cs" />
     <Compile Include="Exceptions\PropertyException.cs" />
+    <Compile Include="PropertyTypes\GlobalVersion.cs" />
+    <Compile Include="Props\GlobalVersion.cs" />
     <Compile Include="Queries\User.cs" />
     <Compile Include="Queries\List.cs" />
     <Compile Include="Queries\LifeCycleMap.cs" />

@@ -355,8 +355,11 @@ namespace Aras.Model
                                             Items.List valuefilterlist = (Items.List)this.Session.Lists.Store.Get(thisprop.GetProperty("data_source"));
                                             this._propertyTypeCache[name] = new PropertyTypes.FilterList(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, valuefilterlist);
                                             break;
+                                        case "global_version":
+                                            this._propertyTypeCache[name] = new PropertyTypes.GlobalVersion(this, name, label, ReadOnly, Required, SortOrder, InSearch, InRelationshipGrid, ColumnWidth, DefaultString);
+                                            break;
                                         default:
-                                            throw new NotImplementedException("Property Type not implmented: " + thisprop.GetProperty("data_type"));
+                                            throw new NotImplementedException("Property Type not implemented: " + thisprop.GetProperty("data_type"));
                                     }
                                 }
                             }
