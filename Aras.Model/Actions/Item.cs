@@ -73,7 +73,11 @@ namespace Aras.Model.Actions
                 else
                 {
                     this.Completed = true;
-                    throw new Exceptions.ServerException(response);
+
+                    if (response.ErrorMessage != "Aras.Server.Core.ItemIsNotLockedException")
+                    {
+                        throw new Exceptions.ServerException(response);
+                    }
                 }
             }
 
