@@ -207,7 +207,7 @@ namespace Aras.Model
                 this.Refresh();
             }
 
-            return this.Items.GetEnumerator();
+            return this.Items.ToList().GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()

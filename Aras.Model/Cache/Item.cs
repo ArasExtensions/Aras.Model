@@ -473,7 +473,7 @@ namespace Aras.Model.Cache
                                 break;
 
                             case Model.Item.Locks.OtherUser:
-                                throw new Exceptions.ServerException("Item Locked by another User");
+                                throw new Exceptions.ServerException("Item Locked by another User: " + this.ID + " / " + this.ItemType.Name);
                         }
 
                         break;
