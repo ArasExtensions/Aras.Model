@@ -146,56 +146,63 @@ namespace Aras.Model
 
         private Dictionary<String, PropertyType> SelectCache;
         private Dictionary<PropertyTypes.Item, Query> SelectPropertyCache;
+        private readonly object SelectCacheLock = new object();
 
         public String Select
         {
             get
             {
-                List<String> names = new List<String>();
-
-                foreach(PropertyType proptype in this.SelectCache.Values)
+                lock (this.SelectCacheLock)
                 {
-                    names.Add(proptype.Name);
-                }
+                    List<String> names = new List<String>();
 
-                return String.Join(",", names);
+                    foreach (PropertyType proptype in this.SelectCache.Values)
+                    {
+                        names.Add(proptype.Name);
+                    }
+
+                    return String.Join(",", names);
+                }
             }
             set
             {
-                this.SelectCache.Clear();
-                this.SelectPropertyCache.Clear();
-
-                if (!String.IsNullOrEmpty(value))
+                lock (this.SelectCacheLock)
                 {
-                    String select = value;
+                    this.SelectCache.Clear();
+                    this.SelectPropertyCache.Clear();
 
-                    // Ensure source_id selected for Relationships
-                    if (this.ItemType is RelationshipType)
+                    if (!String.IsNullOrEmpty(value))
                     {
-                        select += ",source_id";
-                    }
+                        String select = value;
 
-                    foreach (String name in select.Split(new Char[] { ',' }))
-                    {
-                        PropertyType proptype = this.ItemType.PropertyType(name);
-
-                        if (!this.SelectCache.ContainsKey(proptype.Name))
+                        // Ensure source_id selected for Relationships
+                        if (this.ItemType is RelationshipType)
                         {
-                            this.SelectCache[proptype.Name] = proptype;
+                            select += ",source_id";
+                        }
 
-                            if (proptype is PropertyTypes.Item)
+                        foreach (String name in select.Split(new Char[] { ',' }))
+                        {
+                            PropertyType proptype = this.ItemType.PropertyType(name);
+
+                            if (!this.SelectCache.ContainsKey(proptype.Name))
                             {
-                                if (proptype.Name.Equals("source_id") && (this.Parent != null))
+                                this.SelectCache[proptype.Name] = proptype;
+
+                                if (proptype is PropertyTypes.Item)
                                 {
-                                    this.SelectPropertyCache[(PropertyTypes.Item)proptype] = this.Parent;
-                                }
-                                else if (proptype.Name.Equals("related_id") && (this.Parent != null) && this.Parent.Recursive && this.Parent.ItemType.Equals(((PropertyTypes.Item)proptype).ValueType))
-                                {
-                                    this.SelectPropertyCache[(PropertyTypes.Item)proptype] = this.Parent;
-                                }
-                                else
-                                {
-                                    this.SelectPropertyCache[(PropertyTypes.Item)proptype] = new Query(this, ((PropertyTypes.Item)proptype).ValueType);
+                                    if (proptype.Name.Equals("source_id") && (this.Parent != null))
+                                    {
+                                        this.SelectPropertyCache[(PropertyTypes.Item)proptype] = this.Parent;
+                                    }
+                                    else if (proptype.Name.Equals("related_id") && (this.Parent != null) && this.Parent.Recursive && this.Parent.ItemType.Equals(((PropertyTypes.Item)proptype).ValueType))
+                                    {
+                                        this.SelectPropertyCache[(PropertyTypes.Item)proptype] = this.Parent;
+                                    }
+                                    else
+                                    {
+                                        this.SelectPropertyCache[(PropertyTypes.Item)proptype] = new Query(this, ((PropertyTypes.Item)proptype).ValueType);
+                                    }
                                 }
                             }
                         }
